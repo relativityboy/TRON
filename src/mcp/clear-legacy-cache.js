@@ -1,15 +1,18 @@
+import {optionalIndexedDB} from '../storage/optional-indexeddb.js';
 // Remove only retired MCP model data, preserving game assets and other models.
 export async function clearLegacyMcpCache(){
  const tasks=[];
- if(globalThis.indexedDB)tasks.push(new Promise((resolve,reject)=>{
-  const request=indexedDB.deleteDatabase('tron-mcp-voice-models');
+ const database=optionalIndexedDB();
+ if(database)tasks.push(new Promise((resolve,reject)=>{
+  const request=database.deleteDatabase('tron-mcp-voice-models');
   request.onsuccess=()=>resolve();
   request.onerror=()=>reject(request.error);
   request.onblocked=()=>{console.info('Old MCP voice cache will be removed when older tabs close.');resolve();};
  }));
- if(globalThis.caches)tasks.push((async()=>{
-  for(const name of await caches.keys()){
-   const cache=await caches.open(name);
+ tasks.push((async()=>{
+  const cacheStorage=globalThis.caches;if(!cacheStorage)return;
+  for(const name of await cacheStorage.keys()){
+   const cache=await cacheStorage.open(name);
    for(const request of await cache.keys()){
     if(/chatterbox-ONNX|ort-wasm-simd-threaded\.asyncify|voice\.worker-/i.test(request.url))await cache.delete(request);
    }

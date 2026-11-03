@@ -1,3 +1,4 @@
+import {openCacheDatabase} from '../storage/optional-indexeddb.js';
 import {MCP_VOICE_EFFECTS} from './voice-effects.js';
 // Bump when the reference voice, hosted model, or processing algorithm changes.
 // Numeric effect adjustments also change the key automatically.
@@ -7,18 +8,15 @@ const DATABASE='tron-mcp-rendered-speech';
 export class McpSpeechCache{
  constructor(version=MCP_AUDIO_VERSION){this.version=version;this.opening=null;}
  async open(){
-  if(!globalThis.indexedDB)return null;
-  return this.opening??=new Promise((resolve,reject)=>{
-   const request=indexedDB.open(DATABASE,1);
-   request.onupgradeneeded=()=>{request.result.createObjectStore('audio',{keyPath:'key'});request.result.createObjectStore('metadata');};
-   request.onerror=()=>reject(request.error);
-   request.onsuccess=()=>{
-    const db=request.result;db.onversionchange=()=>{db.close();this.opening=null;};
+  return this.opening??=openCacheDatabase(DATABASE,1,db=>{db.createObjectStore('audio',{keyPath:'key'});db.createObjectStore('metadata');}).then(db=>{
+   if(!db)return null;
+   return new Promise((resolve,reject)=>{
+    db.onversionchange=()=>{db.close();this.opening=null;};
     const transaction=db.transaction(['audio','metadata'],'readwrite'),metadata=transaction.objectStore('metadata');
     const current=metadata.get('voiceVersion');
     current.onsuccess=()=>{if(current.result!==this.version){transaction.objectStore('audio').clear();metadata.put(this.version,'voiceVersion');}};
     transaction.oncomplete=()=>resolve(db);transaction.onabort=()=>{db.close();reject(transaction.error);};
-   };
+   });
   }).catch(error=>{console.warn('MCP audio cache unavailable:',error?.message);return null;});
  }
  key(text){return JSON.stringify([this.version,text.trim().replace(/\s+/g,' ')]);}

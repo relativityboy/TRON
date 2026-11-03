@@ -3,6 +3,13 @@ title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
 
+## Restricted storage fallback — November 2
+
+On macOS arm64 / Node 22.23.4, `npm test` passes 656 checks. `tests/unit/optional-indexeddb.test.js` covers absent/throwing IndexedDB, synchronous and asynchronous open errors, inaccessible Cache Storage, blocked/stalled opens, late connection closure, and successful open/upgrade. `node tests/browser/storage-unavailable.mjs` passes in headless Chrome against Vite on port 5188: the full app reaches the opening terminal with the loading overlay hidden, no page errors, direct music URL fallback and speech cache misses, both with missing APIs and getters throwing SecurityError.
+
+`TRON_TEST_ENGINE=webkit node tests/browser/storage-unavailable.mjs` cannot launch because Playwright WebKit 2370 is not installed. Actual Safari in macOS Lockdown Mode is untested; IndexedDB fallback alone does not establish compatibility with its other restrictions. WebKit documents disabled IndexedDB in [Safari 17 Lockdown Mode](https://webkit.org/blog/14445/webkit-features-in-safari-17-0/). Existing unsafe getter checks could reject background cleanup/speech operations, but the exact cause of the reported loading stall has not been reproduced. No deployment.
+
+
 ## Evolved AI default release — October 25
 
 User-approved `approach-480000-1-0` promotion: all 642 unit tests pass, including solo/MP default identity. Production build and asset audit pass. `node tests/browser/cycle-ai.mjs` verifies the normal, non-trial entry point in Chrome 155 at 1280×800; frame AI p99 0.60 ms/max 1.00 ms, dense p99 0.40 ms/max 0.70 ms, no page errors. Promoted module weights exactly match the evaluated candidate. `node tests/pwa.mjs` passes installability, scoped icons/manifest, offline tank/cycle startup, ranged audio and non-interrupting updates. Worker dry run and deployment succeed; version `db608817-b999-4aa8-8aba-ad266946b86d`. Static publication proceeds via website revision pin. Full release metadata is in `tools/ai/results/promotion-480000.json`.

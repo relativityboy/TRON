@@ -1,3 +1,9 @@
+## Optional storage in restricted browsers — November 2
+
+- [x] Treat IndexedDB as an optional optimization: safely handle missing/throwing API access, rejected opens, blocked opens and a 1.5-second open timeout. Close late connections after fallback. Music retains its original network URL and speech generates without persistent caching. Legacy cleanup also tolerates inaccessible IndexedDB and Cache Storage.
+- [x] Verify missing/denied storage startup in headless Chrome and unit coverage for failed/blocked/stalled opens; all 656 unit checks pass. See validation for limits. Actual Safari/macOS Lockdown Mode remains unverified; no deployment.
+
+
 ## Promote evolved AI as normal gameplay — October 25
 
 - [x] User requested the validated candidate become the normal version for PWA testing. Promote `approach-480000-1-0` through `shared/simulation/cycle-ai/policies/aggression-v3.js`; shared solo/MP defaults and the plateau trainer now use it. Preserve v2 for rollback and update the regression asserting both authorities use the expected default. This is an explicit user promotion after automated checks, not a claim of human play review.

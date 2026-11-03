@@ -11,6 +11,12 @@ See also: /llms.txt (curated index) and /sitemap.xml.
 <!-- Page: (root) -->
 Source: /
 
+## Optional storage in restricted browsers — November 2
+
+- [x] Treat IndexedDB as an optional optimization: safely handle missing/throwing API access, rejected opens, blocked opens and a 1.5-second open timeout. Close late connections after fallback. Music retains its original network URL and speech generates without persistent caching. Legacy cleanup also tolerates inaccessible IndexedDB and Cache Storage.
+- [x] Verify missing/denied storage startup in headless Chrome and unit coverage for failed/blocked/stalled opens; all 656 unit checks pass. See validation for limits. Actual Safari/macOS Lockdown Mode remains unverified; no deployment.
+
+
 ## Promote evolved AI as normal gameplay — October 25
 
 - [x] User requested the validated candidate become the normal version for PWA testing. Promote `approach-480000-1-0` through `shared/simulation/cycle-ai/policies/aggression-v3.js`; shared solo/MP defaults and the plateau trainer now use it. Preserve v2 for rollback and update the regression asserting both authorities use the expected default. This is an explicit user promotion after automated checks, not a claim of human play review.
@@ -5967,6 +5973,13 @@ Source: /validation/
 title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
+
+## Restricted storage fallback — November 2
+
+On macOS arm64 / Node 22.23.4, `npm test` passes 656 checks. `tests/unit/optional-indexeddb.test.js` covers absent/throwing IndexedDB, synchronous and asynchronous open errors, inaccessible Cache Storage, blocked/stalled opens, late connection closure, and successful open/upgrade. `node tests/browser/storage-unavailable.mjs` passes in headless Chrome against Vite on port 5188: the full app reaches the opening terminal with the loading overlay hidden, no page errors, direct music URL fallback and speech cache misses, both with missing APIs and getters throwing SecurityError.
+
+`TRON_TEST_ENGINE=webkit node tests/browser/storage-unavailable.mjs` cannot launch because Playwright WebKit 2370 is not installed. Actual Safari in macOS Lockdown Mode is untested; IndexedDB fallback alone does not establish compatibility with its other restrictions. WebKit documents disabled IndexedDB in [Safari 17 Lockdown Mode](https://webkit.org/blog/14445/webkit-features-in-safari-17-0/). Existing unsafe getter checks could reject background cleanup/speech operations, but the exact cause of the reported loading stall has not been reproduced. No deployment.
+
 
 ## Evolved AI default release — October 25
 
