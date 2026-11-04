@@ -1,7 +1,7 @@
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 // A photographic finish after tone mapping, rather than a rough wall material.
 // Pixel sizes are drawing-buffer pixels; strengths operate on display RGB.
-export const FILM_FINISH=Object.freeze({grainStrength:.028,mottleStrength:.055,grainSizePixels:1.6,mottleSizePixels:18,framesPerSecond:24,vignetteStrength:.36,vignetteScale:1.35});
+export const FILM_FINISH=Object.freeze({grainStrength:.014,mottleStrength:.0275,grainSizePixels:1.6,mottleSizePixels:18,framesPerSecond:24,vignetteStrength:.36,vignetteScale:1.35});
 export function createFilmFinishPass(options={}){
  const c={...FILM_FINISH,...options};
  return new ShaderPass({

@@ -10,7 +10,7 @@ export const BASIS = Object.freeze({a:2.2,b:1.05,c:.08,d:1});
 const determinant=BASIS.a*BASIS.d-BASIS.b*BASIS.c;
 export function gridToWorld(u,v) {return {x:BASIS.a*u+BASIS.b*v,s:BASIS.c*u+BASIS.d*v};}
 export function worldToGrid(x,s) {return {u:(BASIS.d*x-BASIS.b*s)/determinant,v:(BASIS.a*s-BASIS.c*x)/determinant};}
-export const SPAWN = {...gridToWorld(0,-HALF-2*HALF),yaw:-Math.atan2(BASIS.b,BASIS.d)};
+export const SPAWN = {...gridToWorld(0,-HALF-HALF),yaw:-Math.atan2(BASIS.b,BASIS.d)};
 export const RECOGNIZER_STARTS = [
   [-HALF-130,-HALF+120], [HALF+150,-HALF+230],
   [-HALF-110,HALF-80], [HALF+120,HALF+120], [60,HALF+160],

@@ -1,3 +1,11 @@
+## Subtler animated film finish — November 3
+
+- [x] Restore the original animated screen-space film finish at the user's request, removing the stationary/surface-anchored trials. Halve both grain and soft mottling strengths to .014 and .0275; preserve the 24-frame/second cadence, pixel scales, quiet blacks/highlights, vignette and low-quality bypass. Preserve the closer Clu spawn.
+
+## Clu starting distance — November 3
+
+- [x] Halve the initial approach gap to the maze in blueprint and authored layouts, preserving Clu's lateral position and heading. The default central labyrinth approach is now 668.8 m instead of 1,337.6 m. Both outer-maze settings have clear spawn positions; 47 simulation/outer-maze tests pass.
+
 ## Film finish — November 3
 
 - [x] Replace the existing uniform noise with subtle monochrome grain and soft brightness mottling after tone mapping. Favor blue midtones, preserve quiet blacks/highlights and crisp edges, update grain at 24 frames/second, retain the existing vignette and low-quality bypass. Strengths and pixel scales live in `FILM_FINISH`.
