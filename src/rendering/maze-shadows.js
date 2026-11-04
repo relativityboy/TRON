@@ -12,7 +12,7 @@ const WALL_SHADOW_DEPTH = Object.freeze({factor: -2, units: -4});
 export class MazeShadows extends RecognizerShadows{
  constructor(world,vehicles=[],map=DEFAULT_WORLD){
   const {MAZE_INSTANCES,MAZE_LENGTH,WALL_HEIGHT}=map;
-  // The shallow decorative ledges are smaller than a shadow texel. Casting
+  // The decorative facade details can be smaller than a shadow texel. Casting
   // them into the slab's own map creates alternating triangle-shaped patches.
   // Use the shared solid wall prisms for casting, retain relief as receivers.
   const positions=world.slabs.userData.shadowPositions;

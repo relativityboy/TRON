@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "workshop": "vite --host 127.0.0.1 --port 5190 --strictPort",
     "build": "vite build && npm run docs && node tools/build/copy-docs.mjs && node tools/build/asset-compat.mjs && node tools/build/build-pwa.mjs && node tools/validation/check-asset-build.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node tools/validation/run-unit-tests.mjs",

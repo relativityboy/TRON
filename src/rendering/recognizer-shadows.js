@@ -1,3 +1,4 @@
+import {arenaLightVisibility} from './arena-light-visibility.js';
 import {mazeLightVisibility} from './maze-light-visibility.js';
 import * as T from 'three';
 // One compact light-space tile per aircraft: stable detail across distant mazes.
@@ -69,6 +70,8 @@ export class RecognizerShadows {
     const exactWall=prefix==='carrierShadow'&&receiver.userData.exactMazeWallShadow;
     const occlusion=this.occlusion&&!receiver.userData.exactMazeFloorShadow&&!exactWall&&unionAttenuation===undefined?mazeLightVisibility(this.occlusion,prefix+'Maze',prefix+'World',wallReceiver?wallId:null,authoredNormal?surfaceNormal:null):null;
     if(occlusion){Object.assign(shader.uniforms,occlusion.uniforms);shader.fragmentShader=occlusion.declarations+'\n'+shader.fragmentShader;}
+    const arenaOcclusion=receiver.userData.arenaShadowOcclusion?arenaLightVisibility(receiver.userData.arenaShadowOcclusion,prefix+'Arena','recShadowWorld'):null;
+    if(arenaOcclusion){Object.assign(shader.uniforms,arenaOcclusion.uniforms);shader.fragmentShader=arenaOcclusion.declarations+'\n'+shader.fragmentShader;}
     const tests=this.entries.map((_,i)=>`{
      vec4 projected=recShadowMatrices[${i}]*vec4(recShadowWorld,1.);vec3 p=projected.xyz/projected.w;
      // Compare depth at the actual sampled texel center on the receiver plane.
@@ -96,9 +99,9 @@ export class RecognizerShadows {
      }
     }`).join('\n');
     const emissive=shader.fragmentShader.includes('totalEmissiveRadiance')?' + totalEmissiveRadiance*(1.-recShadowShade)':'';
-    shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',named(`float recShadowShade=1.;\n${occlusion?.code||''}\n${tests}\n${occlusion?`recShadowShade=mix(1.,recShadowShade,${occlusion.visible});`:''}\n${unionAttenuation===undefined?`gl_FragColor.rgb=gl_FragColor.rgb*recShadowShade${emissive};`:`gl_FragColor.rgb=vec3(min(${unionAttenuation.toFixed(3)},recShadowShade)/max(recShadowShade,.001));`}\n#include <tonemapping_fragment>`));
+    shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',named(`float recShadowShade=1.;\n${occlusion?.code||''}\n${arenaOcclusion?.code||''}\n${tests}\n${occlusion?`recShadowShade=mix(1.,recShadowShade,${occlusion.visible});`:''}\n${arenaOcclusion?`recShadowShade=mix(1.,recShadowShade,${arenaOcclusion.visible});`:''}\n${unionAttenuation===undefined?`gl_FragColor.rgb=gl_FragColor.rgb*recShadowShade${emissive};`:`gl_FragColor.rgb=vec3(min(${unionAttenuation.toFixed(3)},recShadowShade)/max(recShadowShade,.001));`}\n#include <tonemapping_fragment>`));
    };
-   material.customProgramCacheKey=()=>`${previousKey}|${prefix}:${size}:${receiverDarkness}:receiver-plane-v11:${filterEdges}:${depthBias}:${excludeSelf}:${this.entries.length}:union${receiver.userData.shadowUnionAttenuation??'none'}:exactWall${!!receiver.userData.exactMazeWallShadow}:exactFloor${!!receiver.userData.exactMazeFloorShadow}:occlusion${this.occlusion?.entries.length||0}`;
+   material.customProgramCacheKey=()=>`${previousKey}|${prefix}:${size}:${receiverDarkness}:receiver-plane-v12:${filterEdges}:${depthBias}:${excludeSelf}:${this.entries.length}:union${receiver.userData.shadowUnionAttenuation??'none'}:exactWall${!!receiver.userData.exactMazeWallShadow}:exactFloor${!!receiver.userData.exactMazeFloorShadow}:occlusion${this.occlusion?.entries.length||0}:arena${receiver.userData.arenaShadowOcclusion?.size||0}`;
    // A rebuilt atlas can reuse the same shader source/key. Evict the old
    // material program bindings so Three invokes onBeforeCompile again with
    // this atlas and its current matrices instead of a disposed texture.

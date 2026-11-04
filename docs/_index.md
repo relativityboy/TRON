@@ -1,3 +1,45 @@
+## Film finish — November 3
+
+- [x] Replace the existing uniform noise with subtle monochrome grain and soft brightness mottling after tone mapping. Favor blue midtones, preserve quiet blacks/highlights and crisp edges, update grain at 24 frames/second, retain the existing vignette and low-quality bypass. Strengths and pixel scales live in `FILM_FINISH`.
+- [x] Chrome GPU check verifies stable grain within a film frame, changing grain across frames, preserved black/white swatches and bounded variation. Maze captures saved in `test-results/film-finish/`; visual review of the film match remains with the user.
+
+## Maze, arena shadows and menu refinements — November 3
+
+- [x] Keep the development tuning panel hidden during ordinary play. Require `?tuning=1` before Shift+T can open it; ignore repeated shortcut keydowns. Add a visible Close button and consume Escape to dismiss it without opening the exit prompt. Clear it on return to the menu/error state. Normal shifted T still activates CLU turbo. Rename the solo choice LIGHT CYCLES SOLO, move it first and select it by default; keyboard navigation follows the new order.
+- [x] Restrict the accepted facade pattern to canyon faces: remove ribs/molding and their associated lines from outward faces looking onto open grid, and from passages narrower than 24 m. Classify against each site's own static walls at three face samples, including rotated sites. Preserve basic roof/corner outlines. Reduce both relief projections by 25%, to 1.125 m vertical ribs and 1.40625 m horizontal molding, with matching outlines and damage cuts.
+- [x] Stop Recognizer shadows from projecting through arena walls/roof onto shielded interior faces. Give architecture receivers a visibility mask from the existing arena wall depth atlas, plus a light-facing surface check. Preserve moving shadows on directly lit exterior surfaces and refresh visibility when static geometry changes.
+- [x] All 677 unit tests pass. Chrome verifies new solo/default navigation and launch, hidden/opt-in tuning with Close/Escape/held keys, current wall captures/impact/reset, and GPU regressions for blocked far-side and overhang shadows while legitimate exterior shadows persist. Production build/asset audit passes. No deployment; user appearance review remains ongoing.
+
+## Optional WebAssembly and clearer canyon walls — November 3
+
+- [x] Fix the observed Safari Lockdown Mode startup failure (`Can't find variable: WebAssembly`): remove Rapier's unconditional import/initialization, test minimal WebAssembly compilation, load Rapier only when usable and fall back if load/init fails or exceeds three seconds. Keep normal Rapier behavior when ready. Provide simple JavaScript debris with fixed-step Earth gravity, inherited/delayed motion, swept wall/roof contacts, floor settling, observations and cleanup. Approximate fallback debris does not generate vehicle-impact damage. Existing vehicle/AI simulation remains JavaScript.
+- [x] At the user's request, deepen the wall fronts to the approved model's `#111423`, darken rib end faces and add faint blue, depth-tested edge strokes on ribs, molding tops/returns, roof edges and silhouette corners. Preserve solid faces; no triangle diagonals. Clip these strokes through impact cavities, including on projecting relief, and restore them on reset.
+- [x] All 674 unit tests and the production build/asset audit pass. Chrome verifies full menu/CLU startup and fallback effects with WebAssembly missing, access denied, compilation blocked and instantiation rejected, with IndexedDB/Cache Storage denied too. Chrome wall captures/impact/reset checks pass with the darker colors and new edges. Actual macOS Safari Lockdown Mode remains for user verification. Local only; no deployment.
+
+## Accepted revision 7 maze wall pattern — November 3
+
+- [x] Following the user's approval, replace the old inset outlines and sparse beveled ledges with revision 7's broad vertical ribs and horizontal molding. Repeat 18 m ribs at 36 m spacing, projecting 1.5 m and stopping 0.25 m below the 54 m roof. Center the 2.7 m horizontal molding at 8.1 m, projecting 1.875 m. Adapt the pattern to joined exposed wall faces, including angled walls; stop relief short of corners. Preserve maze outlines, existing colors, independent collision/visibility prisms and solid shadow casters. Keep the approved GLB, checksum, workshop design and provenance in `assets/source/models/maze-wall/` as excluded source material.
+- [x] Extend impact cuts through decorative fronts/caps and seal their cavity sides so the ribs/molding cannot hide damage; retain reset restoration and update the affected shadow overlays. All 666 unit tests pass, including pattern proportions, collision/caster invariants and damage through ribs plus molding. Production build/asset audit passes. Chrome renders close/overview captures and confirms a recessed hit plus restored rib without page errors. Captures/measurements are in validation. No deployment; integrated appearance remains available for user review.
+
+## Wall workshop connection recovery — November 3
+
+- [x] Diagnose the editor-unavailable message: older Vite processes on 5188/5189 serve fallback game HTML for `/api/wall-studio/state`, while the current 5190 server returns valid JSON. Restart the outdated processes with the new middleware. Add `npm run workshop` for the fixed 5190 address, identify non-JSON server responses in the page and retry state reads after failed startup. When recovering from a static starting-model fallback, always install the saved model/history even if both have revision zero. No automatic retry of paid revision requests.
+- [x] Seven workspace unit tests pass. Chrome reproduces the stale HTML response, verifies disabled editing while disconnected and automatic recovery with history populated, then passes the existing complete modeling workflow. APIs on 5188, 5189 and 5190 verified returning JSON. No deployment.
+
+## User-directed wall workshop — November 2
+
+- [x] Extend the local `/wall-study.html` preview with natural-language model revisions, image drop/upload and reference selection, current-view capture, optional part selection, in-page job status, cancellation, persistent revision history/restore and GLB export. Use the signed-in local Codex CLI for each separate revision, returning validated simple boxes/profile extrusions instead of editing project code. Limit geometry to 48 parts / 1,500 triangles. Store local revisions/references under ignored `.local/wall-studio/`; expose the backend only in local Vite development. No gameplay integration or publication.
+- [x] Validate failure/cancel/timeout preservation, stale/duplicate request protection, local-origin/token checks, reference handling and revision persistence. Headless Chrome covers image drop, selection, Enter submission, rerendering without moving the camera, reload, failure/cancel, restore, GLB download and mobile overflow. A separately opted-in real Codex request removes eight ledges and returns eleven slab/panel parts in a temporary workspace. Full unit suite: 663 pass; production build/asset audit pass. Current human-modeling review remains pending; the initial wall geometry is still unapproved.
+
+## Maze wall video reconstruction trial — November 2
+
+- [x] Inspect the two supplied HDR clips; preserve originals and prepare tone-mapped inspection frames and optional 1920-pixel SDR inputs locally. Test CPU PyCOLMAP with conservative static-wall masks using both SIFT and forward/backward optical flow. SIFT yields only 4/20 and 2/27 views; flow yields 5/20 and no model. No trustworthy mesh recovered. Local artifacts/measurements and reproducible scripts are recorded in validation; no media uploaded or paid API called.
+- [x] Superseded by the user-guided Wall Workshop: revision 7 was accepted for the game on November 3 and its pattern is integrated. The initial procedural study remains rejected; no neural reconstruction service was used.
+
+## Standalone maze wall study — November 2
+
+- [x] Create a separate review GLB at `studies/maze-wall/maze-wall.glb`, reproducible with `node tools/studies/export-maze-wall.mjs`. Use the supplied Maze Details and Maze Top 2 film frames for dark vertical relief, sparse sloped ledges and broad clipped blue roofs. Provide orbitable detail/slab/canyon views at `/wall-study.html`; preview loads the exported GLB itself. Source/use constraints and provisional metre dimensions are recorded beside the model. Chrome captures render without page errors; the user subsequently rejected the geometry. No gameplay integration or deployment.
+
 ## Optional storage in restricted browsers — November 2
 
 - [x] Treat IndexedDB as an optional optimization: safely handle missing/throwing API access, rejected opens, blocked opens and a 1.5-second open timeout. Close late connections after fallback. Music retains its original network URL and speech generates without persistent caching. Legacy cleanup also tolerates inaccessible IndexedDB and Cache Storage.

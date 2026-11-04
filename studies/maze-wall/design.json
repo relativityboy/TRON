@@ -1,0 +1,695 @@
+{
+  "name": "Maze wall \u2014 starting study",
+  "materials": [
+    {
+      "id": "wall",
+      "color": "#111423",
+      "roughness": 1
+    },
+    {
+      "id": "facet",
+      "color": "#14182a",
+      "roughness": 1
+    },
+    {
+      "id": "bevel",
+      "color": "#273958",
+      "roughness": 1
+    },
+    {
+      "id": "roof",
+      "color": "#3b5075",
+      "roughness": 1
+    }
+  ],
+  "parts": [
+    {
+      "id": "slab",
+      "name": "Clipped slab",
+      "kind": "extrusion",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "xz",
+      "points": [
+        [
+          -54,
+          -12
+        ],
+        [
+          46,
+          -12
+        ],
+        [
+          54,
+          -4
+        ],
+        [
+          54,
+          12
+        ],
+        [
+          -46,
+          12
+        ],
+        [
+          -54,
+          4
+        ]
+      ],
+      "depth": 54,
+      "material": "wall",
+      "topMaterial": "roof"
+    },
+    {
+      "id": "back-panel-0",
+      "name": "back vertical face 1",
+      "kind": "box",
+      "position": [
+        -36.5,
+        27,
+        -12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        16.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "wall",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "back-panel-1",
+      "name": "back vertical face 2",
+      "kind": "box",
+      "position": [
+        -18.5,
+        27,
+        -12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        18.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "facet",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "back-panel-2",
+      "name": "back vertical face 3",
+      "kind": "box",
+      "position": [
+        2.5,
+        27,
+        -12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        22.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "wall",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "back-panel-3",
+      "name": "back vertical face 4",
+      "kind": "box",
+      "position": [
+        22.5,
+        27,
+        -12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        16.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "wall",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "back-panel-4",
+      "name": "back vertical face 5",
+      "kind": "box",
+      "position": [
+        38.0,
+        27,
+        -12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        13.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "facet",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "back-ledge-0",
+      "name": "back stepped ledge 1",
+      "kind": "extrusion",
+      "position": [
+        -28,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          7.7,
+          -12.09
+        ],
+        [
+          7.95,
+          -12.64
+        ],
+        [
+          10.05,
+          -12.64
+        ],
+        [
+          10.5,
+          -12.12
+        ],
+        [
+          10.5,
+          -12.09
+        ]
+      ],
+      "depth": 42,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "back-ledge-1",
+      "name": "back stepped ledge 2",
+      "kind": "extrusion",
+      "position": [
+        14.2,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          14.2,
+          -12.09
+        ],
+        [
+          14.45,
+          -12.64
+        ],
+        [
+          16.55,
+          -12.64
+        ],
+        [
+          17,
+          -12.12
+        ],
+        [
+          17,
+          -12.09
+        ]
+      ],
+      "depth": 16.8,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "back-ledge-2",
+      "name": "back stepped ledge 3",
+      "kind": "extrusion",
+      "position": [
+        -44,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          31.2,
+          -12.09
+        ],
+        [
+          31.45,
+          -12.64
+        ],
+        [
+          33.55,
+          -12.64
+        ],
+        [
+          34,
+          -12.12
+        ],
+        [
+          34,
+          -12.09
+        ]
+      ],
+      "depth": 15,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "back-ledge-3",
+      "name": "back stepped ledge 4",
+      "kind": "extrusion",
+      "position": [
+        31.2,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          37.2,
+          -12.09
+        ],
+        [
+          37.45,
+          -12.64
+        ],
+        [
+          39.55,
+          -12.64
+        ],
+        [
+          40,
+          -12.12
+        ],
+        [
+          40,
+          -12.09
+        ]
+      ],
+      "depth": 12.8,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "front-panel-0",
+      "name": "front vertical face 1",
+      "kind": "box",
+      "position": [
+        -36.5,
+        27,
+        12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        16.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "wall",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "front-panel-1",
+      "name": "front vertical face 2",
+      "kind": "box",
+      "position": [
+        -18.5,
+        27,
+        12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        18.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "facet",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "front-panel-2",
+      "name": "front vertical face 3",
+      "kind": "box",
+      "position": [
+        2.5,
+        27,
+        12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        22.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "wall",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "front-panel-3",
+      "name": "front vertical face 4",
+      "kind": "box",
+      "position": [
+        22.5,
+        27,
+        12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        16.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "wall",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "front-panel-4",
+      "name": "front vertical face 5",
+      "kind": "box",
+      "position": [
+        38.0,
+        27,
+        12.045
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        13.955,
+        53.86,
+        0.09
+      ],
+      "plane": "xy",
+      "points": [],
+      "depth": 1,
+      "material": "facet",
+      "topMaterial": "wall"
+    },
+    {
+      "id": "front-ledge-0",
+      "name": "front stepped ledge 1",
+      "kind": "extrusion",
+      "position": [
+        -28,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          7.7,
+          12.09
+        ],
+        [
+          7.95,
+          12.64
+        ],
+        [
+          10.05,
+          12.64
+        ],
+        [
+          10.5,
+          12.12
+        ],
+        [
+          10.5,
+          12.09
+        ]
+      ],
+      "depth": 42,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "front-ledge-1",
+      "name": "front stepped ledge 2",
+      "kind": "extrusion",
+      "position": [
+        14.2,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          14.2,
+          12.09
+        ],
+        [
+          14.45,
+          12.64
+        ],
+        [
+          16.55,
+          12.64
+        ],
+        [
+          17,
+          12.12
+        ],
+        [
+          17,
+          12.09
+        ]
+      ],
+      "depth": 16.8,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "front-ledge-2",
+      "name": "front stepped ledge 3",
+      "kind": "extrusion",
+      "position": [
+        -44,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          31.2,
+          12.09
+        ],
+        [
+          31.45,
+          12.64
+        ],
+        [
+          33.55,
+          12.64
+        ],
+        [
+          34,
+          12.12
+        ],
+        [
+          34,
+          12.09
+        ]
+      ],
+      "depth": 15,
+      "material": "wall",
+      "topMaterial": "bevel"
+    },
+    {
+      "id": "front-ledge-3",
+      "name": "front stepped ledge 4",
+      "kind": "extrusion",
+      "position": [
+        31.2,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        1,
+        1,
+        1
+      ],
+      "plane": "yz",
+      "points": [
+        [
+          37.2,
+          12.09
+        ],
+        [
+          37.45,
+          12.64
+        ],
+        [
+          39.55,
+          12.64
+        ],
+        [
+          40,
+          12.12
+        ],
+        [
+          40,
+          12.09
+        ]
+      ],
+      "depth": 12.8,
+      "material": "wall",
+      "topMaterial": "bevel"
+    }
+  ]
+}

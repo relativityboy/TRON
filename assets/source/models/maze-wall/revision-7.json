@@ -1,0 +1,546 @@
+{
+  "source": "User-exported maze-wall-revision-7.glb from the local Wall Workshop",
+  "author": "Project-authored geometry generated with Codex and corrected by the user",
+  "approved": "2026-11-03 \u2014 use this pattern instead of the current maze ledges",
+  "sha256": "21343872666d3c31a69fc79082eb209a59aef9532a101a7e7f1c7be72e5c2d59",
+  "bytes": 52700,
+  "referenceImages": [
+    "references/film/images/mazes/Maze Details.png",
+    "references/film/images/mazes/Maze Top 2.png"
+  ],
+  "useConstraints": "Retained as a local editable/reference source. Film reference images remain their respective rights holders\u2019 work; no film texture is embedded in the GLB. No third-party model was acquired.",
+  "runtimeAdaptation": "src/rendering/maze-wall-pattern.js repeats the accepted 18 m ribs at 36 m spacing with molding centered at 8.1 m. Following further user direction, depths are 75% of the source (1.125 m ribs and 1.40625 m molding). The pattern is omitted from exterior faces and opposing-wall gaps under 24 m. Existing outlines/collision are retained; relief stops short of corners. Source GLB geometry is preserved and is not shipped or loaded by the game.",
+  "workshopRevision": {
+    "id": 7,
+    "createdAt": "2026-11-03T22:48:38.996Z",
+    "request": "That looks pretty good. Could you move the horizontal ledge up to about 1.5x it's current height?",
+    "summary": "Raised both horizontal ledges from 5.4 to 8.1 metres, preserving their dimensions.",
+    "model": {
+      "name": "Maze wall \u2014 starting study",
+      "materials": [
+        {
+          "id": "wall",
+          "color": "#111423",
+          "roughness": 1
+        },
+        {
+          "id": "facet",
+          "color": "#14182a",
+          "roughness": 1
+        },
+        {
+          "id": "bevel",
+          "color": "#273958",
+          "roughness": 1
+        },
+        {
+          "id": "roof",
+          "color": "#3b5075",
+          "roughness": 1
+        }
+      ],
+      "parts": [
+        {
+          "id": "slab",
+          "name": "Clipped slab",
+          "kind": "extrusion",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "plane": "xz",
+          "points": [
+            [
+              -54,
+              -12
+            ],
+            [
+              46,
+              -12
+            ],
+            [
+              54,
+              -4
+            ],
+            [
+              54,
+              12
+            ],
+            [
+              -46,
+              12
+            ],
+            [
+              -54,
+              4
+            ]
+          ],
+          "depth": 54,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "back-panel-0",
+          "name": "back vertical face 1",
+          "kind": "box",
+          "position": [
+            -36.5,
+            27,
+            -12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            16.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "back-panel-1",
+          "name": "back vertical face 2",
+          "kind": "box",
+          "position": [
+            -18.5,
+            27,
+            -12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "facet",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "back-panel-2",
+          "name": "back vertical face 3",
+          "kind": "box",
+          "position": [
+            2.5,
+            27,
+            -12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            22.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "back-panel-3",
+          "name": "back vertical face 4",
+          "kind": "box",
+          "position": [
+            22.5,
+            27,
+            -12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            16.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "back-panel-4",
+          "name": "back vertical face 5",
+          "kind": "box",
+          "position": [
+            38,
+            27,
+            -12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            13.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "facet",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "front-panel-0",
+          "name": "front vertical face 1",
+          "kind": "box",
+          "position": [
+            -36.5,
+            27,
+            12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            16.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "front-panel-1",
+          "name": "front vertical face 2",
+          "kind": "box",
+          "position": [
+            -18.5,
+            27,
+            12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "facet",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "front-panel-2",
+          "name": "front vertical face 3",
+          "kind": "box",
+          "position": [
+            2.5,
+            27,
+            12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            22.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "front-panel-3",
+          "name": "front vertical face 4",
+          "kind": "box",
+          "position": [
+            22.5,
+            27,
+            12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            16.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "front-panel-4",
+          "name": "front vertical face 5",
+          "kind": "box",
+          "position": [
+            38,
+            27,
+            12.045
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            13.955,
+            53.86,
+            0.09
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "facet",
+          "topMaterial": "wall"
+        },
+        {
+          "id": "front-ledge-0",
+          "name": "Front vertical ledge 1",
+          "kind": "box",
+          "position": [
+            -36,
+            26.875,
+            12.75
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18,
+            53.75,
+            1.5
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "front-ledge-1",
+          "name": "Front vertical ledge 2",
+          "kind": "box",
+          "position": [
+            0,
+            26.875,
+            12.75
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18,
+            53.75,
+            1.5
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "front-ledge-2",
+          "name": "Front vertical ledge 3",
+          "kind": "box",
+          "position": [
+            36,
+            26.875,
+            12.75
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18,
+            53.75,
+            1.5
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "back-ledge-0",
+          "name": "Back vertical ledge 1",
+          "kind": "box",
+          "position": [
+            -36,
+            26.875,
+            -12.75
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18,
+            53.75,
+            1.5
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "back-ledge-1",
+          "name": "Back vertical ledge 2",
+          "kind": "box",
+          "position": [
+            0,
+            26.875,
+            -12.75
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18,
+            53.75,
+            1.5
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "back-ledge-2",
+          "name": "Back vertical ledge 3",
+          "kind": "box",
+          "position": [
+            36,
+            26.875,
+            -12.75
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            18,
+            53.75,
+            1.5
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "front-horizontal-ledge",
+          "name": "Front horizontal molding",
+          "kind": "box",
+          "position": [
+            4,
+            8.1,
+            12.9375
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            100,
+            2.7,
+            1.875
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        },
+        {
+          "id": "back-horizontal-ledge",
+          "name": "Back horizontal molding",
+          "kind": "box",
+          "position": [
+            -4,
+            8.1,
+            -12.9375
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            100,
+            2.7,
+            1.875
+          ],
+          "plane": "xy",
+          "points": [],
+          "depth": 1,
+          "material": "wall",
+          "topMaterial": "roof"
+        }
+      ]
+    }
+  }
+}

@@ -37,7 +37,7 @@ import { AntialiasedScenePass } from './antialiased-scene-pass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import {createFilmFinishPass} from './film-finish.js';
 import { createWorld } from './world.js';
 import { createRecognizer, cloneEnemyTank } from './models.js';
 import { config, RECOGNIZER_SCALE, angleDelta } from '../game/config.js';
@@ -244,14 +244,7 @@ export class View {
     this.composer.addPass(this.smaa);
     this.output = new OutputPass();
     this.composer.addPass(this.output);
-    this.film = new ShaderPass({
-      uniforms: { tDiffuse: { value: null }, time: { value: 0 } },
-      vertexShader:
-        'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-      fragmentShader: `uniform sampler2D tDiffuse;uniform float time;varying vec2 vUv;
-      void main(){vec3 c=texture2D(tDiffuse,vUv).rgb;float n=fract(sin(dot(vUv+fract(time),vec2(12.9898,78.233)))*43758.5453)-.5;
-      float vignette=1.-.36*pow(length((vUv-.5)*1.35),2.); gl_FragColor=vec4(c*vignette+n*.016,1.);}`,
-    });
+    this.film = createFilmFinishPass();
     this.composer.addPass(this.film);
     this.elapsed = 0;
     this.lowQuality = false;

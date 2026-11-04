@@ -61,7 +61,7 @@ export async function loadArena(world,floorReceivers=[]) {
   const aircraftReceivers=[];
   architecture.traverse(mesh=>{
     if(mesh.isMesh)for(const material of [].concat(mesh.material)){
-      aircraftReceivers.push({material,geometry:mesh.geometry,userData:{...mesh.userData,arenaAircraftShadow:true},isMesh:true});
+      aircraftReceivers.push({material,geometry:mesh.geometry,userData:{...mesh.userData,arenaAircraftShadow:true,arenaShadowOcclusion:group.userData.cycleRace.wallShadows},isMesh:true});
     }
   });
   group.userData.recognizerShadowReceivers=aircraftReceivers;

@@ -23,9 +23,9 @@ try{
  const typography=await page.evaluate(()=>{const a=getComputedStyle(document.querySelector('.terminal-copy')),b=getComputedStyle(document.querySelector('#start'));return [a.fontSize,a.lineHeight,a.letterSpacing,b.fontSize,b.lineHeight,b.letterSpacing,b.borderWidth,b.outlineStyle];});
  assert.deepEqual(typography.slice(0,3),typography.slice(3,6));assert.equal(typography[6],'0px');assert.equal(typography[7],'none');
  await page.waitForTimeout(300);assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('terminal')),true);
- await page.keyboard.press('ArrowDown');assert.equal(await page.locator('#start').getAttribute('aria-pressed'),'true');
+ await page.keyboard.press('ArrowDown');assert.equal(await page.locator('#start-multiplayer').getAttribute('aria-pressed'),'true');
  await page.keyboard.press('ArrowUp');assert.equal(await page.locator('#start-cycles').getAttribute('aria-pressed'),'true');
- await page.keyboard.press('ArrowDown');
+ await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');
  await page.screenshot({path:'test-results/home-menu.png'});
  const terminalTop=await page.locator('.terminal-content').last().evaluate(e=>e.getBoundingClientRect().top);
  await page.keyboard.press('Enter');

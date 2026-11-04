@@ -9,3 +9,5 @@
 #screenshot-status{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:100;pointer-events:none;color:#9fc5dd;background:#020710dd;padding:8px 12px;font:11px/1.5 monospace;letter-spacing:1px;text-align:center;}
 
 #tuning>label{display:block;margin:10px 0;line-height:1.6}#tuning select{display:block;width:100%;margin-top:5px;padding:5px;background:#182638;color:#d7e7ff;border:1px solid #68778b}#ai-decision{white-space:pre-wrap;overflow-wrap:anywhere;font:10px/1.5 monospace;max-height:260px;overflow:auto}#ai-status{line-height:1.5;color:#b4c8df}
+
+#tuning .tuning-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}#tuning .tuning-heading h3{margin:0}#tuning .tuning-heading button{flex-shrink:0;margin:0}

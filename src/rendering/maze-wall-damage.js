@@ -1,3 +1,4 @@
+import {subtractReliefCuts,clipReliefEdge} from './maze-wall-pattern.js';
 import * as T from 'three';
 import {contains,subtractAll,edgeCuts} from './wall-cut-polygons.js';
 import {seededRandom} from '../game/random.js';
@@ -63,6 +64,8 @@ export class MazeWallDamage{
  rebuild(){
   const positions=[],colors=[],ids=[],localPositions=[],localIds=[],base=this.original.attributes;
   const damaged=new Map(this.cavities.map(c=>[c.face.start,c.face]));
+  const patches=(this.slabs.userData.reliefPatches||[]).filter(p=>damaged.has(p.face.start));
+  const removed=[...damaged.keys(),...patches.map(p=>p.start)].sort((a,b)=>a-b);
   const emit=(points,tone,id)=>{for(const p of points){positions.push(...p);colors.push(...tone);ids.push(id);}};
   for(const face of damaged.values()){
    const localStart=positions.length;
@@ -90,6 +93,18 @@ export class MazeWallDamage{
      }
     }
    }
+   // Cut the same footprint through raised ribs/molding so relief cannot
+   // conceal the existing impact cavity. Keep the solid collision wall intact.
+   const emitRelief=(polygon,tone)=>{for(let i=1;i<polygon.length-1;i++)emit([polygon[0],polygon[i],polygon[i+1]].map(p=>world(face,p.x,p.y,-p.out)),tone,face.shadowId);};
+   for(const patch of patches.filter(p=>p.face===face))for(const polygon of subtractReliefCuts(patch.vertices,cuts.map(c=>c.ring)))emitRelief(polygon,patch.tone);
+   for(const box of face.reliefBoxes||[])for(let i=0;i<cuts.length;i++){
+    const cut=cuts[i];
+    for(let j=0;j<cut.ring.length;j++){
+     const edge=clipReliefEdge(cut.ring[j],cut.ring[(j+1)%cut.ring.length],box);if(!edge)continue;
+     const [a,b]=edge,side=[{...a,out:0},{...b,out:0},{...b,out:box.out},{...a,out:box.out}];
+     for(const polygon of subtractReliefCuts(side,cuts.filter((_,k)=>k!==i).map(c=>c.ring)))emitRelief(polygon,box.tone.map(v=>v*.35));
+    }
+   }
    localPositions.push(...positions.slice(localStart));localIds.push(...ids.slice(localStart/3));
 
   }
@@ -97,8 +112,8 @@ export class MazeWallDamage{
   for(const [name,extra,size] of [['position',positions,3],['color',colors,3],['shadowWallId',ids,1]]){
    const original=base[name].array,array=new Float32Array(original.length+extra.length);array.set(original);array.set(extra,original.length);geometry.setAttribute(name,new T.BufferAttribute(array,size));
   }
-  const indices=new Uint32Array(base.position.count-damaged.size*6+positions.length/3);let from=0,offset=0;
-  for(const start of [...damaged.keys()].sort((a,b)=>a-b)){indices.set(this.originalIndex.subarray(from,start),offset);offset+=start-from;from=start+6;}
+  const indices=new Uint32Array(base.position.count-removed.length*6+positions.length/3);let from=0,offset=0;
+  for(const start of removed){indices.set(this.originalIndex.subarray(from,start),offset);offset+=start-from;from=start+6;}
   indices.set(this.originalIndex.subarray(from),offset);offset+=base.position.count-from;
   for(let i=0;i<positions.length/3;i++)indices[offset+i]=base.position.count+i;
   geometry.setIndex(new T.BufferAttribute(indices,1));geometry.boundingSphere=this.original.boundingSphere?.clone()??null;
@@ -109,7 +124,7 @@ export class MazeWallDamage{
   const localGeometry=new T.BufferGeometry();localGeometry.setAttribute('position',new T.Float32BufferAttribute(localPositions,3));localGeometry.setAttribute('shadowWallId',new T.Float32BufferAttribute(localIds,1));
   const receiver=new T.Mesh(localGeometry);receiver.matrix.copy(this.slabs.matrix);receiver.matrixAutoUpdate=false;
   this.slabs.userData.damageReceiver=receiver;
-  this.slabs.userData.damagedSourceTriangles=new Set(this.cavities.flatMap(c=>[c.face.start/3,c.face.start/3+1]));
+  this.slabs.userData.damagedSourceTriangles=new Set(removed.flatMap(start=>[start/3,start/3+1]));
   this.rebuildSeams();this.revision++;this.dirty=false;
  }
  rebuildSeams(){
@@ -118,7 +133,8 @@ export class MazeWallDamage{
    const a=new T.Vector3().fromBufferAttribute(p,i),b=new T.Vector3().fromBufferAttribute(p,i+1);let spans=[[0,1]];
    for(const c of this.cavities)for(const cut of c.cuts){
     const f=c.face,plane=q=>(q.x-f.a.x)*f.nx-(q.z+f.a.s)*f.ns;
-    if(Math.abs(plane(a))>.4||Math.abs(plane(b))>.4)continue;
+    const reach=Math.max(.4,...(f.reliefBoxes||[]).map(box=>box.out+.1));
+    if(Math.abs(plane(a))>reach||Math.abs(plane(b))>reach)continue;
     const u=local(f,a),v=local(f,b),ring=cut.shape.map(([x,y])=>({x:c.x+x*c.radius,y:c.y+y*c.radius}));
     // Split at every boundary crossing: stepped outlines are concave.
     const dx=v.x-u.x,dy=v.y-u.y,cuts=[0,1];

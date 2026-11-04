@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Wall Workshop</title><link rel="stylesheet" href="/studies/maze-wall/workshop.css"></head>
+<body>
+<header class="app-header"><div><span class="eyebrow">TRON / MODEL STUDIES</span><h1>Wall Workshop <span id="revision-label">Loading…</span></h1></div><div class="header-actions"><span class="local-badge">Local workspace</span><button id="download" disabled>Export GLB <span aria-hidden="true">↗</span></button></div></header>
+<main>
+ <section class="model-column" aria-label="Model and feedback">
+  <div class="view-toolbar"><div class="views" role="group" aria-label="Camera view"><button data-view="whole" aria-pressed="true">Perspective</button><button data-view="front" aria-pressed="false">Front</button><button data-view="side" aria-pressed="false">Side</button><button data-view="top" aria-pressed="false">Top</button><button data-view="detail" aria-pressed="false">Detail</button><button data-view="canyon" aria-pressed="false">Canyon</button></div><button id="reset-view" title="Fit model in view" aria-label="Fit model in view">Fit</button></div>
+  <div id="viewport"><div class="viewport-hint">Drag to orbit · scroll to zoom · click a part to select</div><div id="model-loading" role="status">Opening your wall study…</div></div>
+  <div class="model-controls"><span id="model-stats">—</span><label><input id="inspect" type="checkbox"> Brighter</label><label><input id="wire" type="checkbox"> Wireframe</label></div>
+  <div class="selection-row"><label for="parts">Editing</label><select id="parts"><option value="">Whole model</option></select><span id="selection-hint">Choose a part, or describe the whole wall.</span></div>
+  <section class="feedback-panel" aria-label="Describe a model change"><div class="feedback-heading"><h2>Your direction</h2><span id="attachment-note">Current view included</span></div>
+   <form id="feedback-form"><label class="sr-only" for="feedback">Describe the change</label><textarea id="feedback" maxlength="4000" rows="3" placeholder="For example: remove the small ledges. Make this one broad stepped section that reaches the floor." required></textarea><div class="submit-row"><span class="helper">Enter to revise · Shift + Enter for a new line</span><button type="button" id="cancel" hidden>Cancel revision</button><button type="submit" id="submit" class="primary" disabled>Revise model <span aria-hidden="true">↵</span></button></div></form>
+   <div id="status" role="status" aria-live="polite">Connecting to the local editor…</div><p class="privacy-note">Submitting sends your view, direction and selected references to Codex using your local sign-in. Modeling files stay separate from the game.</p>
+  </section>
+ </section>
+ <aside>
+  <section class="reference-panel"><div class="section-heading"><div><span class="eyebrow">VISUAL DIRECTION</span><h2>References <span id="reference-count">0</span></h2></div><label class="file-button" for="reference-files">+ Add images</label><input class="sr-only" id="reference-files" type="file" accept="image/png,image/jpeg,image/webp" multiple></div><div id="dropzone" tabindex="0" role="button" aria-label="Drop or choose reference images"><span class="drop-symbol" aria-hidden="true">＋</span><span>Drop reference images here</span><small>PNG, JPG or WebP · up to 6 included per revision</small></div><p class="reference-help">Checked images guide your next revision. Click an image to inspect it.</p><div id="references" class="reference-grid"></div></section>
+  <section class="history-panel"><div class="section-heading"><div><span class="eyebrow">SAVED LOCALLY</span><h2>Revision history</h2></div></div><p class="reference-help">Every successful edit is saved. Restore any version to keep working from it.</p><ol id="history"></ol></section>
+ </aside>
+</main>
+<dialog id="reference-dialog"><div class="dialog-heading"><strong id="reference-title"></strong><button id="close-reference" aria-label="Close image">Close ×</button></div><img id="reference-image" alt=""></dialog>
+<script type="module" src="/studies/maze-wall/preview.js"></script>
+</body></html>

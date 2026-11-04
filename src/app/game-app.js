@@ -57,7 +57,8 @@ export async function createGameApp() {
   const { world: map } = scenario;
   const cycleStart = new URLSearchParams(location.search).get('cycleStart');
   const testCycleStart = cycleStart === '1';
-  let selectedGame = testCycleStart?'cycles':'multiplayer', multiplayer=null;
+  let selectedGame = 'cycles', multiplayer=null;
+  const developmentTuningEnabled=import.meta.env.DEV&&new URLSearchParams(location.search).get('tuning')==='1';
   const playTracker=new PlayTracker(markPlay);
   const cycleGame=()=>selectedGame==='cycles'||selectedGame==='multiplayer';
   const $ = (id) => document.getElementById(id);
@@ -181,7 +182,7 @@ export async function createGameApp() {
     if (!['loading', 'ready', 'entering', 'running', 'paused', 'error'].includes(next))
       throw new Error(`Unknown application mode: ${next}`);
     mode = next;
-    if(['ready','error'].includes(next))document.body.classList.remove('cycle-intro','cycle-loading','home-access');
+    if(['ready','error'].includes(next)){document.body.classList.remove('cycle-intro','cycle-loading','home-access');$('tuning').hidden=true;}
     if (next !== 'running') {
       clearMouseAim();
       releaseMouse();
@@ -426,6 +427,7 @@ export async function createGameApp() {
     if(event.code==='KeyY'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!exitConfirm.open&&!cycleTuning?.open&&(mode==='running'||mode==='entering'&&openingTransition)){
       event.preventDefault();if(!event.repeat)showControlsHelp();return;
     }
+    if(event.code==='Escape'&&!$('tuning').hidden){event.preventDefault();$('tuning').hidden=true;return;}
     if(exitConfirm.open)return;
     if(event.code==='Escape'&&['running','entering','paused'].includes(mode)){
       event.preventDefault();
@@ -646,8 +648,9 @@ export async function createGameApp() {
       return;
     }
     if (key === 'KeyT') {
-      if (event.shiftKey && import.meta.env.DEV) {
-        $('tuning').hidden = !$('tuning').hidden;
+      if (event.shiftKey && developmentTuningEnabled) {
+        event.preventDefault();
+        if(!event.repeat)$('tuning').hidden = !$('tuning').hidden;
         return;
       }
       if (['running', 'entering'].includes(mode)) boostTank(run);
@@ -1174,6 +1177,7 @@ export async function createGameApp() {
   }
 
   if (import.meta.env.DEV) {
+    listen($('close-tuning'),'click',()=>{$('tuning').hidden=true;});
     $('enemy-ai').value = config.aiMode;
     $('ai-small-encounter').checked = config.aiSmallEncounter;
     listen($('apply-ai'), 'click', () => {

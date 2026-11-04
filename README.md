@@ -4,7 +4,7 @@ An open-ended Three.js/WebGL simulation inspired by the 1982 film: explore a dia
 
 ## Play locally
 
-Requires patched Node.js 22.23.4+ (22.x) or 24.22.1+ (24.x) and a desktop browser with WebGL 2.
+Requires patched Node.js 22.23.4+ (22.x) or 24.22.1+ (24.x) and a desktop browser with WebGL 2. WebAssembly is optional: restricted browsers use simpler JavaScript debris motion and scenery collisions. Debris-to-vehicle impact damage requires the Rapier backend; normal vehicle control and weapon damage do not.
 
 ```sh
 npm ci
@@ -34,13 +34,23 @@ Open <http://127.0.0.1:5173>. Enter completes the typing terminal; Enter again s
 | R | Reset Clu and all aircraft |
 | M | Mute/unmute |
 | T | Ten-second turbo boost (2.5× normal top speed; available once per minute) |
-| Shift+T | Development tuning and Recognizer observation diagnostics |
+| Shift+T | Development tuning, only when opened with `?tuning=1`; Close or Escape dismisses it |
 
 The barrel stays level. Bullets assist only height when the manually aimed cannon aligns with an unobscured Recognizer. Shots and sight lines are blocked by the same diagonal walls that constrain the tank.
 
 Each aircraft begins outside the maze and maintains its own observations. Radio messages are delayed, range-limited copies of sightings; they do not refresh old information. After losing sight, a craft predicts a short continuation of the last observed motion, investigates and searches, then forgets stale sightings. It cannot consult Clu's hidden position. Aircraft use separate spatial audio sources, muffled by intervening slabs.
 
 The maze is a reconstruction study based on the supplied frames, not an exact recovered film map. Models remain procedural; inspected internet replacements are documented but not yet acquired. Recognizer legs are approximately 9 m / 30 ft following the user's scale estimate.
+
+## Local wall workshop
+
+Run `npm run workshop` and open <http://127.0.0.1:5190/wall-study.html> for a fixed workshop address. The page is also available at <http://127.0.0.1:5173/wall-study.html> with a current `npm run dev` server. Orbit the model, optionally select a part, type a correction and press Enter. Shift+Enter inserts a newline. Drop PNG/JPEG/WebP references into the page; checked references and a capture of the current view accompany the correction. Each submission starts a separate local `codex exec` request using your existing Codex sign-in and configured model, and consumes that account's normal usage. Run `codex login` if needed; no additional API key is required for a ChatGPT-authenticated CLI.
+
+The editor returns validated boxes and polygon-profile extrusions, capped at 48 parts / 1,500 triangles. It does not edit game code. Successful revisions and reference images persist under ignored `.local/wall-studio/`; previous versions can be restored, and the displayed model can be exported as GLB. Cancelled, failed or timed-out requests retain the previous model. Reference files stay on this Mac until selected images are submitted to Codex. The development server only exposes this editor on localhost; it is not part of the production site or `npm run preview`.
+
+The source starting model is `studies/maze-wall/design.json`. `node tools/studies/export-maze-wall.mjs` exports the latest local workspace model (or the starting design when no workspace exists) to `studies/maze-wall/maze-wall.glb`. The earlier procedural wall remains an unapproved starting study, not a fidelity target.
+
+Workflow checks: `node --test tests/unit/wall-studio.test.js` and `node tests/browser/wall-workshop.mjs`. The browser check uses a controlled editor and a temporary workspace. `TRON_STUDIO_LIVE=1 node tests/browser/wall-workshop-live.mjs` explicitly opts into one real Codex revision in a temporary workspace.
 
 ## Build and verification
 
@@ -165,7 +175,7 @@ References: [Codex containers](https://learn.chatgpt.com/docs/agent-approvals-se
 
 Design and API contract: [Jev enemy control](docs/jev/_index.md).
 
-The game now starts in **Tactical + Jev** with the full enemy population (small encounter disabled). To change modes, press **Shift+T**, choose **Enemy AI**, then click **Apply AI and restart**. Your selection persists; earlier experimental preferences are reset once for this new default:
+The game now starts in **Tactical + Jev** with the full enemy population (small encounter disabled). To change modes, open the dev game with **?tuning=1**, press **Shift+T**, choose **Enemy AI**, then click **Apply AI and restart**. Your selection persists; earlier experimental preferences are reset once for this new default:
 
 - **Classic** restores the original controller, roster and pursuit reinforcements. It makes no AI requests.
 - **Tactical — local** uses oriented, swept aircraft clearance, staged turns/descents and a bounded corridor planner. Units choose withdrawal, regrouping, pressure, wall-side strikes or cover from local scores. It needs no key.
@@ -175,7 +185,7 @@ The **Small tactical encounter** checkbox starts two Recognizers and one ground 
 
 The local Vite server reads the key from `TYPESAFE_API_KEY` (including `.env.local`) or, if absent, the single raw key in `credentials/Typesafe.txt`. Restart Vite after changing credentials. The environment file is ignored by Git; `credentials/Typesafe.txt` is tracked with git-crypt encryption. Both locations are denied by the development file server. Locked checkouts ignore the encrypted credential and use local AI fallback unless a server environment key is provided. Never put the key in a `VITE_` variable. `.env.example` documents the optional model setting. The existing credential file has been connected; no key needs to be pasted into the game.
 
-Only units whose fresh sighting/radio memory or unknown sound estimate is within one maze length request Jev decisions. Distant or unaware units use local tactics. Enemies hear nearby engines and more distant cannon fire, impacts and explosions; walls muffle sounds and reports carry uncertain bearing/range estimates. Hearing permits investigation, not a confirmed target fix. Range controls are in Shift+T.
+Only units whose fresh sighting/radio memory or unknown sound estimate is within one maze length request Jev decisions. Distant or unaware units use local tactics. Enemies hear nearby engines and more distant cannon fire, impacts and explosions; walls muffle sounds and reports carry uncertain bearing/range estimates. Hearing permits investigation, not a confirmed target fix. Range controls are in Shift+T when the dev page is explicitly opened with `?tuning=1`.
 
 Requests go through the same local server at `/api/jev/decision`. Direct browser access was checked: TypeSafe rejected CORS preflights for the tested localhost/127.0.0.1 origins. The relay is therefore required for this browser setup; it sends requests directly to TypeSafe without an additional AI layer. There is one in-flight request, at least 600 ms between starts, a 2.2-second server timeout, and a $1 USD rolling-hour local spending budget (set server-only `JEV_HOURLY_BUDGET_USD` in `.env.local` and restart Vite to change it). Local clients space calls by at least 650 ms of wall time. This game-owned cap is separate from purchased JEV credits. The browser retries failures with backoff. No calls are made while paused or in Classic/local mode. Late replies after pause, restart or teleport cannot change a vehicle's active maneuver.
 

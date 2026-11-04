@@ -1,14 +1,18 @@
 import * as THREE from 'three';
 import {DEBRIS_DAMAGE} from './debris-damage.js';
-import RAPIER from '@dimforge/rapier3d-compat';
+import {optionalPhysicsBackend} from './optional-physics.js';
+import {JavascriptDebrisPhysics} from './debris-physics-js.js';
+import {DEBRIS_PHYSICS} from './debris-physics-config.js';
+export {DEBRIS_PHYSICS} from './debris-physics-config.js';
 
-export const debrisPhysicsReady=RAPIER.init();
-// Meters and seconds. Scenery and vehicle contacts; no debris/debris contacts.
-export const DEBRIS_PHYSICS={gravityMetersPerSecondSquared:9.81,step:1/120,maxFrame:.1,restitution:.28,friction:.55,horizontalDampingPerSecond:.12,angularDamping:.04,maxPieces:160};
+let RAPIER=null;
+export const debrisPhysicsReady=optionalPhysicsBackend().then(backend=>{RAPIER=backend;return backend;});
 const rotation=new THREE.Quaternion(),rotationMatrix=new THREE.Matrix4(),rotatedCenter=new THREE.Vector3();
 const SCENERY=0x00010002,DEBRIS=0x00020005,VEHICLE=0x00040002;
 export class DebrisPhysics {
  constructor(nearbyWalls=()=>[]){
+  if(!RAPIER)return new JavascriptDebrisPhysics(nearbyWalls);
+  this.backend='rapier';
   this.nearbyWalls=nearbyWalls;this.world=new RAPIER.World({x:0,y:-DEBRIS_PHYSICS.gravityMetersPerSecondSquared,z:0});
   this.world.timestep=DEBRIS_PHYSICS.step;this.world.integrationParameters.maxCcdSubsteps=4;
   this.world.numSolverIterations=8;
