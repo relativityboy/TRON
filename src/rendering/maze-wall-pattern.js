@@ -2,7 +2,7 @@
 // Source GLB SHA-256: 21343872666d3c31a69fc79082eb209a59aef9532a101a7e7f1c7be72e5c2d59.
 // Metres at the study's 54 m wall height. Relief is presentation-only.
 export const MAZE_WALL_EDGE_STYLE=Object.freeze({color:0x3b4c6a,opacity:.62,surfaceOffsetMeters:.025});
-export const MAZE_WALL_PATTERN=Object.freeze({referenceHeightMeters:54,reliefDepthScale:.75,minimumDecoratedGapMeters:24,ribWidthMeters:18,ribPitchMeters:36,ribFirstCenterMeters:18,ribProjectionMeters:1.5,ribTopInsetMeters:.25,moldingCenterMeters:8.1,moldingHeightMeters:2.7,moldingProjectionMeters:1.875,cornerInsetMeters:1.875});
+export const MAZE_WALL_PATTERN=Object.freeze({referenceHeightMeters:54,reliefDepthScale:.4875,minimumDecoratedGapMeters:24,ribWidthMeters:18,ribPitchMeters:36,ribFirstCenterMeters:18,ribProjectionMeters:1.5,ribTopInsetMeters:.25,moldingCenterMeters:8.1,moldingHeightMeters:2.7,moldingProjectionMeters:1.875,cornerInsetMeters:1.875});
 export function wallPatternBoxes(length,height){
  const C=MAZE_WALL_PATTERN,scale=height/C.referenceHeightMeters,margin=Math.min(C.cornerInsetMeters*scale,length/3),boxes=[];
  const add=(left,right,bottom,top,out,kind)=>{if(right-left>.05&&top-bottom>.05)boxes.push({left,right,bottom,top,out,kind});};

@@ -1,3 +1,7 @@
+## Shallower maze relief — November 5
+
+- [x] Reduce both current relief depths by a further 35%: vertical ribs 1.125 → 0.73125 m, horizontal molding 1.40625 → 0.9140625 m at the 54 m reference height. Shared depth scaling preserves spacing, height, corner miters and matching outlines. Eight focused geometry, corner, exterior and damage/reset tests pass; browser fixture expectations updated for the new projection.
+
 ## Continuous horizontal ledges — November 5
 
 - [x] Join horizontal molding across adjacent decorated canyon faces with offset-line miters at convex, concave and oblique corners. Remove the old corner inset and hidden end caps at joins; match the top outline's miter including its surface offset. Retain capped ends where exterior/narrow faces intentionally have no relief; guard near-reversing normals against unbounded spikes.

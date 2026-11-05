@@ -20,7 +20,7 @@ try{
   window.wallPatternFrame={face,x,z};
   v.camera.position.set(x+face.nx*65-face.ux*24,30,z-face.ns*65-face.uz*24);v.camera.lookAt(x,23,z);v.camera.updateProjectionMatrix();v.composer.render(0);
   const patches=slabs.userData.reliefPatches.filter(p=>p.face===face);if(!patches.length)throw Error('Selected wall has no revision 7 relief');
-  const rib=face.reliefBoxes.find(b=>b.out===1.125);if(!rib)throw Error('Vertical rib missing');
+  const rib=face.reliefBoxes.find(b=>b.kind==='rib');if(!rib)throw Error('Vertical rib missing');
   const distance=(rib.left+rib.right)/2,px=face.a.x+face.ux*distance,pz=-face.a.s+face.uz*distance;
   const ray=new Raycaster(new Vector3(px+face.nx*10,15,pz-face.ns*10),new Vector3(-face.nx,0,face.ns));slabs.updateMatrixWorld();
   const before=ray.intersectObject(slabs)[0];
@@ -42,6 +42,6 @@ try{
   if(!damage.hit({subject:'surface',x:px,y:15,s:-pz,normal:{x:face.nx,y:0,z:-face.ns}}))throw Error('Wall impact rejected');damage.update(0);v.world.slabs.updateMatrixWorld();const hit=ray.intersectObject(v.world.slabs)[0];
   const result={afterDistance:hit.distance,cavities:damage.cavities.length};damage.clear();result.resetDistance=ray.intersectObject(v.world.slabs)[0].distance;damage.dispose();return result;
  });
- assert(Math.abs(report.beforeDistance-8.875)<.01);assert(impact.afterDistance>10.5);assert.equal(impact.cavities,1);assert(Math.abs(impact.resetDistance-8.875)<.01);assert.deepEqual(errors,[]);
+ assert(Math.abs(report.beforeDistance-9.26875)<.01);assert(impact.afterDistance>10.5);assert.equal(impact.cavities,1);assert(Math.abs(impact.resetDistance-9.26875)<.01);assert.deepEqual(errors,[]);
  await writeFile('test-results/maze-wall-pattern/report.json',JSON.stringify({...report,...impact,loadMilliseconds:Date.now()-started,errors},null,2));console.log(JSON.stringify({...report,...impact,errors}));
 }finally{await browser.close();await server.close();await rm(cacheDir,{recursive:true,force:true});}
