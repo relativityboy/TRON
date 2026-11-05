@@ -1,3 +1,4 @@
+import {guardGameKey} from './game-keyboard.js';
 import {yieldStartup} from '../loading/yield-startup.js';
 import {markPlay} from '../analytics/mark-play.js';
 import {PlayTracker} from '../analytics/play-tracker.js';
@@ -384,12 +385,12 @@ export async function createGameApp() {
   function showControlsHelp(){
     const cycle=run.playerVehicle==='cycle',road=cycle&&run.cycleRace.cycles[run.cycleRace.playerId].escaped;
     const groups=cycle?[
-      ['DRIVING',...(road?['W / ACCELERATE + TURBO','A/D OR ARROWS / STEER','S / BRAKE / REVERSE']:['A/D OR LEFT/RIGHT / TURN','W / TURBO','S / BRAKE'])],
+      ['DRIVING',...(road?['W OR UP / ACCELERATE + TURBO','A/D OR ARROWS / STEER','S OR DOWN / BRAKE / REVERSE']:['A/D OR LEFT/RIGHT / TURN','W OR UP / TURBO','S OR DOWN / BRAKE'])],
       ['CAMERA','P / FIRST PERSON','J/L / GLANCE','I/K / ZOOM','V / AERIAL'],
       ['AFTER DEATH','LEFT/RIGHT / FOLLOW CYCLES','ENTER / RESTART'],
       ['RENDERING','SHIFT-R / NORMAL OR POV-RAY CYCLES'],
     ]:[
-      ['DRIVING','WASD OR ARROWS / DRIVE','SHIFT-W / CRUISE','W OR S / CANCEL CRUISE','T / TURBO'],
+      ['DRIVING','WASD OR ARROWS / DRIVE','SHIFT-W OR SHIFT-UP / CRUISE','W/S OR UP/DOWN / CANCEL CRUISE','T / TURBO'],
       ['WEAPONS','J/L / TURRET','F OR J+L / CENTER + LEVEL','SPACE / FIRE','I/K / GUNNER AIM'],
       ['CAMERA','P / GUNNER VIEW','O / GUNNER ZOOM','V / AERIAL','I/K / AERIAL ZOOM'],
     ];
@@ -415,7 +416,9 @@ export async function createGameApp() {
     dismissControlsHelp();
   },true);
   listen(window,'keyup',event=>dismissedHelpKeys.delete(event.code));
+  listen($('game'),'contextmenu',event=>{if(['running','entering'].includes(mode))event.preventDefault();});
   listen(window, 'keydown', (event) => {
+    if(guardGameKey(event,['running','entering'].includes(mode))){inputController.clearKeys();return;}
     if(homeTransition.active){event.preventDefault();return;}
     idleTime = 0;
     if(dismissedHelpKeys.has(event.code)){event.preventDefault();return;}
@@ -537,7 +540,7 @@ export async function createGameApp() {
       if(multiplayer)return;
       if (!event.repeat) {
         resume();
-        if (event.code === 'KeyW') run.cruiseThrottle = event.shiftKey;
+        if (['KeyW','ArrowUp'].includes(event.code)) run.cruiseThrottle = event.shiftKey;
         if (
           ['running', 'entering'].includes(mode) &&
           [
@@ -562,10 +565,10 @@ export async function createGameApp() {
     if (event.target instanceof HTMLInputElement) return;
     const key = event.code;
     if(run.playerVehicle==='cycle'&&!view.cameraRig.freeCamera.active&&['running','entering'].includes(mode)){
-      if(['KeyW','KeyS'].includes(key)){
+      if(['KeyW','ArrowUp','KeyS','ArrowDown'].includes(key)){
         event.preventDefault();keys.add(key);
         if(!event.repeat){
-          if(key==='KeyS'&&run.cycleRace.cycles[run.cycleRace.playerId].escaped)inputController.cycleReverseQueued=Math.abs(run.cycleRace.cycles[run.cycleRace.playerId].roadSpeed)<.01;
+          if(['KeyS','ArrowDown'].includes(key)&&run.cycleRace.cycles[run.cycleRace.playerId].escaped)inputController.cycleReverseQueued=Math.abs(run.cycleRace.cycles[run.cycleRace.playerId].roadSpeed)<.01;
         }
         return;
       }
@@ -581,7 +584,7 @@ export async function createGameApp() {
       ['running', 'entering'].includes(mode)
     )
       clearMouseAim();
-    if (key === 'KeyW' && !event.repeat && ['running', 'entering'].includes(mode)) {
+    if (['KeyW','ArrowUp'].includes(key) && !event.repeat && ['running', 'entering'].includes(mode)) {
       run.cruiseThrottle = event.shiftKey ? true : false;
     }
     if (!event.repeat && ['running', 'entering'].includes(mode) && key === 'KeyP') {

@@ -11,6 +11,16 @@ See also: /llms.txt (curated index) and /sitemap.xml.
 <!-- Page: (root) -->
 Source: /
 
+## Complete arrow-key driving — November 4
+
+- [x] Make Up/Down equivalent to W/S for cycle turbo, braking and road acceleration/reverse. Preserve Left/Right turns/steering, brake priority and key-release clearing. Match Clu Up to W for cruise activation/cancellation, including Shift-Up. Update driving help and HUD labels; free-camera arrow look remains unchanged.
+- [x] Five focused input/keyboard tests pass, including equivalent commands for WASD/arrows in tanks, arena cycles and road cycles, plus mixed-key brake priority and touch clearing.
+
+## Suppress accidental browser panels during play — November 4
+
+- [x] Cancel default key actions during active gameplay/opening, while preserving ordinary game shortcuts, Shift controls, menu behavior and editable fields. Consume Command/Control/Option/Fn shortcuts before they trigger game actions and clear held movement keys. Suppress the game canvas context menu. Owned listeners follow the existing disposal lifecycle.
+- [x] Three focused keyboard tests pass. Chrome verifies canceled emoji/Fn/default key events and context menu in both Clu and cycle modes, with normal navigation, Shift+T and opt-in tuning intact. macOS may intercept Globe/Fn/emoji shortcuts before delivering a browser event; the game cannot guarantee suppression of OS-owned panels. Actual Safari/macOS shortcut behavior needs user verification.
+
 ## CycleInteriorSound1 engine loop — November 4
 
 - [x] Replace both cycle engine loops with the user's `/Users/steve/Desktop/CycleInteriorSound1.mp4`. Extract actual 1.043 s stereo audio rather than padding to the 2.395 s video duration. Build a 0.7223 s loop from a phase-matched inner selection, 80 ms raised-cosine overlap and circular stereo-linked RMS smoothing; preserve original waveform and speed/Doppler behavior.

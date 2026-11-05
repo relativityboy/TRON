@@ -17,9 +17,18 @@ try{
  await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isHidden());
  await page.keyboard.press('ArrowDown');assert.equal(await page.locator('#start-multiplayer').getAttribute('aria-pressed'),'true');await page.keyboard.press('ArrowUp');
  await page.keyboard.press('Enter');await page.waitForFunction(()=>__tron.state.mode==='running'&&__tron.state.playerVehicle==='cycle',{},{timeout:60000});
+ const blockedDefaults=async()=>{
+  const result=await page.evaluate(()=>{
+   const keys=[{code:'Space',ctrlKey:true,metaKey:true},{code:'Fn',key:'Fn'},{code:'KeyE'},{code:'F1'}];
+   return keys.map(options=>{const event=new KeyboardEvent('keydown',{...options,bubbles:true,cancelable:true});const accepted=window.dispatchEvent(event);window.dispatchEvent(new KeyboardEvent('keyup',{code:options.code,bubbles:true}));return !accepted;});
+  });assert(result.every(Boolean));
+  assert.equal(await page.locator('#game').evaluate(game=>game.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}))),false);
+ };
+ await blockedDefaults();
  await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isHidden());
  await home();await page.locator('#start').click();await page.keyboard.press('Enter');await page.waitForFunction(()=>__tron.state.mode==='running'&&!document.body.classList.contains('home-opening'),{},{timeout:60000});
  await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isHidden());assert((await page.evaluate(()=>__tron.state.turboRemaining))>0,'Shift+T remains turbo during normal CLU play');
+ await blockedDefaults();
  await home('?tuning=1');await page.locator('#start').click();await page.keyboard.press('Enter');await page.waitForFunction(()=>__tron.state.mode==='running'&&!document.body.classList.contains('home-opening'),{},{timeout:60000});
  await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isVisible());
  await page.evaluate(()=>window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyT',shiftKey:true,repeat:true,bubbles:true})));assert(await page.locator('#tuning').isVisible(),'held shortcut cannot repeatedly toggle');

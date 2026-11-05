@@ -37,9 +37,9 @@ export class InputController {
     const road=run.playerVehicle==='cycle'&&run.cycleRace?.cycles[run.cycleRace.playerId]?.escaped;
     return {
       cycleTurn:this.cycleTurns[0]??0,
-      cycleRoad:road?{cruise:true,speedAdjust:Number(held('KeyW')),reverse:this.cycleReverseQueued,turbo:held('KeyW')&&!held('KeyS'),brake:held('KeyS'),steer:Number(held('KeyD','ArrowRight'))-Number(held('KeyA','ArrowLeft'))}:{},
-      cycleTurbo:run.playerVehicle==='cycle'&&held('KeyW')&&!held('KeyS'),
-      cycleSlow:run.playerVehicle==='cycle'&&held('KeyS'),
+      cycleRoad:road?{cruise:true,speedAdjust:Number(held('KeyW','ArrowUp')),reverse:this.cycleReverseQueued,turbo:held('KeyW','ArrowUp')&&!held('KeyS','ArrowDown'),brake:held('KeyS','ArrowDown'),steer:Number(held('KeyD','ArrowRight'))-Number(held('KeyA','ArrowLeft'))}:{},
+      cycleTurbo:run.playerVehicle==='cycle'&&held('KeyW','ArrowUp')&&!held('KeyS','ArrowDown'),
+      cycleSlow:run.playerVehicle==='cycle'&&held('KeyS','ArrowDown'),
       throttle: held('KeyS', 'ArrowDown')
         ? -1
         : Number(run.cruiseThrottle || held('KeyW', 'ArrowUp')),
