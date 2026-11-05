@@ -1,3 +1,8 @@
+## Continuous horizontal ledges — November 5
+
+- [x] Join horizontal molding across adjacent decorated canyon faces with offset-line miters at convex, concave and oblique corners. Remove the old corner inset and hidden end caps at joins; match the top outline's miter including its surface offset. Retain capped ends where exterior/narrow faces intentionally have no relief; guard near-reversing normals against unbounded spikes.
+- [x] Eight focused geometry/exterior/damage tests pass, including continuous front vertices and outlines on square, inward and angled turns. Chrome overview capture shows wrapped molding; impact cavity and reset regression passes without page errors. Collision and solid shadow casters remain unchanged.
+
 ## Complete arrow-key driving — November 4
 
 - [x] Make Up/Down equivalent to W/S for cycle turbo, braking and road acceleration/reverse. Preserve Left/Right turns/steering, brake priority and key-release clearing. Match Clu Up to W for cruise activation/cancellation, including Shift-Up. Update driving help and HUD labels; free-camera arrow look remains unchanged.

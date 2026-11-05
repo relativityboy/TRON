@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
-import {wallPatternBoxes,MAZE_WALL_PATTERN as P} from '../../src/rendering/maze-wall-pattern.js';
+import {appendWallPattern,appendWallPatternEdges,wallPatternBoxes,MAZE_WALL_PATTERN as P} from '../../src/rendering/maze-wall-pattern.js';
 import {createOutlineMaze} from '../../src/levels/outline-maze.js';
 import {createWorld} from '../../src/rendering/world.js';
 import {MazeWallDamage} from '../../src/rendering/maze-wall-damage.js';
@@ -51,4 +51,23 @@ test('faint facade outlines contain no diagonal wireframe and break across impac
   for(let i=0;i<q.count;i+=2)if(Math.abs(q.getX(i)+45)<1e-4&&Math.abs(q.getX(i+1)+45)<1e-4&&Math.abs(q.getZ(i)-13.15)<1e-4){spans++;assert(!(Math.min(q.getY(i),q.getY(i+1))<15&&Math.max(q.getY(i),q.getY(i+1))>15),'outline must not bridge the cavity');}
   assert.equal(spans,2);damage.clear();assert.equal(seams.geometry.attributes.position.count,p.count);
  }finally{damage.dispose();f.dispose();}
+});
+
+test('molding and outlines meet at convex, concave and oblique corners without end caps',()=>{
+ for(const polygon of [[[0,0],[100,0],[100,100],[0,100]],[[0,0],[100,0],[100,40],[40,40],[40,100],[0,100]],[[0,0],[100,0],[140,70],[0,100]]]){
+  const faces=polygon.map(([x,s],i)=>{const [bx,bs]=polygon[(i+1)%polygon.length],length=Math.hypot(bx-x,bs-s),ux=(bx-x)/length,us=(bs-s)/length;return {a:{x,s},b:{x:bx,s:bs},length,ux,uz:-us,nx:us,ns:-ux,mazeId:0,height:54,shadowId:i};});
+  let index=0;const patches=appendWallPattern({faces,damageFaces:faces,height:54,quad:()=>{const start=index;index+=6;return start;},wallTone:[.01,.02,.03],roofTone:[.03,.07,.19]});
+  const point=(face,x,out)=>[face.a.x+face.ux*x+face.nx*out,-face.a.s+face.uz*x-face.ns*out];
+  for(let i=0;i<faces.length;i++){
+   const a=faces[i],b=faces[(i+1)%faces.length],ba=a.reliefBoxes.find(p=>p.kind==='molding'),bb=b.reliefBoxes.find(p=>p.kind==='molding');
+   assert.equal(ba.left,0);assert.equal(ba.right,a.length);assert(!ba.leftEnd&&!ba.rightEnd);
+   const pa=point(a,ba.frontRight,ba.out),pb=point(b,bb.frontLeft,bb.out);assert(Math.hypot(pa[0]-pb[0],pa[1]-pb[1])<1e-8);
+   assert(patches.some(p=>p.face===a&&p.vertices.some(v=>v.x===ba.frontRight&&v.out===ba.out)));
+  }
+  const lines=[];appendWallPatternEdges(faces,(a,b)=>lines.push([a,b]));
+  const height=(P.moldingCenterMeters+P.moldingHeightMeters/2);
+  const band=lines.filter(([a,b])=>Math.abs(a[1]-height)<1e-8&&Math.abs(b[1]-height)<1e-8);
+  assert.equal(band.length,faces.length);
+  for(let i=0;i<band.length;i++){const end=band[i][1],start=band[(i+1)%band.length][0];assert(Math.hypot(...end.map((v,j)=>v-start[j]))<1e-8);}
+ }
 });
