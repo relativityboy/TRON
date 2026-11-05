@@ -82,19 +82,21 @@ export function createWorld(scene,world=DEFAULT_WORLD,arena=null) {
   // Stable flat receiver normals avoid derivative noise on faces grazing the light.
   geometry.computeVertexNormals();
   geometry.setAttribute('shadowReceiverNormal',geometry.attributes.normal.clone());
+  const canyonEnclosure={value:0};
   const slabMaterial=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
   slabMaterial.onBeforeCompile=shader=>{
     distantFog(shader,120);
+    shader.uniforms.canyonEnclosure=canyonEnclosure;
     shader.vertexShader='varying vec3 vSlab;\n'+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvSlab=position;');
-    shader.fragmentShader='varying vec3 vSlab;\n'+shader.fragmentShader;
+    shader.fragmentShader='varying vec3 vSlab; uniform float canyonEnclosure;\n'+shader.fragmentShader;
     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
       // Continuous broad washes across joined cells, never a tile-by-tile tint.
       float wash=.85+.15*sin(vSlab.x*.002-vSlab.z*.003);
       diffuseColor.rgb*=wash;
       // Lift far silhouettes gradually, without altering nearby surface colors.
       float distantReadability=smoothstep(350.,1600.,distance(cameraPosition.xz,vSlab.xz));
-      diffuseColor.rgb+=vec3(.005,.012,.028)*distantReadability;`);
+      diffuseColor.rgb+=vec3(.005,.012,.028)*distantReadability*(1.-canyonEnclosure);`);
   };
   const slabs=new THREE.Mesh(geometry,slabMaterial);slabs.userData.damageFaces=damageFaces;slabs.userData.reliefPatches=reliefPatches;slabs.userData.shadowPositions=shadowPositions;slabs.userData.shadowIds=casterShadowIds;scene.add(slabs);
   const aerialView={value:0};
@@ -132,5 +134,5 @@ export function createWorld(scene,world=DEFAULT_WORLD,arena=null) {
       diffuseColor.rgb=mix(diffuseColor.rgb*wash*visibility,vec3(.65,.76,.95),grid*outside*mix(.95,.045,aerialView)*gridFade);`);
   };
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(40000,40000),floorMaterial);floor.rotation.x=-Math.PI/2;floor.position.y=-.06;floor.renderOrder=-2;floor.userData.arenaFootprint=arenaFootprint;scene.add(floor);
-  return {floor,slabs,seams,aerialView};
+  return {floor,slabs,seams,aerialView,canyonEnclosure};
 }

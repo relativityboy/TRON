@@ -1,3 +1,4 @@
+import {CluHaze,CLU_HAZE} from './clu-haze.js';
 import {recognizerPose} from './recognizer-pose.js';
 import {yieldToBrowser} from '../loading/yield-to-browser.js';
 import {CycleRendererGuard} from './cycle-renderer-guard.js';
@@ -114,6 +115,9 @@ export class View {
     this.scene.background = new THREE.Color(0x03050c);
     this.horizon = new Horizon(this.scene, map);
     this.scene.fog = new THREE.FogExp2(0x090d1d, config.fog);
+    this.cluHaze=new CluHaze();
+    this.baseFogColor=this.scene.fog.color.clone();
+    this.canyonFogColor=new THREE.Color(CLU_HAZE.enclosedColor);
     this.cameraRig = new CameraRig(map);
     this.camera = this.cameraRig.camera;
     this.scene.add(createGameLights());
@@ -276,6 +280,7 @@ export class View {
 
   reset() {
     this.sceneryClock?.reset();
+    this.cluHaze.reset();
     this.cameraRig.reset();
     this.gunnerHit = null;
     this.nextGunnerSolution = 0;
@@ -532,8 +537,13 @@ export class View {
         ...this.recognizers.map((c) => c.root),
         ...this.enemyTanks.map((c) => c.root),
       ]);
+    const adaptiveCluHaze=run.playerVehicle!=='cycle'&&!this.cameraRig.referenceCamera&&!preview;
+    const hazeScale=adaptiveCluHaze?this.cluHaze.update(this.map,x,s,mode==='running'||mode==='entering'?dt:0):1;
+    this.world.canyonEnclosure.value=adaptiveCluHaze?this.cluHaze.enclosure:0;
+    this.scene.fog.color.copy(this.baseFogColor);
+    if(adaptiveCluHaze)this.scene.fog.color.lerp(this.canyonFogColor,this.cluHaze.enclosure);
     this.scene.fog.density =
-      config.fog *
+      config.fog * hazeScale *
       (this.cameraRig.referenceCamera?.fogScale ??
         (this.cameraRig.opening != null
           ? THREE.MathUtils.lerp(0.06, 1, this.cameraRig.opening)

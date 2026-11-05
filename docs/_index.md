@@ -1,3 +1,12 @@
+## Dark canyon depth cueing — November 5
+
+- [x] Correct the adaptive Clu haze direction per film feedback: enclosed fog fades toward near-black blue rather than a lighter blue. Gradually suppress the existing distant-wall brightness lift with enclosure so it cannot counteract the dark depth cue. Preserve adaptation timing, outdoor clarity and original cycle/reference/menu fog and wall lift.
+
+## Adaptive Clu canyon haze trial — November 5
+
+- [x] For Clu only, estimate enclosure with 16 low-level wall rays out to 180 m, sampled at 5 Hz. Smooth toward enclosure over a 3 s time constant and clear over 5 s, without snapping at maze boundaries. Blend fog density from .45× outdoors to 1.8× enclosed, and toward a subdued blue canyon tint. Retain opening/aerial scaling; freeze adaptation while paused, reset with the view, and bypass for reference captures, menu previews and all cycle modes.
+- [x] Two unit tests verify wall coverage, gradual build/clear, pause and reset. Chrome verifies open/enclosed densities .00108/.00432 and identical cycle densities/colors at both adaptation extremes (.0024), without page errors. In-game appearance is a user-review trial; no claim of film fidelity.
+
 ## Shallower maze relief — November 5
 
 - [x] Reduce both current relief depths by a further 35%: vertical ribs 1.125 → 0.73125 m, horizontal molding 1.40625 → 0.9140625 m at the 54 m reference height. Shared depth scaling preserves spacing, height, corner miters and matching outlines. Eight focused geometry, corner, exterior and damage/reset tests pass; browser fixture expectations updated for the new projection.
