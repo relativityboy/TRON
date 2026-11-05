@@ -4,8 +4,8 @@ const { SPAWN, HALF } = DEFAULT_WORLD;
 
 // Background transit in world meters. Source long axis is X; preserve its
 // roughly 1,225-meter length. Simulation time makes pause/restart deterministic.
-// Clu starts one maze width from its near edge; transit is 1.5 times that far ahead.
-const transitDistance = 3 * HALF,
+// Preserve the original transit route after halving Clu's approach distance.
+const transitDistance = 2 * HALF,
   lateralOffset = 3000;
 export const CARRIER = {
   searchlightsEnabled: false,
@@ -19,7 +19,7 @@ export const CARRIER = {
 
 export function carrierFor(world = DEFAULT_WORLD) {
   const { SPAWN, HALF } = world,
-    transitDistance = 3 * HALF;
+    transitDistance = 2 * HALF;
   return {
     ...CARRIER,
     startX: SPAWN.x - Math.sin(SPAWN.yaw) * transitDistance - Math.cos(SPAWN.yaw) * lateralOffset,

@@ -9,6 +9,10 @@ Reviewed 2026-09-14. Personal-use resource shelf; retain attribution and source 
 
 Start with the Syna-Max Recognizer and derezz recreations. Four public HQ MP3 previews are saved locally; full original downloads use the creator’s Freesound pages. The shelf also retains current game sounds, cleanup experiments, six stock-effect leads, and two complete vendor metadata catalogs. Auditory comparison is pending; file verification is not a claim of film fidelity.
 
+## CycleInteriorSound1 engine — November 4
+
+World and cabin cycle engines now use the user-supplied CycleInteriorSound1.mp4 recording. The inner stereo waveform has an 80 ms phase-matched raised-cosine loop join and circular stereo-linked level smoothing. No spectral resynthesis. Source hash, timecodes and reproducible conversion command are recorded in cycle-source.json. User approved the resulting engine sound on November 4.
+
 ## Recreations
 
 ### Recognizer — Syna-Max

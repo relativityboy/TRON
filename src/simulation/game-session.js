@@ -73,7 +73,7 @@ export class GameSession {
   advance(input, dt, {holdCycleRace=false}={}) {
     const r = this.run,
       revision = r.teleportRevision;
-    this.previous = { x: r.x, s: r.s, yaw: r.yaw, turretYaw: r.turretYaw, aimPitch: r.aimPitch };
+    this.previous = { x: r.x, s: r.s, yaw: r.yaw, turretYaw: r.turretYaw, aimPitch: r.aimPitch, recognizers:r.recognizers.map(({id,x,y,s,yaw,fold,state,teleport})=>({id,x,y,s,yaw,fold,state,teleport})) };
     // step(): teleport/hearing, transfer lock, motors, carrier/enemies,
     // weapons, beam completion, teleport/hearing. Retain these same-tick boundaries.
     if(r.playerVehicle==='cycle'&&holdCycleRace){

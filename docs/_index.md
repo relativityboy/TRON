@@ -1,3 +1,13 @@
+## CycleInteriorSound1 engine loop — November 4
+
+- [x] Replace both cycle engine loops with the user's `/Users/steve/Desktop/CycleInteriorSound1.mp4`. Extract actual 1.043 s stereo audio rather than padding to the 2.395 s video duration. Build a 0.7223 s loop from a phase-matched inner selection, 80 ms raised-cosine overlap and circular stereo-linked RMS smoothing; preserve original waveform and speed/Doppler behavior.
+- [x] Record source SHA256, selected timecodes and reproducible conversion in `cycle-source.json` and catalog. Measured loop level spread 0.305 dB, seam step .00775 versus ordinary 99th-percentile step .03229, peak .431. Chrome verifies both stereo buffers, level consistency, speed pitch, pause/resume/reset and no sample errors. User approved the resulting engine sound on November 4.
+
+## Smooth Recognizer presentation — November 4
+
+- [x] Retain independent Recognizer poses before each fixed simulation tick, including cycle arena patrol updates. Interpolate render positions, shortest-path yaw and leg folding between ticks, matching the player/cycle presentation cadence. Snap on missing/replaced units, state transitions and teleports. Navigation, sensors and collisions continue using simulation poses.
+- [x] Fourteen focused pose/session tests pass, covering angle wrap, discontinuities and independent snapshots. Chrome renders five evenly spaced position/yaw samples between real aircraft poses without page errors. Preserve the original carrier transit route after the closer Clu spawn and update its distance regression expectation. Actual turning feel remains subject to user review.
+
 ## Subtler animated film finish — November 3
 
 - [x] Restore the original animated screen-space film finish at the user's request, removing the stationary/surface-anchored trials. Halve both grain and soft mottling strengths to .014 and .0275; preserve the 24-frame/second cadence, pixel scales, quiet blacks/highlights, vignette and low-quality bypass. Preserve the closer Clu spawn.

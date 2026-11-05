@@ -4435,10 +4435,10 @@
         "public/audio/cycle-drive-cabin.wav"
       ],
       "runtimeUrl": "assets/audio/cycle-drive-cabin.wav",
-      "creditId": "unresolved",
-      "author": null,
+      "creditId": "film",
+      "author": "TRON (1982) filmmakers / respective rights holders, including Disney",
       "sourceUrl": null,
-      "license": "Unresolved; do not infer redistribution permission from presence in this catalog.",
+      "license": "Film-derived mixed soundtrack; no redistribution license supplied.",
       "provenanceRecords": [
         "docs/assets/_index.md",
         "public/assets/audio/carrier-derez-source.json",
@@ -4449,10 +4449,12 @@
         "public/assets/audio/mcp-reference.json",
         "public/assets/audio/sources.json"
       ],
-      "transformations": "No conversion performed during reorganization. Earlier modifications remain documented in credits/sidecars.",
-      "conversionCommands": [],
-      "bytes": 158804,
-      "sha256": "79609486aa58718a6ef4ffb6f6a0e53cd03ec3408adf70e458c5a8b144dce511",
+      "transformations": "CycleInteriorSound1.mp4: DC removal, phase-matched 80 ms raised-cosine overlap, circular stereo-linked RMS leveling; original stereo PCM.",
+      "conversionCommands": [
+        "python3 tools/assets/prepare-cycle-interior.py \"/Users/steve/Desktop/CycleInteriorSound1.mp4\""
+      ],
+      "bytes": 127464,
+      "sha256": "6d946e92ec172034b9dc4f1ed62627310a06c53fda19588c06c64e0a11da00d2",
       "deploymentPolicy": "runtime",
       "unresolvedProvenance": true
     },
@@ -4465,10 +4467,10 @@
         "public/audio/cycle-drive.wav"
       ],
       "runtimeUrl": "assets/audio/cycle-drive.wav",
-      "creditId": "unresolved",
-      "author": null,
+      "creditId": "film",
+      "author": "TRON (1982) filmmakers / respective rights holders, including Disney",
       "sourceUrl": null,
-      "license": "Unresolved; do not infer redistribution permission from presence in this catalog.",
+      "license": "Film-derived mixed soundtrack; no redistribution license supplied.",
       "provenanceRecords": [
         "docs/assets/_index.md",
         "public/assets/audio/carrier-derez-source.json",
@@ -4479,10 +4481,12 @@
         "public/assets/audio/mcp-reference.json",
         "public/assets/audio/sources.json"
       ],
-      "transformations": "No conversion performed during reorganization. Earlier modifications remain documented in credits/sidecars.",
-      "conversionCommands": [],
-      "bytes": 158804,
-      "sha256": "cc76cf57edc64a861217b74805ed682be838186b0ea74cb68dbfdcb47ab428f4",
+      "transformations": "CycleInteriorSound1.mp4: DC removal, phase-matched 80 ms raised-cosine overlap, circular stereo-linked RMS leveling; original stereo PCM.",
+      "conversionCommands": [
+        "python3 tools/assets/prepare-cycle-interior.py \"/Users/steve/Desktop/CycleInteriorSound1.mp4\""
+      ],
+      "bytes": 127464,
+      "sha256": "6d946e92ec172034b9dc4f1ed62627310a06c53fda19588c06c64e0a11da00d2",
       "deploymentPolicy": "runtime",
       "unresolvedProvenance": true
     },

@@ -27,8 +27,8 @@ test('spawn and navigation samples clear traced walls',()=>{
 });
 
 
-test('initial tank position is one maze width outside the southern boundary',()=>{
- assert.ok(Math.abs((-maze.FLOOR_HALF[1]-maze.SPAWN.s)-maze.HALF*2)<1e-8);
+test('initial tank position is half a maze width outside the southern boundary',()=>{
+ assert.ok(Math.abs((-maze.FLOOR_HALF[1]-maze.SPAWN.s)-maze.HALF)<1e-8);
  for(let s=maze.SPAWN.s;s< -maze.FLOOR_HALF[1];s+=10)assert.ok(maze.freePosition(maze.SPAWN.x,s,3.5));
 });
 

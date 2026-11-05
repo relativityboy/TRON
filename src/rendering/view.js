@@ -1,3 +1,4 @@
+import {recognizerPose} from './recognizer-pose.js';
 import {yieldToBrowser} from '../loading/yield-to-browser.js';
 import {CycleRendererGuard} from './cycle-renderer-guard.js';
 import {AdaptiveAA,ADAPTIVE_AA,supportedSamples} from './adaptive-aa.js';
@@ -413,9 +414,10 @@ export class View {
       const craft = this.recognizers[i];
       craft.id = e.id;
       craft.root.visible = e.state !== 'destroyed';
-      craft.root.position.set(e.x, e.y, -e.s);
-      craft.root.rotation.set(0, e.yaw, 0);
-      craft.pose(e.fold || 0);
+      const pose=recognizerPose(e,previous.recognizers?.find(old=>old.id===e.id),alpha);
+      craft.root.position.set(pose.x, pose.y, -pose.s);
+      craft.root.rotation.set(0, pose.yaw, 0);
+      craft.pose(pose.fold || 0);
       craft.setTintColor(e.tintColor ?? (e.role==='arena-patrol'?config.arenaPatrolTintColor:config.recognizerTintColor));
       craft.rez?.update(
         e.state === 'materializing' ? run.time - e.rezStarted : null,
