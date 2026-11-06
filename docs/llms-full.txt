@@ -11,6 +11,14 @@ See also: /llms.txt (curated index) and /sitemap.xml.
 <!-- Page: (root) -->
 Source: /
 
+## Carrier visibility and simulation timestamps — November 6
+
+- [x] Diagnose the missing carrier from the user's live diagnostics: its X position, world bounds and materialization opacity became `NaN`, with no reported shader errors. `GameSession.advance()` retained poses but omitted `time`, while `SceneryClock` interpolated `previous.time`. Restore the pre-step timestamp in every simulation snapshot and let scenery use current simulation time if an older snapshot lacks a finite timestamp. Preserve the original carrier route, Clu spawn/camera, reveal, lights and speed; revert the speculative lane change.
+- [x] All 700 unit tests and production build/asset audit pass. Add a regression that feeds actual CLU session snapshots into the scenery clock and carrier materialization through multiple times and restart. Earlier isolated clock/projection checks supplied valid timestamps themselves and missed the integration failure. Keep the authored and cycle-opening placement checks.
+- [x] At the user's request, run a loopback diagnostics receiver (`node tools/validation/carrier-diagnostics-server.mjs`, port 5191). Development-only `/?carrierDebug=1` reports carrier visibility/bounds/reveal, scenery time, camera, shader failures and scaled game-canvas captures every 1.5 seconds. Bound host/origin/body size, abort on disposal and exclude from production. Explicitly report non-finite carrier position rather than treating a NaN bounding box as inside the frustum.
+- [x] User confirms the carrier is visible again after the timestamp fix. Pre-fix report and capture are saved under `test-results/carrier-clock/before.*`. Browser launch remains unavailable; distinguish user visual confirmation from an automated GPU test.
+
+
 ## Stable self-shade on maze walls — November 5
 
 - [x] Address the user's intermittent flicker on walls facing away from the light by applying constant self-shade in the wall's base draw instead of depth-competing overlay polygons. Retain the same 60% darkness, molding facade inheritance, lit roofs and cast-shadow geometry on lit faces. Preserve the shade attribute through damage/reset; aircraft apply only stronger occlusion so overlapping shade does not multiply darkness.
@@ -6083,6 +6091,14 @@ Source: /validation/
 title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
+
+## Missing carrier: simulation timestamp regression — November 6
+
+The local report from the user's CLU session at simulation time 15.1333 s showed all 200 carrier meshes marked visible, but carrier X, world bounds, reveal cut and opacity serialized as `null` (non-finite JavaScript values). Shader diagnostics reported no errors and the WebGL context was healthy. The retained pose snapshot in `GameSession.advance()` omitted `time`, so `SceneryClock.sample()` produced NaN after the first fixed tick. That propagated into carrier translation and its reveal. The issue was not lazy loading: startup awaits the carrier GLB.
+
+Final local macOS verification: `npm test` passes 700/700; `npm run build` passes production compilation and asset audit; `git diff --check` passes. Restore `time:r.time` in the pre-step snapshot. Older/incomplete snapshots fall back to current simulation time, preserving finite scenery without inventing wall-clock advancement. A new integration regression uses actual session advances, the scenery clock and `CarrierMaterialization` through initial ticks, 15/59/180 seconds and restart; the isolated clock tests previously supplied their own valid timestamps. Revert the speculative carrier-lane change and retain the original carrier, Clu and cycle-opening placement. No shader/effects change is needed for this failure.
+
+The user requested a local diagnostics server instead of console pasting. Run `node tools/validation/carrier-diagnostics-server.mjs`; open `http://127.0.0.1:5190/?carrierDebug=1` and enter CLU. Development reports and a 960×540 game-canvas capture go to loopback port 5191 every 1.5 seconds. Read `/latest` and `/latest.png`, also saved under `/private/tmp/tron-carrier-live.*`. Receiver restricts Host/origin and body size to 2 MiB; disposal aborts uploads. Production build excludes the reporter. Pre-fix artifacts are preserved under `test-results/carrier-clock/before.*`. The user subsequently confirms the carrier is visible again. Post-fix report at simulation time 6.7167 s records finite position (-2154.9912, 360, -1748.8), finite scenery time 6.7004 s, in-frustum true, unblocked center, 200 visible wire meshes and no shader errors. Preserved post-fix report/canvas under `test-results/carrier-clock/after.*`. No automated GPU test pass is claimed.
 
 ## Wall self-shade flicker correction — November 5
 

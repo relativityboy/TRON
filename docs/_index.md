@@ -1,3 +1,11 @@
+## Carrier visibility and simulation timestamps — November 6
+
+- [x] Diagnose the missing carrier from the user's live diagnostics: its X position, world bounds and materialization opacity became `NaN`, with no reported shader errors. `GameSession.advance()` retained poses but omitted `time`, while `SceneryClock` interpolated `previous.time`. Restore the pre-step timestamp in every simulation snapshot and let scenery use current simulation time if an older snapshot lacks a finite timestamp. Preserve the original carrier route, Clu spawn/camera, reveal, lights and speed; revert the speculative lane change.
+- [x] All 700 unit tests and production build/asset audit pass. Add a regression that feeds actual CLU session snapshots into the scenery clock and carrier materialization through multiple times and restart. Earlier isolated clock/projection checks supplied valid timestamps themselves and missed the integration failure. Keep the authored and cycle-opening placement checks.
+- [x] At the user's request, run a loopback diagnostics receiver (`node tools/validation/carrier-diagnostics-server.mjs`, port 5191). Development-only `/?carrierDebug=1` reports carrier visibility/bounds/reveal, scenery time, camera, shader failures and scaled game-canvas captures every 1.5 seconds. Bound host/origin/body size, abort on disposal and exclude from production. Explicitly report non-finite carrier position rather than treating a NaN bounding box as inside the frustum.
+- [x] User confirms the carrier is visible again after the timestamp fix. Pre-fix report and capture are saved under `test-results/carrier-clock/before.*`. Browser launch remains unavailable; distinguish user visual confirmation from an automated GPU test.
+
+
 ## Stable self-shade on maze walls — November 5
 
 - [x] Address the user's intermittent flicker on walls facing away from the light by applying constant self-shade in the wall's base draw instead of depth-competing overlay polygons. Retain the same 60% darkness, molding facade inheritance, lit roofs and cast-shadow geometry on lit faces. Preserve the shade attribute through damage/reset; aircraft apply only stronger occlusion so overlapping shade does not multiply darkness.

@@ -21,3 +21,9 @@ test('solo scenery interpolates simulation time and respects pauses and resets',
   assert.equal(clock.sample({time:0,multiplayer:{}},{time:0},1,0),0);
   assert.equal(clock.sample({time:1},{time:0},.5,.1),.5);
 });
+
+test('solo scenery cannot become NaN when an older pose snapshot omits its timestamp',()=>{
+ const clock=new SceneryClock();
+ for(const previous of [{},{time:undefined},{time:NaN},undefined])assert.equal(clock.sample({time:15},previous,.5,1/60),15);
+ assert.equal(clock.sample({time:2},{time:1},.25,1/60),1.25,'valid snapshots retain interpolation');
+});

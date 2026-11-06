@@ -95,6 +95,7 @@ export async function createGameApp() {
   tribute.preview=new CreditModelPreview();
   const victoryPrinter=new TerminalPrinter($('terminal-text'),victoryText);
   let endingStage=null;
+  let carrierDiagnostics=null;
   let view,
     run = session.run,
     mode = 'loading';
@@ -1080,6 +1081,7 @@ export async function createGameApp() {
         if(multiplayer&&formation?.ready&&run.cycleRace.cameraStaging&&!cycleRendererControl.busy&&!homeTransition.active&&!document.hidden&&(!sound.context||sound.cycleSamplesReady))multiplayer.cameraReady(formation.round,formation.seat);
         if((mode==='running'||mode==='entering'&&openingTransition)&&!run.arenaWaiting&&!document.body.classList.contains('cycle-loading'))homeTransition.sceneReady();
       }
+      carrierDiagnostics?.sample();
       sound.cycleOpeningSeconds=view.cameraRig.cycleOpening===null?null:view.cameraRig.cycleOpening*CYCLE_OPENING.durationSeconds;
       if(multiplayer)sound.cycleOpeningAudio?.updateMaterialization(run.cycleRace,mode==='running');
       else sound.cycleOpeningAudio?.update(sound.cycleOpeningSeconds,mode==='running');
@@ -1128,6 +1130,10 @@ export async function createGameApp() {
       await yieldToBrowser();
       const physics = loadingTimings.sync('Create debris physics world',()=>new DebrisPhysics(map.nearbyWalls));
       view = await loadingTimings.async('Build rendering world / meshes / shadows',()=>View.create($('game'), tank, recognizer, carrier, null, map, physics, null, boss));
+      if(import.meta.env.DEV&&new URLSearchParams(location.search).get('carrierDebug')==='1'){
+        const {createCarrierDiagnostics}=await import('./carrier-diagnostics.js');
+        carrierDiagnostics=createCarrierDiagnostics({getView:()=>view,getRun:()=>run,getMode:()=>mode});
+      }
       performance.mark('tron:world-ready');
       session.arenaReady=!run.cycleRace;
       session.attachDebris(physics, view.breakups);
@@ -1331,6 +1337,7 @@ export async function createGameApp() {
     homeTransition.clear();
     if (disposed) return;
     disposed = true;
+    carrierDiagnostics?.dispose();
     tribute.preview.dispose();
     cycleTuning?.dispose();
     cycleRendererControl.dispose();

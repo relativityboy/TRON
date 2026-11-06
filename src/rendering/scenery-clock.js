@@ -10,7 +10,8 @@ export class SceneryClock {
       this.multiplayer = true;
     } else {
       this.multiplayer = false;
-      this.time = previous.time + (run.time - previous.time) * alpha;
+      const previousTime=Number.isFinite(previous?.time)?previous.time:run.time;
+      this.time = previousTime + (run.time - previousTime) * alpha;
     }
     return this.time;
   }
