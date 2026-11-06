@@ -1,4 +1,5 @@
 import {subtractReliefCuts,clipReliefEdge} from './maze-wall-pattern.js';
+import {applyWallSelfShade} from './wall-self-shade.js';
 import * as T from 'three';
 import {contains,subtractAll,edgeCuts} from './wall-cut-polygons.js';
 import {seededRandom} from '../game/random.js';
@@ -123,10 +124,12 @@ export class MazeWallDamage{
   geometry.setIndex(new T.BufferAttribute(indices,1));geometry.boundingSphere=this.original.boundingSphere?.clone()??null;
   if(!geometry.boundingSphere)geometry.computeBoundingSphere();
   geometry.computeVertexNormals();geometry.setAttribute('shadowReceiverNormal',geometry.attributes.normal.clone());
+  applyWallSelfShade(geometry);
   if(this.slabs.geometry!==this.original)this.slabs.geometry.dispose();this.slabs.geometry=geometry;
   this.slabs.userData.damageReceiver?.geometry.dispose();
   const localGeometry=new T.BufferGeometry();localGeometry.setAttribute('position',new T.Float32BufferAttribute(localPositions,3));localGeometry.setAttribute('shadowWallId',new T.Float32BufferAttribute(localIds,1));
   localGeometry.setAttribute('shadowSelfShadeNormal',new T.Float32BufferAttribute(localSelfNormals,3));
+  localGeometry.computeVertexNormals();applyWallSelfShade(localGeometry);
   const receiver=new T.Mesh(localGeometry);receiver.matrix.copy(this.slabs.matrix);receiver.matrixAutoUpdate=false;
   this.slabs.userData.damageReceiver=receiver;
   this.slabs.userData.damagedSourceTriangles=new Set(removed.flatMap(start=>[start/3,start/3+1]));

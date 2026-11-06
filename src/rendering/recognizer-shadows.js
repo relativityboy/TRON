@@ -99,9 +99,13 @@ export class RecognizerShadows {
      }
     }`).join('\n');
     const emissive=shader.fragmentShader.includes('totalEmissiveRadiance')?' + totalEmissiveRadiance*(1.-recShadowShade)':'';
-    shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',named(`float recShadowShade=1.;\n${occlusion?.code||''}\n${arenaOcclusion?.code||''}\n${tests}\n${occlusion?`recShadowShade=mix(1.,recShadowShade,${occlusion.visible});`:''}\n${arenaOcclusion?`recShadowShade=mix(1.,recShadowShade,${arenaOcclusion.visible});`:''}\n${unionAttenuation===undefined?`gl_FragColor.rgb=gl_FragColor.rgb*recShadowShade${emissive};`:`gl_FragColor.rgb=vec3(min(${unionAttenuation.toFixed(3)},recShadowShade)/max(recShadowShade,.001));`}\n#include <tonemapping_fragment>`));
+    // Self-shaded wall faces already attenuate their base draw. Aircraft share
+    // that light source: apply only any stronger occlusion, never multiply it.
+    const selfShadedWall=receiver.isMesh&&receiver.geometry.hasAttribute('wallSelfShade');
+    const shadeFactor=selfShadedWall?'min(vWallSelfShade,recShadowShade)/max(vWallSelfShade,.001)':'recShadowShade';
+    shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',named(`float recShadowShade=1.;\n${occlusion?.code||''}\n${arenaOcclusion?.code||''}\n${tests}\n${occlusion?`recShadowShade=mix(1.,recShadowShade,${occlusion.visible});`:''}\n${arenaOcclusion?`recShadowShade=mix(1.,recShadowShade,${arenaOcclusion.visible});`:''}\n${unionAttenuation===undefined?`gl_FragColor.rgb=gl_FragColor.rgb*${shadeFactor}${emissive};`:`gl_FragColor.rgb=vec3(min(${unionAttenuation.toFixed(3)},recShadowShade)/max(recShadowShade,.001));`}\n#include <tonemapping_fragment>`));
    };
-   material.customProgramCacheKey=()=>`${previousKey}|${prefix}:${size}:${receiverDarkness}:receiver-plane-v12:${filterEdges}:${depthBias}:${excludeSelf}:${this.entries.length}:union${receiver.userData.shadowUnionAttenuation??'none'}:exactWall${!!receiver.userData.exactMazeWallShadow}:exactFloor${!!receiver.userData.exactMazeFloorShadow}:occlusion${this.occlusion?.entries.length||0}:arena${receiver.userData.arenaShadowOcclusion?.size||0}`;
+   material.customProgramCacheKey=()=>`${previousKey}|${prefix}:${size}:${receiverDarkness}:receiver-plane-v13:${filterEdges}:${depthBias}:${excludeSelf}:${this.entries.length}:union${receiver.userData.shadowUnionAttenuation??'none'}:selfShade${receiver.geometry.hasAttribute('wallSelfShade')}:exactWall${!!receiver.userData.exactMazeWallShadow}:exactFloor${!!receiver.userData.exactMazeFloorShadow}:occlusion${this.occlusion?.entries.length||0}:arena${receiver.userData.arenaShadowOcclusion?.size||0}`;
    // A rebuilt atlas can reuse the same shader source/key. Evict the old
    // material program bindings so Three invokes onBeforeCompile again with
    // this atlas and its current matrices instead of a disposed texture.

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as T from 'three';
 import {createStaticWallShadowGeometry} from '../../src/rendering/static-wall-shadows.js';
 import {shadeMazeEdges} from '../../src/rendering/maze-edge-shadows.js';
+import {applyWallSelfShade} from '../../src/rendering/wall-self-shade.js';
 test('neighboring wall IDs on the same rounded plane cannot cast false triangles',()=>{
  for(const offset of [0,7000]){
   const receiverGeometry=new T.PlaneGeometry(40,30).toNonIndexed();receiverGeometry.translate(offset,15,-offset);
@@ -40,4 +41,16 @@ test('closed slab faces turned away from the light self-shade, while roofs and s
   for(let i=0;i<source.count;i++)counts.set(source.getX(i),(counts.get(source.getX(i))||0)+1);
   for(let i=0;i<p.count;i+=3){const away=n.getX(i)*.5-n.getY(i)+n.getZ(i)*.5>1e-7;assert.equal(counts.get(i/3)||0,away?3:0);}
  }finally{shadow.dispose();geometry.dispose();receiver.material.dispose();}
+});
+test('surface self-shade removes coplanar overlays while retaining darkness at distant world coordinates',()=>{
+ for(const offset of [0,7000,12000]){
+  const geometry=new T.BoxGeometry(20,54,20).toNonIndexed();geometry.translate(offset,27,-offset);
+  geometry.setAttribute('shadowWallId',new T.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count).fill(1),1));
+  applyWallSelfShade(geometry);
+  const n=geometry.attributes.normal,shade=geometry.attributes.wallSelfShade;
+  for(let i=0;i<n.count;i++){const away=n.getX(i)*.5-n.getY(i)+n.getZ(i)*.5>1e-7;assert(Math.abs(shade.getX(i)-(away?.4:1))<1e-6);}
+  const receiver=new T.Mesh(geometry),overlay=createStaticWallShadowGeometry(receiver,geometry,{selfShade:true,bakedSelfShade:true});
+  assert.equal(overlay.attributes.position.count,0,'the box self-shades in its base draw, without a depth-competing overlay');
+  overlay.dispose();geometry.dispose();receiver.material.dispose();
+ }
 });

@@ -48,8 +48,8 @@ test('molding retains facade self-shade through impact clipping and reset, witho
    const pos=g.attributes.position,normal=g.attributes.shadowSelfShadeNormal;assert.equal(normal.count,pos.count);
    let molding=0,roof=0;
    for(let i=0;i<pos.count;i++){
-    if(Math.abs(pos.getY(i)-9.45)<1e-4&&pos.getZ(i)>12.1&&normal.getZ(i)>.9){assert.equal(normal.getX(i),0);assert.equal(normal.getY(i),0);molding++;}
-    if(Math.abs(pos.getY(i)-54)<1e-4){assert.equal(normal.getX(i),0);assert.equal(normal.getY(i),0);assert.equal(normal.getZ(i),0);roof++;}
+    if(Math.abs(pos.getY(i)-9.45)<1e-4&&pos.getZ(i)>12.1&&normal.getZ(i)>.9){assert.equal(normal.getX(i),0);assert.equal(normal.getY(i),0);assert(Math.abs(g.attributes.wallSelfShade.getX(i)-.4)<1e-6);molding++;}
+    if(Math.abs(pos.getY(i)-54)<1e-4){assert.equal(normal.getX(i),0);assert.equal(normal.getY(i),0);assert.equal(normal.getZ(i),0);if(g.attributes.normal.getY(i)>.9)assert.equal(g.attributes.wallSelfShade.getX(i),1);roof++;}
    }
    assert(molding>0);if(requireRoof)assert(roof>0);
   };

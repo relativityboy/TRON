@@ -1,3 +1,10 @@
+## Stable self-shade on maze walls — November 5
+
+- [x] Address the user's intermittent flicker on walls facing away from the light by applying constant self-shade in the wall's base draw instead of depth-competing overlay polygons. Retain the same 60% darkness, molding facade inheritance, lit roofs and cast-shadow geometry on lit faces. Preserve the shade attribute through damage/reset; aircraft apply only stronger occlusion so overlapping shade does not multiply darkness.
+- [x] Fifteen focused wall tests and all 696 unit tests pass; production build and asset audit pass. Current default maze removes 26,812 self-shade overlay triangles (93,461 → 66,649 total), with zero remaining overlay vertices on faces shaded in the base draw. Extend the GPU regression to compare overlay visibility, camera jitter at 0/7,000/12,000 m and weaker/stronger aircraft overlap.
+- [ ] Confirm in-game flicker is resolved. Chrome still aborts before launch, including an escalated retry; no new GPU pass or rendered inspection is claimed.
+
+
 ## Horizontal ledges inherit wall shade — November 5
 
 - [x] Give horizontal molding explicit facade self-shade normals: its upward-facing caps and projecting miter tips inherit an unlit wall's shade instead of relying solely on intersections with the solid casting prism. Keep geometric normals for decal lift and aircraft shadows. Apply the same rule to molding outlines; preserve impact-clipped attributes and reset. Continue using the existing 60% stencil union, so overlapping shadow polygons do not darken the ledge twice. Keep roof and rib-cap shading unchanged.

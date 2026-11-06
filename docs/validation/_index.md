@@ -3,6 +3,12 @@ title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
 
+## Wall self-shade flicker correction — November 5
+
+The user's intermittent flicker on away-facing walls is consistent with the nearly coplanar self-shade overlay competing with the wall's depth. Apply a constant per-face `wallSelfShade` attribute in the base material and omit those faces from the exact overlay; retain their existing 60% attenuation, molding inheritance and geometric receiver normals. Damage rebuilds and local shadow receivers regenerate the attribute; restart restores the original. Aircraft shadow wrappers compose against that attenuation using minimum visibility rather than double-darkening it.
+
+Local macOS: fifteen focused geometry/damage/shadow tests pass; `npm test` passes 696/696; `npm run build` passes production compilation and asset audit. A current-maze geometry audit measures 93,461 → 66,649 overlay triangles and zero overlay vertices remaining on base-self-shaded faces. `node --check` and `git diff --check` pass. The browser regression now checks unchanged self-shade with overlays hidden, moving cameras at distant offsets, ledges, lit roofs and weaker/stronger aircraft overlap. An attempted Chrome run, including escalation, aborts before browser startup; no GPU result or post-fix appearance approval is claimed. In-game confirmation remains outstanding.
+
 ## Horizontal ledge shadow inheritance — November 5
 
 Local macOS: `node --test tests/unit/wall-shadow-coplanar.test.js tests/unit/maze-wall-pattern.test.js tests/unit/maze-wall-damage.test.js` passes 14 tests; final `npm test` passes 695/695. `npm run build` passes production compilation and asset audit. The first full-suite run loaded an unfinished new test assertion; the corrected focused and final full-suite runs pass. Existing outline damage coverage now compares connected spans, allowing valid light/shadow splits without weakening its cavity-gap assertion.

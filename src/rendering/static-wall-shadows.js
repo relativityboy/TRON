@@ -44,7 +44,7 @@ function triangles(geometry,matrix){
 const casterCache=new WeakMap();
 // Each caster triangle sweeps a prism along the light direction. Intersecting
 // that prism with a receiver triangle produces an exact planar shadow polygon.
-export function createStaticWallShadowGeometry(receiver,casterGeometry,{selfShade=false}={}){
+export function createStaticWallShadowGeometry(receiver,casterGeometry,{selfShade=false,bakedSelfShade=false}={}){
  receiver.updateWorldMatrix(true,false);
  const receivers=triangles(receiver.geometry,receiver.matrixWorld),matrixKey=receiver.matrixWorld.elements.join(',');
  let cached=casterCache.get(casterGeometry);
@@ -70,7 +70,7 @@ export function createStaticWallShadowGeometry(receiver,casterGeometry,{selfShad
   // their own slab. Use the same stencil-union layer as other wall shadows so
   // overlapping occlusion never multiplies darkness.
   if(selfShade&&receiver.id>0&&(normal.dot(LIGHT)>EPSILON||(receiver.selfNormal?.dot(LIGHT)??0)>EPSILON)){
-   for(const p of receiver.points){positions.push(p.x+lift.x,p.y+lift.y,p.z+lift.z);sourceTriangles.push(sourceTriangle);}
+   if(!bakedSelfShade)for(const p of receiver.points){positions.push(p.x+lift.x,p.y+lift.y,p.z+lift.z);sourceTriangles.push(sourceTriangle);}
    continue;
   }
   for(const caster of candidates){

@@ -1,4 +1,5 @@
 import {shadeMazeEdges} from './maze-edge-shadows.js';
+import {applyWallSelfShade,patchWallSelfShadeShader} from './wall-self-shade.js';
 import {MAZE_SHADOW_STYLE} from './maze-shadow-style.js';
 import {exteriorWallFace,wallFaceGap} from './maze-wall-exterior.js';
 import {appendWallPattern,appendWallPatternEdges,MAZE_WALL_EDGE_STYLE,MAZE_WALL_PATTERN} from './maze-wall-pattern.js';
@@ -94,9 +95,11 @@ export function createWorld(scene,world=DEFAULT_WORLD,arena=null) {
     for(let i=patch.start;i<patch.start+6;i++)selfShadeNormals.set([patch.face.nx,0,-patch.face.ns],i*3);
   }
   geometry.setAttribute('shadowSelfShadeNormal',new THREE.BufferAttribute(selfShadeNormals,3));
+  applyWallSelfShade(geometry);
   const canyonEnclosure={value:0};
   const slabMaterial=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
   slabMaterial.onBeforeCompile=shader=>{
+    patchWallSelfShadeShader(shader);
     distantFog(shader,120);
     shader.uniforms.canyonEnclosure=canyonEnclosure;
     shader.vertexShader='varying vec3 vSlab;\n'+shader.vertexShader;
