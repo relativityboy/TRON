@@ -73,7 +73,7 @@ export function appendWallPattern({faces,damageFaces,height,quad,wallTone,roofTo
     const leftBoundary=left+start<=box.left+.001,rightBoundary=right+start>=box.right-.001;
     const fl=l+(leftBoundary?(box.leftMiter||0):0),fr=r+(rightBoundary?(box.rightMiter||0):0);
     const wall=(x,y,out)=>[owner.a.x+owner.ux*x+owner.nx*out,y,-owner.a.s+owner.uz*x-owner.ns*out];
-    const emit=(vertices,tone)=>{const index=quad(...vertices.map(v=>wall(v.x,v.y,v.out)),tone,owner.shadowId);patches.push({face:owner,start:index,vertices,tone});};
+    const emit=(vertices,tone)=>{const index=quad(...vertices.map(v=>wall(v.x,v.y,v.out)),tone,owner.shadowId);patches.push({face:owner,start:index,vertices,tone,kind:box.kind});};
     const shade=1+owner.nx*.25-owner.ns*.12,tone=wallTone.map(v=>v*shade);
     emit([p(fl,b,d),p(fr,b,d),p(fr,t,d),p(fl,t,d)],tone);
     emit([p(l,t,0),p(fl,t,d),p(fr,t,d),p(r,t,0)],roofTone);
@@ -103,8 +103,8 @@ export function appendWallPatternEdges(damageFaces,line){
  const offset=MAZE_WALL_EDGE_STYLE.surfaceOffsetMeters;
  for(const face of damageFaces){
   const p=(x,y,out)=>[face.a.x+face.ux*x+face.nx*out,y,-face.a.s+face.uz*x-face.ns*out];
-  const emit=(a,b)=>line(a,b,face.shadowId,[face.nx,0,-face.ns]);
   for(const box of face.reliefBoxes||[]){
+   const normal=[face.nx,0,-face.ns],emit=(a,b)=>line(a,b,face.shadowId,normal,box.kind==='molding'?normal:[0,0,0]);
    const {left:l,right:r,bottom:b,top:t,out}=box,d=out+offset;
    const fl=l+((box.frontLeft??l)-l)*d/out,fr=r+((box.frontRight??r)-r)*d/out;
    emit(p(fl,t,d),p(fr,t,d));

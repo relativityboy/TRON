@@ -5,7 +5,8 @@ import {RecognizerShadows} from './recognizer-shadows.js';
 // Bias measured in depth-buffer units plus receiver slope. Clipped shadow
 // vertices are independently rounded to float32; at distant maze coordinates
 // one unit allowed entire patches to alternate with the underlying wall.
-export const MAZE_SHADOW_STYLE=Object.freeze({darkness:.6});
+import {MAZE_SHADOW_STYLE} from './maze-shadow-style.js';
+export {MAZE_SHADOW_STYLE} from './maze-shadow-style.js';
 const WALL_SHADOW_DEPTH = Object.freeze({factor: -2, units: -4});
 
 // The maze is static: render its depth maps once, independently of moving casters.
@@ -52,7 +53,7 @@ gl_Position=projectionMatrix*viewMatrix*p;}`,
   const wallMaterial=material.clone();wallMaterial.depthTest=true;wallMaterial.polygonOffset=true;wallMaterial.polygonOffsetFactor=WALL_SHADOW_DEPTH.factor;wallMaterial.polygonOffsetUnits=WALL_SHADOW_DEPTH.units;
   wallMaterial.stencilWriteMask=wallMaterial.stencilFuncMask=wallMaterial.stencilRef=2;
   wallMaterial.vertexShader='void main(){\n#include <begin_vertex>\ngl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}';
-  this.wallShadow=new T.Mesh(createStaticWallShadowGeometry(world.slabs,casterGeometry||world.slabs.geometry),wallMaterial);
+  this.wallShadow=new T.Mesh(createStaticWallShadowGeometry(world.slabs,casterGeometry||world.slabs.geometry,{selfShade:true}),wallMaterial);
   // Moving carrier shadows and exact maze polygons represent occlusion of
   // the same light. Compose their minimum visibility, not multiplied darkness.
   world.slabs.userData.exactMazeWallShadow=true;
@@ -69,7 +70,7 @@ gl_Position=projectionMatrix*viewMatrix*p;}`,
   if(this.wallShadow.geometry!==this.originalWallShadow)this.wallShadow.geometry.dispose();
   const receiver=slabs.userData.damageReceiver;
   if(!receiver){this.wallShadow.geometry=this.originalWallShadow;this.damageRevision=revision;return;}
-  const local=createStaticWallShadowGeometry(receiver,this.casterGeometry||slabs.geometry),base=this.originalWallShadow.attributes,positions=[],damaged=slabs.userData.damagedSourceTriangles;
+  const local=createStaticWallShadowGeometry(receiver,this.casterGeometry||slabs.geometry,{selfShade:true}),base=this.originalWallShadow.attributes,positions=[],damaged=slabs.userData.damagedSourceTriangles;
   for(let i=0;i<base.position.count;i++)if(!damaged.has(base.sourceTriangle.getX(i)))positions.push(base.position.getX(i),base.position.getY(i),base.position.getZ(i));
   const array=new Float32Array(positions.length+local.attributes.position.array.length);array.set(positions);array.set(local.attributes.position.array,positions.length);local.dispose();
   const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(array,3));geometry.computeBoundingSphere();

@@ -1,3 +1,14 @@
+## Horizontal ledges inherit wall shade — November 5
+
+- [x] Give horizontal molding explicit facade self-shade normals: its upward-facing caps and projecting miter tips inherit an unlit wall's shade instead of relying solely on intersections with the solid casting prism. Keep geometric normals for decal lift and aircraft shadows. Apply the same rule to molding outlines; preserve impact-clipped attributes and reset. Continue using the existing 60% stencil union, so overlapping shadow polygons do not darken the ledge twice. Keep roof and rib-cap shading unchanged.
+- [x] Fourteen focused wall geometry/damage/shadow tests and all 695 unit tests pass, including an exposed ledge tip, matching outline attenuation, sun-facing preservation and damage/reset. Production build and asset audit pass. Extend the GPU regression with an upward-facing projecting ledge, but do not claim it ran successfully.
+- [x] User confirms the corrected ledge shading works in-game at `http://127.0.0.1:5190/`. Automated GPU verification remains unavailable: Chrome and installed Chromium launches fail even after escalation (macOS `bootstrap_check_in` error 141); launching Chrome through Launch Services also fails. Do not conflate the user's visual approval with an automated browser pass.
+
+## Maze wall self-shadowing — November 5
+- [x] Correct the missing darkening on closed slab faces turned away from the directional light. Include those faces in the existing exact static wall-shadow/stencil union, using the same 60% darkness as cast wall shadows. Keep sun-facing sides and roofs unchanged, and preserve union semantics so multiple occluders do not darken a face twice. Rebuild self-shadowed receiver polygons after wall damage.
+- [x] Seven focused geometry/damage tests pass. Chrome GPU test measures away-facing wall brightness 255 → 102, with toward-light sides and roofs unchanged at 255; wall pattern/impact/reset browser checks pass without page errors. Inspect updated maze overview capture.
+
+
 ## Dark canyon depth cueing — November 5
 
 - [x] Correct the adaptive Clu haze direction per film feedback: enclosed fog fades toward near-black blue rather than a lighter blue. Gradually suppress the existing distant-wall brightness lift with enclosure so it cannot counteract the dark depth cue. Preserve adaptation timing, outdoor clarity and original cycle/reference/menu fog and wall lift.

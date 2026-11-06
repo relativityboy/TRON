@@ -32,18 +32,19 @@ function clip(points,plane){
  return out;
 }
 function triangles(geometry,matrix){
- const position=geometry.attributes.position,ids=geometry.attributes.shadowWallId,index=geometry.index,result=[];
+ const position=geometry.attributes.position,ids=geometry.attributes.shadowWallId,selfNormals=geometry.attributes.shadowSelfShadeNormal,index=geometry.index,result=[],normalMatrix=new T.Matrix3().getNormalMatrix(matrix);
  for(let offset=0;offset<(index?.count??position.count);offset+=3){
   const indices=[0,1,2].map(i=>index?index.getX(offset+i):offset+i);
   const points=indices.map(i=>new T.Vector3().fromBufferAttribute(position,i).applyMatrix4(matrix));
-  result.push({points,id:ids?.getX(indices[0])??0,bounds:bounds(points)});
+  const selfNormal=selfNormals?new T.Vector3().fromBufferAttribute(selfNormals,indices[0]).applyMatrix3(normalMatrix).normalize():null;
+  result.push({points,id:ids?.getX(indices[0])??0,bounds:bounds(points),selfNormal});
  }
  return result;
 }
 const casterCache=new WeakMap();
 // Each caster triangle sweeps a prism along the light direction. Intersecting
 // that prism with a receiver triangle produces an exact planar shadow polygon.
-export function createStaticWallShadowGeometry(receiver,casterGeometry){
+export function createStaticWallShadowGeometry(receiver,casterGeometry,{selfShade=false}={}){
  receiver.updateWorldMatrix(true,false);
  const receivers=triangles(receiver.geometry,receiver.matrixWorld),matrixKey=receiver.matrixWorld.elements.join(',');
  let cached=casterCache.get(casterGeometry);
@@ -63,9 +64,17 @@ export function createStaticWallShadowGeometry(receiver,casterGeometry){
   const candidates=new Set();cells(receiver.bounds,key=>{for(const c of bins.get(key)||[])candidates.add(c);});
   const r=receiver.bounds;
   const [ra,rb,rc]=receiver.points;
-  const lift=new T.Vector3().subVectors(rb,ra).cross(new T.Vector3().subVectors(rc,ra)).normalize().multiplyScalar(WALL_SHADOW_SURFACE_OFFSET_METERS);
+  const normal=new T.Vector3().subVectors(rb,ra).cross(new T.Vector3().subVectors(rc,ra)).normalize();
+  const lift=normal.clone().multiplyScalar(WALL_SHADOW_SURFACE_OFFSET_METERS);
+  // Closed slab faces turned away from the directional light are shielded by
+  // their own slab. Use the same stencil-union layer as other wall shadows so
+  // overlapping occlusion never multiplies darkness.
+  if(selfShade&&receiver.id>0&&(normal.dot(LIGHT)>EPSILON||(receiver.selfNormal?.dot(LIGHT)??0)>EPSILON)){
+   for(const p of receiver.points){positions.push(p.x+lift.x,p.y+lift.y,p.z+lift.z);sourceTriangles.push(sourceTriangle);}
+   continue;
+  }
   for(const caster of candidates){
-   if(receiver.id>0&&caster.id===receiver.id)continue;
+   if(!selfShade&&receiver.id>0&&caster.id===receiver.id)continue;
    // Adjacent slabs can share a plane but carry different wall IDs. Float32
    // rounding must not turn those coplanar faces into triangle-shaped casters.
    if(receiver.points.every(p=>Math.abs(dot(caster.planes[0],p))<COPLANAR_METERS))continue;

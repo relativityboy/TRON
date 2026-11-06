@@ -62,11 +62,11 @@ export class MazeWallDamage{
   }
  }
  rebuild(){
-  const positions=[],colors=[],ids=[],localPositions=[],localIds=[],base=this.original.attributes;
+  const positions=[],colors=[],ids=[],selfNormals=[],localPositions=[],localIds=[],localSelfNormals=[],base=this.original.attributes;
   const damaged=new Map(this.cavities.map(c=>[c.face.start,c.face]));
   const patches=(this.slabs.userData.reliefPatches||[]).filter(p=>damaged.has(p.face.start));
   const removed=[...damaged.keys(),...patches.map(p=>p.start)].sort((a,b)=>a-b);
-  const emit=(points,tone,id)=>{for(const p of points){positions.push(...p);colors.push(...tone);ids.push(id);}};
+  const emit=(points,tone,id,selfNormal=[0,0,0])=>{for(const p of points){positions.push(...p);colors.push(...tone);ids.push(id);selfNormals.push(...selfNormal);}};
   for(const face of damaged.values()){
    const localStart=positions.length;
    const cavities=this.cavities.filter(c=>c.face===face),outer=[{x:0,y:0},{x:face.length,y:0},{x:face.length,y:face.height},{x:0,y:face.height}];
@@ -95,23 +95,27 @@ export class MazeWallDamage{
    }
    // Cut the same footprint through raised ribs/molding so relief cannot
    // conceal the existing impact cavity. Keep the solid collision wall intact.
-   const emitRelief=(polygon,tone)=>{for(let i=1;i<polygon.length-1;i++)emit([polygon[0],polygon[i],polygon[i+1]].map(p=>world(face,p.x,p.y,-p.out)),tone,face.shadowId);};
-   for(const patch of patches.filter(p=>p.face===face))for(const polygon of subtractReliefCuts(patch.vertices,cuts.map(c=>c.ring)))emitRelief(polygon,patch.tone);
+   const emitRelief=(polygon,tone,kind)=>{for(let i=1;i<polygon.length-1;i++)emit([polygon[0],polygon[i],polygon[i+1]].map(p=>world(face,p.x,p.y,-p.out)),tone,face.shadowId,kind==='molding'?[face.nx,0,-face.ns]:[0,0,0]);};
+   for(const patch of patches.filter(p=>p.face===face))for(const polygon of subtractReliefCuts(patch.vertices,cuts.map(c=>c.ring)))emitRelief(polygon,patch.tone,patch.kind);
    for(const box of face.reliefBoxes||[])for(let i=0;i<cuts.length;i++){
     const cut=cuts[i];
     for(let j=0;j<cut.ring.length;j++){
      const edge=clipReliefEdge(cut.ring[j],cut.ring[(j+1)%cut.ring.length],box);if(!edge)continue;
      const [a,b]=edge,side=[{...a,out:0},{...b,out:0},{...b,out:box.out},{...a,out:box.out}];
-     for(const polygon of subtractReliefCuts(side,cuts.filter((_,k)=>k!==i).map(c=>c.ring)))emitRelief(polygon,box.tone.map(v=>v*.35));
+     for(const polygon of subtractReliefCuts(side,cuts.filter((_,k)=>k!==i).map(c=>c.ring)))emitRelief(polygon,box.tone.map(v=>v*.35),box.kind);
     }
    }
-   localPositions.push(...positions.slice(localStart));localIds.push(...ids.slice(localStart/3));
+   localPositions.push(...positions.slice(localStart));localIds.push(...ids.slice(localStart/3));localSelfNormals.push(...selfNormals.slice(localStart));
 
   }
   const geometry=new T.BufferGeometry();
   for(const [name,extra,size] of [['position',positions,3],['color',colors,3],['shadowWallId',ids,1]]){
    const original=base[name].array,array=new Float32Array(original.length+extra.length);array.set(original);array.set(extra,original.length);geometry.setAttribute(name,new T.BufferAttribute(array,size));
   }
+  const selfShadeArray=new Float32Array(base.position.array.length+selfNormals.length);
+  if(base.shadowSelfShadeNormal)selfShadeArray.set(base.shadowSelfShadeNormal.array);
+  selfShadeArray.set(selfNormals,base.position.array.length);
+  geometry.setAttribute('shadowSelfShadeNormal',new T.BufferAttribute(selfShadeArray,3));
   const indices=new Uint32Array(base.position.count-removed.length*6+positions.length/3);let from=0,offset=0;
   for(const start of removed){indices.set(this.originalIndex.subarray(from,start),offset);offset+=start-from;from=start+6;}
   indices.set(this.originalIndex.subarray(from),offset);offset+=base.position.count-from;
@@ -122,6 +126,7 @@ export class MazeWallDamage{
   if(this.slabs.geometry!==this.original)this.slabs.geometry.dispose();this.slabs.geometry=geometry;
   this.slabs.userData.damageReceiver?.geometry.dispose();
   const localGeometry=new T.BufferGeometry();localGeometry.setAttribute('position',new T.Float32BufferAttribute(localPositions,3));localGeometry.setAttribute('shadowWallId',new T.Float32BufferAttribute(localIds,1));
+  localGeometry.setAttribute('shadowSelfShadeNormal',new T.Float32BufferAttribute(localSelfNormals,3));
   const receiver=new T.Mesh(localGeometry);receiver.matrix.copy(this.slabs.matrix);receiver.matrixAutoUpdate=false;
   this.slabs.userData.damageReceiver=receiver;
   this.slabs.userData.damagedSourceTriangles=new Set(removed.flatMap(start=>[start/3,start/3+1]));

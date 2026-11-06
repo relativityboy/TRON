@@ -3,6 +3,14 @@ title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
 
+## Horizontal ledge shadow inheritance — November 5
+
+Local macOS: `node --test tests/unit/wall-shadow-coplanar.test.js tests/unit/maze-wall-pattern.test.js tests/unit/maze-wall-damage.test.js` passes 14 tests; final `npm test` passes 695/695. `npm run build` passes production compilation and asset audit. The first full-suite run loaded an unfinished new test assertion; the corrected focused and final full-suite runs pass. Existing outline damage coverage now compares connected spans, allowing valid light/shadow splits without weakening its cavity-gap assertion.
+
+Horizontal molding carries a separate facade self-shade normal into exact shadow generation, including projecting miter tips. Geometric normals still control polygon lift and moving-shadow receivers. Molding outlines inherit the same 60% attenuation. Damage rebuilds preserve the metadata on both the rendered mesh and the local shadow receiver; reset restores the original geometry. Tests check a cap beyond its casting prism, the sun-facing case, outline darkness, roofs and damage/reset.
+
+Extended `tests/browser/maze-wall-self-shadow.mjs` to measure an upward-facing projecting ledge as well as the existing slab faces. Automated browser execution remains blocked: Chrome/Chromium abort during launch even with escalation (Chromium reports macOS `bootstrap_check_in` error 141); Launch Services also cannot start Chrome. No new GPU result or agent-captured in-game image is claimed. The user subsequently reviewed the game at `http://127.0.0.1:5190/` and confirmed the ledge shading works.
+
 ## Film finish — November 3
 
 - [x] Replace the existing uniform noise with subtle monochrome grain and soft brightness mottling after tone mapping. Favor blue midtones, preserve quiet blacks/highlights and crisp edges, update grain at 24 frames/second, retain the existing vignette and low-quality bypass. Strengths and pixel scales live in `FILM_FINISH`.

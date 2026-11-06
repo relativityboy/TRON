@@ -1,3 +1,5 @@
+import {shadeMazeEdges} from './maze-edge-shadows.js';
+import {MAZE_SHADOW_STYLE} from './maze-shadow-style.js';
 import {exteriorWallFace,wallFaceGap} from './maze-wall-exterior.js';
 import {appendWallPattern,appendWallPatternEdges,MAZE_WALL_EDGE_STYLE,MAZE_WALL_PATTERN} from './maze-wall-pattern.js';
 import {DEFAULT_WORLD,worldFor} from '../levels/scenario.js';
@@ -47,8 +49,8 @@ export function createWorld(scene,world=DEFAULT_WORLD,arena=null) {
     }
     faces.push({...first,b:end});
   }
-  const lines=[],lineShadowIds=[],lineNormals=[],corners=new Map();let lineNormal=[0,1,0];
-  const line=(a,b,id=shadowId,normal=lineNormal)=>{lines.push(new THREE.Vector3(...a),new THREE.Vector3(...b));lineShadowIds.push(id,id);lineNormals.push(...normal,...normal);};
+  const lines=[],lineShadowIds=[],lineNormals=[],lineSelfNormals=[],corners=new Map();let lineNormal=[0,1,0];
+  const line=(a,b,id=shadowId,normal=lineNormal,selfNormal=[0,0,0])=>{lines.push(new THREE.Vector3(...a),new THREE.Vector3(...b));lineShadowIds.push(id,id);lineNormals.push(...normal,...normal);lineSelfNormals.push(...selfNormal,...selfNormal);};
   for(const {a,b,nx,ns,shadowId:faceShadowId} of faces) {
     shadowId=faceShadowId;lineNormal=[nx,0,-ns];
     const length=Math.hypot(b.x-a.x,b.s-a.s);
@@ -72,16 +74,26 @@ export function createWorld(scene,world=DEFAULT_WORLD,arena=null) {
     line([point.x+nx,.25,-point.s-ns],[point.x+nx,WALL_HEIGHT-.15,-point.s-ns]);
   }
   const seams=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lines),
-    new THREE.LineBasicMaterial({color:MAZE_WALL_EDGE_STYLE.color,transparent:true,opacity:MAZE_WALL_EDGE_STYLE.opacity,depthTest:true,depthWrite:false,toneMapped:false}));
+    new THREE.LineBasicMaterial({color:MAZE_WALL_EDGE_STYLE.color,vertexColors:true,transparent:true,opacity:MAZE_WALL_EDGE_STYLE.opacity,depthTest:true,depthWrite:false,toneMapped:false}));
   seams.renderOrder=1;
   seams.geometry.setAttribute('shadowWallId',new THREE.Float32BufferAttribute(lineShadowIds,1));
   seams.geometry.setAttribute('shadowReceiverNormal',new THREE.Float32BufferAttribute(lineNormals,3));
+  seams.geometry.setAttribute('shadowSelfShadeNormal',new THREE.Float32BufferAttribute(lineSelfNormals,3));
+  const unshadedEdges=seams.geometry;seams.geometry=shadeMazeEdges(unshadedEdges,WALLS,WALL_HEIGHT,MAZE_SHADOW_STYLE.darkness);unshadedEdges.dispose();
   seams.material.onBeforeCompile=shader=>distantFog(shader,120);
   scene.add(seams);
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setAttribute('shadowWallId',new THREE.Float32BufferAttribute(shadowIds,1));geometry.computeBoundingSphere();
   // Stable flat receiver normals avoid derivative noise on faces grazing the light.
   geometry.computeVertexNormals();
   geometry.setAttribute('shadowReceiverNormal',geometry.attributes.normal.clone());
+  // Low horizontal molding belongs to the facade's shade, including the
+  // upward-facing strip and miter tips projecting beyond the solid prism.
+  // Keep geometric normals independent for decal lift and aircraft shadows.
+  const selfShadeNormals=new Float32Array(positions.length);
+  for(const patch of reliefPatches)if(patch.kind==='molding'){
+    for(let i=patch.start;i<patch.start+6;i++)selfShadeNormals.set([patch.face.nx,0,-patch.face.ns],i*3);
+  }
+  geometry.setAttribute('shadowSelfShadeNormal',new THREE.BufferAttribute(selfShadeNormals,3));
   const canyonEnclosure={value:0};
   const slabMaterial=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
   slabMaterial.onBeforeCompile=shader=>{

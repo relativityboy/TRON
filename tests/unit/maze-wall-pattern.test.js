@@ -5,6 +5,7 @@ import {appendWallPattern,appendWallPatternEdges,wallPatternBoxes,MAZE_WALL_PATT
 import {createOutlineMaze} from '../../src/levels/outline-maze.js';
 import {createWorld} from '../../src/rendering/world.js';
 import {MazeWallDamage} from '../../src/rendering/maze-wall-damage.js';
+import {createStaticWallShadowGeometry} from '../../src/rendering/static-wall-shadows.js';
 function fixture(){
  const map=createOutlineMaze({shapes:[{outline:[[0,0],[108,0],[108,24],[0,24]]}],size:[108,24],metersPerPixel:1});map.MAZE_INSTANCES=[{x:0,s:0,angle:0}];
  const scene=new T.Scene(),world=createWorld(scene,map),face=world.slabs.userData.damageFaces.find(f=>f.ns===-1&&f.length===108);
@@ -38,6 +39,30 @@ test('impact cavities cut through both ribs and molding, remain sealed, and rese
   }finally{damage.dispose();f.dispose();}
  }
 });
+test('molding retains facade self-shade through impact clipping and reset, without changing roof normals',()=>{
+ const f=fixture(),damage=new MazeWallDamage(f.scene,f.world.slabs,f.world.seams);
+ try{
+  const original=f.world.slabs.geometry,patch=f.world.slabs.userData.reliefPatches.find(p=>p.face===f.face&&p.kind==='molding');
+  assert(patch);
+  const verify=(g,requireRoof=false)=>{
+   const pos=g.attributes.position,normal=g.attributes.shadowSelfShadeNormal;assert.equal(normal.count,pos.count);
+   let molding=0,roof=0;
+   for(let i=0;i<pos.count;i++){
+    if(Math.abs(pos.getY(i)-9.45)<1e-4&&pos.getZ(i)>12.1&&normal.getZ(i)>.9){assert.equal(normal.getX(i),0);assert.equal(normal.getY(i),0);molding++;}
+    if(Math.abs(pos.getY(i)-54)<1e-4){assert.equal(normal.getX(i),0);assert.equal(normal.getY(i),0);assert.equal(normal.getZ(i),0);roof++;}
+   }
+   assert(molding>0);if(requireRoof)assert(roof>0);
+  };
+  for(let i=patch.start;i<patch.start+6;i++)assert.equal(original.attributes.shadowSelfShadeNormal.getZ(i),1);
+  verify(original,true);
+  assert(damage.hit({subject:'surface',x:-36,y:8.1,s:-12,normal:{x:0,y:0,z:1}}));damage.update(0);
+  verify(f.world.slabs.geometry,true);const receiver=f.world.slabs.userData.damageReceiver;verify(receiver.geometry);
+  const shadow=createStaticWallShadowGeometry(receiver,original,{selfShade:true});
+  const source=new Set(shadow.attributes.sourceTriangle.array),n=receiver.geometry.attributes.shadowSelfShadeNormal;
+  for(let i=0;i<n.count;i+=3)if(n.getZ(i)>.9)assert(source.has(i/3),'clipped molding must remain in the shadow union');
+  shadow.dispose();damage.clear();assert.equal(f.world.slabs.geometry,original);verify(original,true);
+ }finally{damage.dispose();f.dispose();}
+});
 test('faint facade outlines contain no diagonal wireframe and break across impact cavities',()=>{
  const f=fixture(),damage=new MazeWallDamage(f.scene,f.world.slabs,f.world.seams);
  try{
@@ -47,9 +72,11 @@ test('faint facade outlines contain no diagonal wireframe and break across impac
   for(let i=0;i<p.count;i+=2){const dx=p.getX(i+1)-p.getX(i),dy=p.getY(i+1)-p.getY(i),dz=p.getZ(i+1)-p.getZ(i);assert(Math.abs(dy)<1e-5||Math.hypot(dx,dz)<1e-5,'no diagonal triangulation outlines');if(Math.abs(p.getX(i)+45)<1e-4&&Math.abs(p.getZ(i)-12.75625)<1e-4&&Math.abs(dy)>40)selected++;}
   assert.equal(selected,1,'rib edge is one continuous vertical stroke');
   assert(damage.hit({subject:'surface',x:-45,y:15,s:-12,normal:{x:0,y:0,z:1}}));damage.update(0);
-  const q=seams.geometry.attributes.position;let spans=0;
-  for(let i=0;i<q.count;i+=2)if(Math.abs(q.getX(i)+45)<1e-4&&Math.abs(q.getX(i+1)+45)<1e-4&&Math.abs(q.getZ(i)-12.75625)<1e-4){spans++;assert(!(Math.min(q.getY(i),q.getY(i+1))<15&&Math.max(q.getY(i),q.getY(i+1))>15),'outline must not bridge the cavity');}
-  assert.equal(spans,2);damage.clear();assert.equal(seams.geometry.attributes.position.count,p.count);
+  const q=seams.geometry.attributes.position,spans=[];
+  for(let i=0;i<q.count;i+=2)if(Math.abs(q.getX(i)+45)<1e-4&&Math.abs(q.getX(i+1)+45)<1e-4&&Math.abs(q.getZ(i)-12.75625)<1e-4){const lo=Math.min(q.getY(i),q.getY(i+1)),hi=Math.max(q.getY(i),q.getY(i+1));spans.push([lo,hi]);assert(!(lo<15&&hi>15),'outline must not bridge the cavity');}
+  // Light/shadow boundaries may split an otherwise continuous outline.
+  const joined=[];for(const span of spans.sort((a,b)=>a[0]-b[0])){const last=joined.at(-1);if(last&&span[0]<=last[1]+1e-5)last[1]=Math.max(last[1],span[1]);else joined.push([...span]);}
+  assert.equal(joined.length,2);damage.clear();assert.equal(seams.geometry.attributes.position.count,p.count);
  }finally{damage.dispose();f.dispose();}
 });
 
