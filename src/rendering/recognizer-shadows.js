@@ -1,9 +1,10 @@
+import {diffuseDepthFilter} from './diffuse-depth-filter.js';
 import {arenaLightVisibility} from './arena-light-visibility.js';
 import {mazeLightVisibility} from './maze-light-visibility.js';
 import * as T from 'three';
 // One compact light-space tile per aircraft: stable detail across distant mazes.
 export class RecognizerShadows {
- constructor(crafts,receivers,maxBursts=5,{size=512,prefix='recShadow',darkness=.78,excludeSelf=false,maxCrafts=Infinity,filterEdges=false,depthBias=.0002,darknessForReceiver=null}={}){
+ constructor(crafts,receivers,maxBursts=5,{size=512,prefix='recShadow',darkness=.78,excludeSelf=false,maxCrafts=Infinity,filterEdges=false,depthBias=.0002,darknessForReceiver=null,diffuseSigmaMeters=0}={}){
   const soft=filterEdges==='soft',tapWidth=soft?6:2;
   const named=code=>code.replaceAll('recShadow',prefix);
   const count=Math.min(crafts.length,maxCrafts);
@@ -29,6 +30,8 @@ export class RecognizerShadows {
   this.available=this.entries.map(e=>({...e}));this.entries=this.entries.slice(0,count);
   this.craftCount=this.entries.length;
   for(let i=0;i<maxBursts;i++)this.entries.push({scene:new T.Scene(),pairs:[],camera:new T.OrthographicCamera(-25,25,25,-25,.1,2000),matrix:new T.Matrix4().makeTranslation(1e9,1e9,1e9),burst:null});
+  this.diffuseEnabled={value:0};
+  this.diffuseSigmaUv=this.entries.map(e=>new T.Vector2(diffuseSigmaMeters/(e.camera.right-e.camera.left),diffuseSigmaMeters/(e.camera.top-e.camera.bottom)));
   this.strengths=new Float32Array(this.entries.length).fill(1);
   this.patches=[];
   this.addReceivers=receivers=>{
@@ -45,10 +48,12 @@ export class RecognizerShadows {
      shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n receiverWallId=shadowWallId;');
      shader.fragmentShader='varying float receiverWallId;\n'+shader.fragmentShader;
     }
+    if(diffuseSigmaMeters){shader.uniforms[prefix+'DiffuseEnabled']=this.diffuseEnabled;shader.uniforms[prefix+'DiffuseSigmaUv']={value:this.diffuseSigmaUv};}
     shader.uniforms[prefix+'Strength']={value:this.strengths};shader.uniforms[prefix+'Atlas']={value:this.target.texture};shader.uniforms[prefix+'Matrices']={value:this.entries.map(e=>e.matrix)};
     shader.vertexShader=named('varying vec3 recShadowWorld;\n')+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',named(`#include <begin_vertex>\n recShadowWorld=${receiver.userData.shadowWorldExpression||'(modelMatrix*vec4(position,1.)).xyz'};`));
     shader.fragmentShader=named(`uniform sampler2D recShadowAtlas;uniform mat4 recShadowMatrices[${this.entries.length}];uniform float recShadowStrength[${this.entries.length}];varying vec3 recShadowWorld;\n`)+shader.fragmentShader;
+    if(diffuseSigmaMeters)shader.fragmentShader=named(`uniform float recShadowDiffuseEnabled;uniform vec2 recShadowDiffuseSigmaUv[${this.entries.length}];\n`)+shader.fragmentShader;
     if(!shader.fragmentShader.includes('#include <packing>'))shader.fragmentShader='#include <packing>\n'+shader.fragmentShader;
     const authoredNormal=receiver.geometry.hasAttribute('shadowReceiverNormal');
     const wallReceiver=this.occlusion&&(receiver.isMesh||authoredNormal)&&receiver.geometry.hasAttribute('shadowWallId');
@@ -82,6 +87,7 @@ export class RecognizerShadows {
      vec2 slope=abs(det)>1e-20?vec2(px.z*py.y-py.z*px.y,py.z*px.x-px.z*py.x)/det:vec2(0.);
      if(all(greaterThan(p,vec3(0.)))&&all(lessThan(p,vec3(1.)))){
       float cover=0.;
+      ${diffuseSigmaMeters?`if(recShadowDiffuseEnabled>.5){${diffuseDepthFilter({index:i,columns:this.columns,rows:this.rows,size:this.size,excludeSelf,depthBias})}}else{`:''}
       ${filterEdges?`vec2 texel=p.xy*${this.size}.-.5;vec2 base=floor(texel);vec2 fraction=fract(texel);`:''}
       ${soft?Array.from({length:6},(_,k)=>`vec2 d${k}=(vec2(${k-2}.)-fraction)/1.1;vec2 w${k}=exp(-.5*d${k}*d${k});`).join('\n')+'\nvec2 weightSum=w0+w1+w2+w3+w4+w5;':''}
       ${Array.from({length:soft?36:filterEdges?4:1},(_,tap)=>`{
@@ -95,6 +101,7 @@ export class RecognizerShadows {
        if(receiverWallId>.5&&abs(casterId-receiverWallId)<.5)sampleCover=0.;`:''}
        cover+=sampleCover${soft?`*w${tap%6}.x*w${Math.floor(tap/6)}.y/(weightSum.x*weightSum.y)`:filterEdges?`*${tap%2?'fraction.x':'(1.-fraction.x)'}*${tap>1?'fraction.y':'(1.-fraction.y)'}`:''};
       }`).join('\n')}
+      ${diffuseSigmaMeters?'}':''}
       recShadowShade=min(recShadowShade,1.-${receiverDarkness.toFixed(3)}*cover*recShadowStrength[${i}]);
      }
     }`).join('\n');
@@ -103,9 +110,9 @@ export class RecognizerShadows {
     // that light source: apply only any stronger occlusion, never multiply it.
     const selfShadedWall=receiver.isMesh&&receiver.geometry.hasAttribute('wallSelfShade');
     const shadeFactor=selfShadedWall?'min(vWallSelfShade,recShadowShade)/max(vWallSelfShade,.001)':'recShadowShade';
-    shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',named(`float recShadowShade=1.;\n${occlusion?.code||''}\n${arenaOcclusion?.code||''}\n${tests}\n${occlusion?`recShadowShade=mix(1.,recShadowShade,${occlusion.visible});`:''}\n${arenaOcclusion?`recShadowShade=mix(1.,recShadowShade,${arenaOcclusion.visible});`:''}\n${unionAttenuation===undefined?`gl_FragColor.rgb=gl_FragColor.rgb*${shadeFactor}${emissive};`:`gl_FragColor.rgb=vec3(min(${unionAttenuation.toFixed(3)},recShadowShade)/max(recShadowShade,.001));`}\n#include <tonemapping_fragment>`));
+    shader.fragmentShader=shader.fragmentShader.replace('#include <tonemapping_fragment>',named(`float recShadowShade=1.;\n${occlusion?.code||''}\n${arenaOcclusion?.code||''}\n${tests}\n${occlusion?`recShadowShade=mix(1.,recShadowShade,${occlusion.visible});`:''}\n${arenaOcclusion?`recShadowShade=mix(1.,recShadowShade,${arenaOcclusion.visible});`:''}\n${unionAttenuation===undefined?`gl_FragColor.rgb=gl_FragColor.rgb*${shadeFactor}${emissive};`:`gl_FragColor.rgb=vec3(min(${(typeof unionAttenuation==='string'?unionAttenuation:unionAttenuation.toFixed(3))},recShadowShade)/max(recShadowShade,.001));`}\n#include <tonemapping_fragment>`));
    };
-   material.customProgramCacheKey=()=>`${previousKey}|${prefix}:${size}:${receiverDarkness}:receiver-plane-v13:${filterEdges}:${depthBias}:${excludeSelf}:${this.entries.length}:union${receiver.userData.shadowUnionAttenuation??'none'}:selfShade${receiver.geometry.hasAttribute('wallSelfShade')}:exactWall${!!receiver.userData.exactMazeWallShadow}:exactFloor${!!receiver.userData.exactMazeFloorShadow}:occlusion${this.occlusion?.entries.length||0}:arena${receiver.userData.arenaShadowOcclusion?.size||0}`;
+   material.customProgramCacheKey=()=>`${previousKey}|${prefix}:${size}:${receiverDarkness}:receiver-plane-v14:${diffuseSigmaMeters}:${filterEdges}:${depthBias}:${excludeSelf}:${this.entries.length}:union${receiver.userData.shadowUnionAttenuation??'none'}:selfShade${receiver.geometry.hasAttribute('wallSelfShade')}:exactWall${!!receiver.userData.exactMazeWallShadow}:exactFloor${!!receiver.userData.exactMazeFloorShadow}:occlusion${this.occlusion?.entries.length||0}:arena${receiver.userData.arenaShadowOcclusion?.size||0}`;
    // A rebuilt atlas can reuse the same shader source/key. Evict the old
    // material program bindings so Three invokes onBeforeCompile again with
    // this atlas and its current matrices instead of a disposed texture.

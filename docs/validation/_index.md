@@ -3,6 +3,14 @@ title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
 
+## Shared diffuse vehicle shadows — November 6
+
+Pre-commit validation of the isolated staged code passes all 687 tests and the production/PWA/asset build. The complete working tree passes 704 tests; the difference comes from earlier unrelated work intentionally excluded from this commit. An initial isolated run lacked documentation asset links; after restoring those fixture links, all staged-code checks pass.
+
+On local macOS arm64 / Node 22.23.4, `npm test` passes 703/703 and `npm run build` passes production/PWA/asset checks. Focused regressions verify live shared floor/vehicle switching, shader uniforms and cache keys, depth-before-interpolation, expanded focused-tile support, original sharp-mode radius/filter restoration, automatic fallback and manual retry. The existing sharp Clu browser test explicitly selects sharp mode.
+
+`node tests/browser/diffuse-vehicle-shadows.mjs` is implemented to compare vehicle transition widths and exact sharp→diffuse→sharp pixel statistics and capture diffuse output. Chrome still aborts before launch, including an escalated attempt, so the GPU test did not execute. No vehicle appearance approval or measured GPU cost is claimed. The user separately confirmed the diffuse ground shadows look good; preserve that approval and the floor appearance.
+
 ## Missing carrier: simulation timestamp regression — November 6
 
 The local report from the user's CLU session at simulation time 15.1333 s showed all 200 carrier meshes marked visible, but carrier X, world bounds, reveal cut and opacity serialized as `null` (non-finite JavaScript values). Shader diagnostics reported no errors and the WebGL context was healthy. The retained pose snapshot in `GameSession.advance()` omitted `time`, so `SceneryClock.sample()` produced NaN after the first fixed tick. That propagated into carrier translation and its reveal. The issue was not lazy loading: startup awaits the carrier GLB.

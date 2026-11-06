@@ -1,3 +1,4 @@
+import {tagRecognizerEye,configureRecognizerEye,RECOGNIZER_EYE} from './recognizer-eye.js';
 import {yieldToBrowser} from '../loading/yield-to-browser.js';
 import {createBossTank} from './boss-tank.js';
 import {RECOGNIZER_TINTS} from '../game/recognizer-appearance.js';
@@ -109,6 +110,8 @@ export async function loadRecognizer() {
     meshes.push(mesh);
   });
   tagRecognizerBlocks(meshes);
+  const eyeTriangles=tagRecognizerEye(meshes);
+  root.userData.eyeTriangles=eyeTriangles;
   const legs=[new THREE.Group(),new THREE.Group()];
   legs.forEach((leg,i)=>{leg.name=i?'right-leg':'left-leg';root.add(leg);});
   for (const mesh of meshes) {
@@ -139,7 +142,7 @@ export async function loadRecognizer() {
   return root;
 }
 
-export function createRecognizer(template, {tintColor=RECOGNIZER_TINTS.black}={}) {
+export function createRecognizer(template, {tintColor=RECOGNIZER_TINTS.black,eyeColor=RECOGNIZER_EYE.color}={}) {
   const root=template.clone(true);
   let material;const materials=new Map();
   root.traverse(mesh=>{
@@ -172,9 +175,10 @@ export function createRecognizer(template, {tintColor=RECOGNIZER_TINTS.black}={}
       leg.position.set(side*15*(1-Math.cos(angle))-side*13*smooth,0,side*15*Math.sin(angle));
     });
   }
+  const eye=configureRecognizerEye(material,eyeColor);
   const setTintColor=color=>material.color.set(color);
   setTintColor(tintColor);
-  return {root,material,legs,pose,setTintColor};
+  return {root,material,legs,pose,setTintColor,...eye};
 }
 
 // Release a completed sibling load if the other file fails.

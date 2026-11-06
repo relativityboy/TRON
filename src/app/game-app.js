@@ -1278,6 +1278,12 @@ export async function createGameApp() {
     aaControl.innerHTML='<span>Adaptive antialiasing</span><input type="checkbox" checked>';
     listen(aaControl.querySelector('input'),'change',e=>{config.adaptiveAntialiasing=e.target.checked;view.adaptiveAA.clear();});
     $('sliders').append(aaControl);
+    const shadowControls=[];
+    for(const [key,title] of [['diffuseGroundShadows','Diffuse wall shadows (floor + vehicles)'],['autoGroundShadowFallback','Automatic shadow performance fallback']]){
+      const label=document.createElement('label');label.innerHTML=`<span>${title}</span><input type="checkbox">`;
+      const input=label.querySelector('input');input.checked=config[key];
+      listen(input,'change',()=>{config[key]=input.checked;});$('sliders').append(label);shadowControls.push({input,key});
+    }
     const tintFields=document.createElement('fieldset');
     tintFields.innerHTML='<legend>Recognizer face tints</legend>';
     const tintInputs=[];
@@ -1306,6 +1312,7 @@ export async function createGameApp() {
       session.configure('hearing', HEARING);
       view.resize();
       aaControl.querySelector('input').checked=config.adaptiveAntialiasing;
+      for(const {input,key} of shadowControls)input.checked=config[key];
       [...$('sliders').children].slice(0,tuningFields.length).forEach((label, i) => {
         const { target, key } = tuningFields[i],
           v = target[key];

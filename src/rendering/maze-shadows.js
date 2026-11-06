@@ -1,3 +1,6 @@
+import {DIFFUSE_DEPTH_FILTER} from './diffuse-depth-filter.js';
+import {DiffuseGroundShadows} from './diffuse-ground-shadows.js';
+import {CycleRendererGuard} from './cycle-renderer-guard.js';
 import {DEFAULT_WORLD,worldFor} from '../levels/scenario.js';
 import * as T from 'three';
 import {createStaticWallShadowGeometry} from './static-wall-shadows.js';
@@ -7,11 +10,12 @@ import {RecognizerShadows} from './recognizer-shadows.js';
 // one unit allowed entire patches to alternate with the underlying wall.
 import {MAZE_SHADOW_STYLE} from './maze-shadow-style.js';
 export {MAZE_SHADOW_STYLE} from './maze-shadow-style.js';
+export const CLU_WALL_SHADOW=Object.freeze({size:1024,radiusMeters:24,centerStepMeters:.25,depthBias:.00002});
 const WALL_SHADOW_DEPTH = Object.freeze({factor: -2, units: -4});
 
 // The maze is static: render its depth maps once, independently of moving casters.
 export class MazeShadows extends RecognizerShadows{
- constructor(world,vehicles=[],map=DEFAULT_WORLD){
+ constructor(world,vehicles=[],map=DEFAULT_WORLD,{sharpReceiver=null}={}){
   const {MAZE_INSTANCES,MAZE_LENGTH,WALL_HEIGHT}=map;
   // The decorative facade details can be smaller than a shadow texel. Casting
   // them into the slab's own map creates alternating triangle-shaped patches.
@@ -29,9 +33,18 @@ export class MazeShadows extends RecognizerShadows{
   if(world.floor)world.floor.userData.exactMazeFloorShadow=true;
   const darkness=MAZE_SHADOW_STYLE.darkness;
   const receivers=[];
-  for(const root of vehicles)root.traverse(o=>{if(o.isMesh&&!o.userData.breakupExclude)receivers.push(o);});
-  super(casters,receivers,0,{size:2048,prefix:'mazeShadow',darkness,excludeSelf:true,filterEdges:true});
+  for(const root of vehicles.filter(root=>root!==sharpReceiver))root.traverse(o=>{if(o.isMesh&&!o.userData.breakupExclude)receivers.push(o);});
+  super(casters,receivers,0,{size:2048,prefix:'mazeShadow',darkness,excludeSelf:true,filterEdges:true,diffuseSigmaMeters:DIFFUSE_DEPTH_FILTER.sigmaMeters});
   this.casterGeometry=casterGeometry;if(casterGeometry)caster.material.dispose();
+  // Clu needs centimeter-scale shadow detail, rather than a whole maze texel.
+  // Reuse solid wall casters, but patch only Clu's existing materials.
+  if(sharpReceiver){
+   const c=CLU_WALL_SHADOW,center=new T.Group(),receivers=[];
+   sharpReceiver.traverse(o=>{if(o.isMesh&&!o.userData.breakupExclude)receivers.push(o);});
+   this.sharpReceiver=sharpReceiver;this.sharpCenter=center;this.sharpPosition=new T.Vector3();this.sharpLastPosition=new T.Vector3(Infinity,Infinity,Infinity);
+   this.sharpShadows=new RecognizerShadows([{root:center,casters:[caster],radius:c.radiusMeters,distance:Math.max(200,WALL_HEIGHT*4)}],receivers,0,{size:c.size,prefix:'mazeShadow',darkness,filterEdges:true,depthBias:c.depthBias,diffuseSigmaMeters:DIFFUSE_DEPTH_FILTER.sigmaMeters});
+  }
+
   // Project exact slab geometry onto the floor and multiply its existing color.
   // Stencil bit 0 makes the operation a union: overlapping triangles/slabs
   // darken each sample only once, preserving grid lines without map stair steps.
@@ -60,7 +73,9 @@ gl_Position=projectionMatrix*viewMatrix*p;}`,
   this.floorShadow.userData.shadowUnionAttenuation=1-darkness;
   this.floorShadow.userData.shadowWorldExpression='p.xyz';
   this.wallShadow.userData.shadowUnionAttenuation=1-darkness;
-  world.carrierShadowOverlays=[this.floorShadow,this.wallShadow];
+  this.diffuseGround=new DiffuseGroundShadows(world,map,darkness);
+  this.groundShadowGuard=new CycleRendererGuard();this.setGroundShadowMode('diffuse');
+  world.carrierShadowOverlays=[this.floorShadow,this.wallShadow,...this.diffuseGround.tiles.map(t=>t.mesh)];
   this.originalWallShadow=this.wallShadow.geometry;
   this.wallShadow.renderOrder=.5;world.slabs.parent.add(this.wallShadow);
  }
@@ -76,6 +91,36 @@ gl_Position=projectionMatrix*viewMatrix*p;}`,
   const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(array,3));geometry.computeBoundingSphere();
   this.wallShadow.geometry=geometry;this.damageRevision=revision;
  }
- dispose(){if(this.wallShadow.geometry!==this.originalWallShadow)this.originalWallShadow.dispose();super.dispose();this.casterGeometry?.dispose();this.floorShadow.material.dispose();this.floorShadow.removeFromParent();this.wallShadow.geometry.dispose();this.wallShadow.material.dispose();this.wallShadow.removeFromParent();}
- update(renderer){if(this.ready)return;super.update(renderer);this.ready=true;}
+ setGroundShadowMode(mode){
+  if(!['sharp','diffuse'].includes(mode))throw Error('Unknown ground shadow mode');
+  this.groundShadowMode=mode;this.groundShadowReason=null;this.groundShadowGuard.reset();
+  this.floorShadow.visible=mode==='sharp'||!this.diffuseGround.ready;this.diffuseGround.visible=mode==='diffuse';
+  this.diffuseEnabled.value=mode==='diffuse'?1:0;
+  if(this.sharpShadows){
+   const c=DIFFUSE_DEPTH_FILTER,radius=CLU_WALL_SHADOW.radiusMeters+(mode==='diffuse'?c.supportSigmas*c.sigmaMeters:0);
+   this.sharpShadows.diffuseEnabled.value=this.diffuseEnabled.value;
+   const camera=this.sharpShadows.entries[0].camera;camera.left=camera.bottom=-radius;camera.right=camera.top=radius;camera.updateProjectionMatrix();
+   this.sharpShadows.diffuseSigmaUv[0].setScalar(c.sigmaMeters/(2*radius));
+   this.sharpLastPosition.set(Infinity,Infinity,Infinity);
+  }
+ }
+ monitorGroundShadows(dt,active,autoFallback,targetFps){
+  if(this.groundShadowMode==='diffuse'&&autoFallback&&this.groundShadowGuard.sample(dt,active&&this.diffuseGround.ready,targetFps)){
+   this.setGroundShadowMode('sharp');this.groundShadowReason='performance';
+   console.info('Diffuse wall shadows: sustained low frame rate; restored sharp floor and vehicle shadows.');
+  }
+ }
+ dispose(){this.diffuseGround.dispose();if(this.wallShadow.geometry!==this.originalWallShadow)this.originalWallShadow.dispose();this.sharpShadows?.dispose();super.dispose();this.casterGeometry?.dispose();this.floorShadow.material.dispose();this.floorShadow.removeFromParent();this.wallShadow.geometry.dispose();this.wallShadow.material.dispose();this.wallShadow.removeFromParent();}
+ update(renderer){
+  if(this.groundShadowMode==='diffuse'&&!this.diffuseGround.ready){
+   try{this.diffuseGround.update(renderer);this.floorShadow.visible=this.diffuseGround.tiles.length===0;this.diffuseGround.visible=true;}
+   catch(error){this.setGroundShadowMode('sharp');this.groundShadowReason='initialization';console.warn('Diffuse wall shadows unavailable; using sharp shadows.',error);}
+  }
+  if(!this.ready){super.update(renderer);this.ready=true;}
+  if(!this.sharpReceiver?.visible)return;
+  this.sharpReceiver.updateWorldMatrix(true,false);this.sharpReceiver.getWorldPosition(this.sharpPosition);
+  const step=CLU_WALL_SHADOW.centerStepMeters;this.sharpPosition.divideScalar(step).round().multiplyScalar(step);
+  if(this.sharpPosition.equals(this.sharpLastPosition))return;
+  this.sharpCenter.position.copy(this.sharpPosition);this.sharpShadows.update(renderer);this.sharpLastPosition.copy(this.sharpPosition);
+ }
 }

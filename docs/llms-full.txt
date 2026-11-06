@@ -11,6 +11,26 @@ See also: /llms.txt (curated index) and /sitemap.xml.
 <!-- Page: (root) -->
 Source: /
 
+## Lower crown eye rectangle — November 6
+
+- [x] Restrict the solid yellow eye to the lower of the two stacked crown rectangles, restoring the upper rectangle to its body color. The normalized model mask now selects four triangles at Y 7.35–7.61 m, instead of eight triangles spanning both rectangles. Keep independent eye-color control, trim, geometry and folding unchanged.
+- [x] Actual imported-GLB regression verifies twelve selected vertices, exclusion of the upper cap and unchanged positions. Browser verification remains blocked by Chrome startup; final appearance remains for user review.
+
+## Shared diffuse wall shadows on vehicles — November 6
+
+- [x] Extend the existing diffuse/sharp switch to wall shadows received by Clu, enemy tanks, Recognizers and the carrier. Keep the user-approved diffuse floor unchanged. Vehicle depth comparisons use a Gaussian filter in light-space meters, sharing the floor's named 8 m softness value, with bilinear interpolation of depth comparisons rather than packed depth colors. This accounts for vehicle elevation; it does not project the ground mask upward onto aircraft. Only maze-wall shadow receivers opt in; aircraft-cast shadows and wall-face shading retain their existing paths.
+- [x] Use the same URL options (`?groundShadows=diffuse` / `?groundShadows=sharp`), live tuning switch (now labeled **Diffuse wall shadows (floor + vehicles)**) and automatic performance fallback for both. Restore the original four-comparison vehicle filter and Clu's original 24 m focused-tile radius in sharp mode. Diffuse mode expands Clu's focused tile to 48 m for filter support; mode changes invalidate its cached position so the next frame refreshes the correct tile without shader recompilation. The vehicle filter costs up to 144 depth reads per applicable tile/fragment; unlike the cached floor blur, this adds per-frame work and still needs real hardware measurement.
+- [x] Local macOS arm64 / Node 22.23.4: `npm test` passes 703/703; `npm run build` passes production/PWA/asset checks. New regression verifies both vehicle shader bindings, uniform-driven switching, tile padding/restoration, fallback across floor/vehicle paths and manual retry. Keep the earlier focused sharpness GPU comparison explicitly in sharp mode.
+- [ ] `node tests/browser/diffuse-vehicle-shadows.mjs` adds a GPU transition-width and sharp→diffuse→sharp restoration comparison/capture. Chrome aborts before launch both normally and after an escalated retry; no new GPU or visual result is claimed. Vehicle appearance, smoothness and frame-time review remain pending. The user approved the preceding diffuse **ground** shadows; that approval does not cover this new vehicle change.
+
+## Diffuse ground-shadow trial — November 6
+
+- [x] Add cached 2048² coverage masks per maze, a separable Gaussian blur with 8 m standard deviation and linear sampling, then multiply only the floor color. Preserve the crisp ground grid, existing shadow darkness, wall/vehicle shading and original sharp floor projection. Combine wall coverage before filtering; preserve stronger carrier-shadow union through the varying floor attenuation. Masks use the same solid wall footprints and light projection as the existing ground shadows, including triangulated concave footprints. As with the previous sharp ground projection, wall-impact cavities do not alter ground coverage.
+- [x] Enable the trial by default. `?groundShadows=sharp` restores the original floor shadows; `?groundShadows=diffuse` explicitly selects the trial. Development tuning (`?tuning=1`, Shift+T) includes **Diffuse ground shadows** and **Automatic shadow performance fallback**. Both are live switches. The default guard waits four active seconds, then restores sharp shadows after three consecutive two-second windows below 65% of target FPS (threshold bounded to 20–40 FPS). Ignore pauses, openings, hidden/unfocused play and long isolated stalls. Fallback stays sharp until a manual retry or scene recreation; it detects overall sustained slowness, not proof that shadows caused it. Initialization exceptions also restore sharp shadows.
+- [x] On local macOS arm64 / Node 22.23.4, all 702 unit tests and production/PWA/asset checks pass. New coverage checks finite per-site geometry, unchanged source walls, visibility/disposal, disabled/inactive guard behavior, sustained fallback and manual retry.
+- [x] User confirms the diffuse ground shadows look good.
+- [ ] Carrier overlap and actual GPU/frame-time review remain pending. `node tests/browser/diffuse-ground-shadows.mjs` provides a GPU gradient/capture check, but Chrome aborts before launch both inside the sandbox and after an escalated retry. No successful GPU test, image inspection or measured performance improvement is claimed. Each full-size cached RGBA mask uses approximately 16 MiB, plus one temporary 16 MiB blur target during creation; no per-frame blur.
+
 ## Carrier visibility and simulation timestamps — November 6
 
 - [x] Diagnose the missing carrier from the user's live diagnostics: its X position, world bounds and materialization opacity became `NaN`, with no reported shader errors. `GameSession.advance()` retained poses but omitted `time`, while `SceneryClock` interpolated `previous.time`. Restore the pre-step timestamp in every simulation snapshot and let scenery use current simulation time if an older snapshot lacks a finite timestamp. Preserve the original carrier route, Clu spawn/camera, reveal, lights and speed; revert the speculative lane change.
@@ -6091,6 +6111,14 @@ Source: /validation/
 title: Validation
 subtitle: Browser checks, performance, and remaining work
 ---
+
+## Shared diffuse vehicle shadows — November 6
+
+Pre-commit validation of the isolated staged code passes all 687 tests and the production/PWA/asset build. The complete working tree passes 704 tests; the difference comes from earlier unrelated work intentionally excluded from this commit. An initial isolated run lacked documentation asset links; after restoring those fixture links, all staged-code checks pass.
+
+On local macOS arm64 / Node 22.23.4, `npm test` passes 703/703 and `npm run build` passes production/PWA/asset checks. Focused regressions verify live shared floor/vehicle switching, shader uniforms and cache keys, depth-before-interpolation, expanded focused-tile support, original sharp-mode radius/filter restoration, automatic fallback and manual retry. The existing sharp Clu browser test explicitly selects sharp mode.
+
+`node tests/browser/diffuse-vehicle-shadows.mjs` is implemented to compare vehicle transition widths and exact sharp→diffuse→sharp pixel statistics and capture diffuse output. Chrome still aborts before launch, including an escalated attempt, so the GPU test did not execute. No vehicle appearance approval or measured GPU cost is claimed. The user separately confirmed the diffuse ground shadows look good; preserve that approval and the floor appearance.
 
 ## Missing carrier: simulation timestamp regression — November 6
 

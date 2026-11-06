@@ -99,6 +99,8 @@ export class View {
     boss = null,
   ) {
     this.map = map;
+    const groundShadowOption=new URLSearchParams(globalThis.location?.search||'').get('groundShadows');
+    if(groundShadowOption==='sharp'||groundShadowOption==='diffuse')config.diffuseGroundShadows=groundShadowOption==='diffuse';
     const RECOGNIZER_STARTS = recognizerStarts(map),
       GROUND_TANK_COUNT = groundTankCount(map);
     this.renderer = new THREE.WebGLRenderer({
@@ -170,6 +172,7 @@ export class View {
       { maxCrafts: AIRCRAFT_SHADOWS.maxCasters, darknessForReceiver:receiver=>receiver.userData.arenaAircraftShadow?AIRCRAFT_SHADOWS.arenaWallDarkness:undefined },
     );
     await yieldToBrowser();
+    this.requestedGroundShadowMode=null;
     this.mazeShadows = new MazeShadows(
       this.world,
       [
@@ -179,6 +182,7 @@ export class View {
         ...(this.carrier ? [this.carrier] : []),
       ],
       this.map,
+      {sharpReceiver:this.tank.root},
     );
     this.carrierShadows = carrier
       ? new CarrierShadows(carrier, this.world, [
@@ -275,6 +279,12 @@ export class View {
   }
 
   updateAntialiasing(dt,active){
+    const shadows=this.mazeShadows;
+    if(shadows){
+      const requested=config.diffuseGroundShadows?'diffuse':'sharp';
+      if(this.requestedGroundShadowMode!==requested){shadows.setGroundShadowMode(requested);this.requestedGroundShadowMode=requested;}
+      shadows.monitorGroundShadows(dt,active,config.autoGroundShadowFallback,config.targetFps);
+    }
     if(this.adaptiveAA.sample(dt,active&&!this.lowQuality&&config.adaptiveAntialiasing,config.targetFps))this.resize();
   }
 
@@ -423,6 +433,7 @@ export class View {
       craft.root.position.set(pose.x, pose.y, -pose.s);
       craft.root.rotation.set(0, pose.yaw, 0);
       craft.pose(pose.fold || 0);
+      craft.setEyeColor(e.eyeColor??config.recognizerEyeColor);
       craft.setTintColor(e.tintColor ?? (e.role==='arena-patrol'?config.arenaPatrolTintColor:config.recognizerTintColor));
       craft.rez?.update(
         e.state === 'materializing' ? run.time - e.rezStarted : null,
@@ -657,10 +668,12 @@ export class View {
       ...this.enemyTanks.map((c) => c.root),
       ...this.recognizers.map((c) => c.root),
     ];
+    this.requestedGroundShadowMode=null;
     this.mazeShadows = new MazeShadows(
       this.world,
       [...vehicles, ...(this.carrier ? [this.carrier] : [])],
       this.map,
+      {sharpReceiver:this.tank.root},
     );
     this.carrierShadows = this.carrier
       ? new CarrierShadows(this.carrier, this.world, vehicles)
