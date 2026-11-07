@@ -50,7 +50,6 @@ for base in ['assets/runtime','assets/source','public','references','docs/sounds
   if path not in known and not path.startswith(('public/','assets/runtime/')):continue
   category='models' if p.suffix.lower() in ['.glb','.obj','.dae','.mtl','.uasset','.umap'] else 'audio' if p.suffix.lower() in ['.mp3','.wav','.m4a','.ogg'] else 'fonts' if p.suffix.lower() in ['.ttf','.otf'] else 'film' if p.suffix.lower() in ['.mp4','.m4v','.mov'] else 'images' if p.suffix.lower() in ['.png','.jpg','.jpeg','.svg','.webp'] else 'support'
   policy='runtime' if path.startswith(('public/','assets/runtime/')) else 'source-only' if path.startswith('assets/source/') else 'reference-only'
-  if path.startswith('assets/source/models/carrier-shuttle/') and p.suffix in ['.glb','.png']:policy='preview'
   source=next((old for old,new in paths.items() if new==path and old.startswith('docs/references/')),None)
   author=credits[cid]['author'];license=credits[cid]['license']
   sidecars=[q.relative_to(ROOT).as_posix() for q in p.parent.glob('*.json') if any(t in q.name for t in ['source','reference','license'])]

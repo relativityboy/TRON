@@ -50,7 +50,7 @@ Clu destruction now uses the same posed-surface breakup system: a stomp hides th
 
 ## Carrier escape shuttle
 
-[Model notes and GLB](carrier-shuttle/index.html) · [Interactive preview](../../shuttle.html). Reference reconstruction from the supplied film stills and escape sequence, with provisional scale and hidden surfaces.
+Retired: the unused shuttle experiments, assets and preview tools were removed on November 7, 2026. No usable shuttle was adopted.
 
 ## Grid cloud
 

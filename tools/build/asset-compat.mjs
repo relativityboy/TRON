@@ -8,11 +8,7 @@ for(const [old,current] of Object.entries(paths)){
  }else if(current.startsWith('assets/runtime/')){
   const output='dist/'+old;await mkdir(dirname(output),{recursive:true});await cp(current,output);
  }
- // Public preview pages dynamically request these models. They are runtime
- // preview derivatives, not an invitation to copy entire authoring directories.
- if(current.startsWith('assets/source/models/carrier-shuttle/')&&/\.(glb|png)$/.test(current)){
-  for(const output of ['dist/'+current,'dist/'+old]){await mkdir(dirname(output),{recursive:true});await cp(current,output);}
- }
+
 }
 console.log('Emitted legacy runtime asset URLs and preview derivatives.');
 

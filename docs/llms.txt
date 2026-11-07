@@ -19,7 +19,7 @@
 ## Models
 
 - [Models](/models/): Imported vehicle sources and runtime adapters
-- [Carrier escape shuttle](/models/carrier-shuttle/): Reference reconstruction of the carrier escape pod
+- [Carrier escape shuttle — retired](/models/carrier-shuttle/): The unused shuttle experiments, assets and preview tools were removed on November 7, 2026. No usable shuttle was adopted. Historical implementation notes elsewhere describe rejected experiments.
 
 ## Multiplayer light cycles
 
