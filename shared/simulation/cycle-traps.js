@@ -79,17 +79,21 @@ export function trackCycleTraps(r,barriers,proposals){
  if(!due&&!deaths.length)return;
  if(r.cycles.length>C.maxCycles||barriers.length>L.maxTrails||r.trails.length>L.maxTrails){c.active.clear();c.previous.clear();return;}
  build(c,r,barriers);c.visits=0;
- if(due){
-  c.next=r.time+L.scanSeconds;
-  const b=r.cycles[c.cursor++%r.cycles.length];if(b?.alive&&!b.escaped)scan(c,r,b);
- }
  for(const {b,hit} of deaths){
-  if(c.awarded.has(b.id))continue;c.awarded.add(b.id);
+  if(c.awarded.has(b.id))continue;
+  // A closing wall can be followed by a self-wall death before this victim's
+  // next round-robin scan. Inspect the actual collision barriers first.
+  scan(c,r,b);c.awarded.add(b.id);
   const eligible=(c.active.get(b.id)??[]).filter(t=>t.owner!==hit.owner&&r.cycles.find(o=>o.id===t.owner)?.team!==b.team&&validate(c,b,t)===true);
   // One victim contributes at most one shared assist reward.
   for(const trap of eligible){const owner=r.cycles.find(o=>o.id===trap.owner);
    (owner.trapAssists??=[]).push({id:b.id,team:b.team,share:1/eligible.length});
   }
   c.active.delete(b.id);
+ }
+ if(due){
+  c.next=r.time+L.scanSeconds;
+  const b=r.cycles[c.cursor++%r.cycles.length];
+  if(b?.alive&&!b.escaped&&!deaths.some(p=>p.b.id===b.id))scan(c,r,b);
  }
 }

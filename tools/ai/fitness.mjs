@@ -1,5 +1,5 @@
 // Offline evaluation only: never adds work to a live simulation tick.
-export const AI_FITNESS=Object.freeze({version:2,winPoints:1,fastWinBonusPoints:.5,enemyWallPoints:1,trapAssistPoints:1,earlyEliminationBonusPoints:1,confinementPoints:0,approachPoints:.15});
+export const AI_FITNESS=Object.freeze({version:3,winPoints:1,fastWinBonusPoints:.5,enemyWallPoints:2,trapAssistPoints:2,earlyEliminationBonusPoints:2,confinementPoints:0,approachPoints:.15});
 // Observe confirmed deaths offline; no timestamps or scoring work added to live AI.
 export class OffenseEvents{
  constructor(){this.seen=new Set();this.events=[];}

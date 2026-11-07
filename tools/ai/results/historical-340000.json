@@ -1,0 +1,19 @@
+{
+  "policy": {
+    "version": 1,
+    "id": "approach-340000-0-0",
+    "space": 0.7,
+    "clearance": 0.5710767524503172,
+    "cutoff": 1.6172238771803673,
+    "pressure": 0.3472025061398745,
+    "allyPenalty": 1.027476475341245,
+    "reserveCost": 0.08986003088857979,
+    "reserveFloor": 0.18521312844008211,
+    "straightBonus": 0.09796467728912829,
+    "switchCost": 0.06432283084141091,
+    "leadSeconds": 0.15562226661108436,
+    "variation": 0.010922345181461424
+  },
+  "source": "shared/simulation/cycle-ai/policies/aggression-v2.js",
+  "note": "Frozen former default used only as an offline training opponent."
+}

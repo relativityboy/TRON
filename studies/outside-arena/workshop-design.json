@@ -1,0 +1,30 @@
+{
+  "name": "Outside arena scene",
+  "parts": [
+    {
+      "id": "wall",
+      "name": "Arena walls and doorway",
+      "parameters": {
+        "heightMeters": 150,
+        "depthMeters": 16,
+        "bayPitchMeters": 40,
+        "pierOffsetMeters": 0,
+        "pierWidthMeters": 22,
+        "pierProjectionMeters": 20,
+        "pierBaseProjectionMeters": 20,
+        "pierTopProjectionMeters": 17,
+        "portalWidthMeters": 9,
+        "portalHeightMeters": 15,
+        "portalChamferMeters": 1.6,
+        "tunnelDepthMeters": 22,
+        "surfaceColor": "#314963"
+      }
+    }
+  ],
+  "lighting": {
+    "angleDegrees": -47,
+    "heightMeters": 230,
+    "intensity": 2.6,
+    "ambientIntensity": 0.22
+  }
+}

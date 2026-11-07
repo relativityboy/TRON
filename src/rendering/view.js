@@ -1,3 +1,4 @@
+import {CluCannonBolts} from './clu-cannon-bolts.js';
 import {CluHaze,CLU_HAZE} from './clu-haze.js';
 import {recognizerPose} from './recognizer-pose.js';
 import {yieldToBrowser} from '../loading/yield-to-browser.js';
@@ -220,6 +221,7 @@ export class View {
     this.shots.frustumCulled = false;
     this.shots.count = 0;
     this.scene.add(this.shots);
+    this.cluCannonBolts=new CluCannonBolts(this.scene);
     this.debris = new THREE.InstancedMesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({ color: new THREE.Color(0xf67556).multiplyScalar(1.6) }),
@@ -457,8 +459,9 @@ export class View {
       craft.flash.visible = !e.teleport && e.recoil > 0.75;
       craft.rez.update(null, vehicleTeleportPad(e, run.teleportPads));
     });
-    this.shots.count = Math.min(80, run.projectiles.length);
-    run.projectiles.slice(0, 80).forEach((p, i) => {
+    const enemyShots=run.projectiles.filter(p=>p.faction==='enemy');
+    this.shots.count = Math.min(80, enemyShots.length);
+    enemyShots.slice(0, 80).forEach((p, i) => {
       this.matrixObject.position.set(p.x, p.y, -p.s);
       this.matrixObject.rotation.set(0, 0, 0);
       this.matrixObject.scale.set(1, 1, 3);
@@ -528,6 +531,7 @@ export class View {
       fragments,
       cycleRace,
     });
+    this.cluCannonBolts.update(run.projectiles,this.camera);
     for(const [id,bike] of (this.arena?.userData.cycleRace.bikes??[]).entries()){
       const mix=run.playerVehicle==='cycle'&&!run.cycleSpectating&&id===cycleRace?.playerId?1-this.cameraRig.cycleVisibility:0;
       bike.userData.cockpitMix=mix;

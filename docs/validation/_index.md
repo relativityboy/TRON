@@ -106,6 +106,49 @@ On macOS arm64 / Node 22.23.4, `npm test` passes 656 checks. `tests/unit/optiona
 
 `TRON_TEST_ENGINE=webkit node tests/browser/storage-unavailable.mjs` cannot launch because Playwright WebKit 2370 is not installed. Actual Safari in macOS Lockdown Mode is untested; IndexedDB fallback alone does not establish compatibility with its other restrictions. WebKit documents disabled IndexedDB in [Safari 17 Lockdown Mode](https://webkit.org/blog/14445/webkit-features-in-safari-17-0/). Existing unsafe getter checks could reject background cleanup/speech operations, but the exact cause of the reported loading stall has not been reproduced. No deployment.
 
+## Rejected synthesis removed from gameplay — October 29
+
+`node tests/browser/recognizer-synth.mjs` now guards the rejection: in Chrome, Recognizer voices remain silent before recordings load; every flight/approach buffer matches its decoded recording; sample reload does not duplicate voices; no grid ambience exists; disposal clears sources. The sound-study synth controls are removed, recorded flyby works, and no request imports `recognizer-synth.js`. No sample/page errors. `node tests/recognizer-audio.mjs` passes existing positional hit/explosion and cleanup checks. `npm run build` passes PWA/asset audit. Experimental synthesis functions and numerical tests remain offline only. No full unit rerun or deployment.
+
+## New light cycle engine — October 29
+
+`python3 tools/assets/prepare-cycle-drone.py` extracts a steadier 34.425–34.775-second grain inside the user's requested 34–35-second range, overlaps 50 ms, levels circular stereo RMS and repeats the 300 ms loop three times. Output is stereo PCM16/44.1 kHz, 0.9 seconds, peak about 0.450. This preserves recorded waveform rather than generating a new timbre; secondary mixed sounds are not isolated or individually pitch-corrected. No audible-fidelity approval is claimed.
+
+`node tests/browser/cycle-audio.mjs` passes in headless Chrome on macOS: all core samples load, the player uses the new cabin buffer, 100 ms RMS variation is 0.893 dB, constant player speed keeps rate 1 despite moving listener, and brake/normal/turbo/grid-speed examples yield 0.85/1/1.28/1.186667. Engine pause/resume/reset and one-time event playback pass, no sample/page errors. The old exact-eight-samples assertion was corrected to allow existing team/entry announcements while checking all eight core effects individually. `npm run build` passes including catalog hashes/aliases, PWA and source-exclusion audit. No simulation changes or full unit-suite rerun; no deployment.
+
+## FFT-based sound reconstruction — October 28
+
+`node tools/audio/analyze-recognizer.mjs /Users/steve/Downloads/Recognizer_sfx.mp4 tools/audio/results/recognizer-reference-fft.json` and `node tools/audio/compare-recognizer.mjs /Users/steve/Downloads/Recognizer_sfx.mp4 tools/audio/results/recognizer-synth-fft-comparison.json` complete on macOS arm64 / Node 22.23.4. Reports retain source hash, method, band energies, section/quiet peaks and envelope spectra. The first three flight bands now measure 49.2%/42.6%/7.8%, against 49.0%/41.2%/7.6% reference. Summed absolute band-fraction error decreases from 0.618 to 0.025. This broad spectral metric is not a perceptual score; modulation comparison has different time resolution (74.44-second source vs 12-second synth). Quiet-frame measurements are not source separation.
+
+`npm test`: 654 pass, including exact-bin FFT/energy verification and measured-band regression. `node tests/browser/recognizer-synth.mjs`: Chrome passes bounded stereo output (maximum peak 0.227), auditions, stable 23-source updates, zero-source disposal and full silent-start audio initialization. `npm run build` passes, including offline-cache generation and binary asset audit. Existing spatial routing is retained; no human listening approval, Safari validation or deployment is claimed.
+
+## Tonal audio revision — October 28
+
+After user listening feedback, remove random noise/high hiss from ambience and reduce/twice-filter aircraft noise. Focused `node --test tests/unit/recognizer-synth.test.js`: two pass. `node tests/browser/recognizer-synth.mjs`: Chrome passes rendered output, audition controls, shared sources and full startup/disposal, with no page errors; revised peaks remain below 0.228. No full-suite/build rerun for this synthesis-parameter revision. Listening approval remains pending.
+
+## Procedural Recognizer / ambience — October 28
+
+On macOS arm64 / Node 22.23.4, `npm test` passes all 652 tests. New signal tests verify deterministic stereo, nonzero bounded energy, continuous loop endpoints and context-local buffer reuse. `node tests/browser/recognizer-synth.mjs` passes in headless Chrome: all three layers render without clipping (peak at most 0.416), repeated voice updates retain 23 sources, disposal leaves zero, and full `Sound` startup has a silent master with ambience installed and clears all sources on disposal. Separate audition buttons work without page errors. Existing `node tests/recognizer-audio.mjs` passes hit/explosion spatial playback and cleanup. Browser launch requires permission outside the sandbox.
+
+`npm run build` passes including asset audit/PWA generation. Recognizer flight/approach are no longer fetched during game startup; the production-path asset assertion now checks the retained explosion sample. This production-path browser test itself was not rerun. Spectrogram inspection of the supplied 74.44-second clip guided the approximation; no human listening/film-match approval is claimed. Source MP4 remains in Downloads, unmodified and excluded from the build. New ambience inherits master pause/mute routing; no deployment.
+
+## Kill-weighted evolution — October 26
+
+`npm test`: all 650 pass with fitness v3 and corrected self-wall trap attribution. Post-run `node --test tests/unit/cycle-ai-fitness.test.js tests/unit/cycle-traps.test.js tests/unit/cycle-ai-plateau.test.js`: twenty pass. Coverage verifies both kill kinds receive equal doubled reward, shared/duplicate victims stay capped, unfinished boxes earn nothing, and actual swept self-wall deaths produce weighted trap credit. Reward/runner syntax checks pass.
+
+The fresh three-generation plateau run completes 464 matches without selecting a new policy. All three training leaders fail held validation, so the retained policy is evaluated once on 48 final matches rather than redundantly mirrored. Serial AI p99 0.352 ms/tick p99 0.638 ms pass; maximum tick 11.500 ms is over budget. Full configuration, provenance, weights and records are in `tools/ai/results/kill-weighted-1000000.json`. No new candidate browser validation or deployment; current default and optional local trial are unchanged. Historical scores use different reward/attribution versions and are not directly comparable.
+
+## Immediate self-wall trap attribution — October 26
+
+`node --test tests/unit/cycle-traps.test.js tests/unit/cycle-ai-fitness.test.js`: 15 pass, including the formerly failing box-closure-between-scans regression. Integration covers actual swept self-wall collision, enclosing-owner credit and full/delta snapshots; negative checks cover direct-hit nonduplication and opened/friendly enclosures. `npm test`: all 649 pass.
+
+`node tests/browser/cycle-trap-credit.mjs` passes in headless Chrome on macOS at 900×400. An actual collision, multiplayer delta and `CycleRoster` update produce one hollow victim-colored dot on the enclosing opponent and none on the dead victim, with no page errors. Inspected `test-results/cycle-trap-credit.png`. Production build/asset audit and Worker dry run also pass. This is a deterministic reconstruction, not a reproduction of the user's unrecorded match. No human play, Safari or deployment claim. Coarse-grid/history and shared-budget limitations remain.
+
+## Plateau-run validation — October 25
+
+`node --test tests/unit/cycle-ai.test.js tests/unit/cycle-ai-fitness.test.js tests/unit/cycle-ai-approach.test.js tests/unit/cycle-ai-plateau.test.js`: 40 pass. Gate tests cover relative/absolute gain, breadth, offense regression and unchanged policies. One-second smoke runs verify CLI/opponent handling and stopping after stale counts 1/2/3 with one unique final evaluation; they are pipeline checks, not gameplay-quality evidence. Runner syntax and diff checks pass.
+
+The full offline run exits normally after four generations / 608 matches and three consecutive unsuccessful generations. A selection-stage gain does not generalize: final candidate fitness 1.42948 vs deployed 1.54465, with 16 vs 12 wins but 18 vs 27 direct kills. Only 6/12 seed groups improve, and offense declines. No trial/default/production policy is replaced. Final serial AI p99 0.224 ms, tick p99 0.326 ms, tick max 8.564 ms; the p99 runtime gate passes but not every tick fits the 8.333 ms budget. Summary with gates, exact weights and paired results: `tools/ai/results/plateau-800000.json`. No browser check is claimed for the rejected candidate; simulation/controller code did not change.
 
 ## Evolved AI default release — October 25
 
@@ -1326,3 +1369,7 @@ Revised audio checks decode seven stereo clips, verify the 0.9-second exterior a
 `npm test`: 339/339 passed after the outside-world cadence, wall-query optimizations and radio-range reduction. Updated radio fixtures explicitly check half of the active world's maze width and place transmitters within the reduced radius. A cadence regression checks tank/road/spectator 60 Hz versus arena 120 Hz.
 
 `node tests/cycle-performance.mjs`: Chrome, local macOS, 1280×800, seed 1982, engine sound/renderer and the existing tire traces enabled. Five-second live-bike CPU totals decreased from 1,572 to 177.5 ms; post-death totals from 639 to 216 ms. Samples include a moving live bike and the same session after death, with JEV requests intercepted for repeatability. Both before and after were approximately 60 fps on this machine. These are combined-change CPU measurements, not proof that the user's browser slowdown is eliminated. Final capture ran after the unit tests completed; artifacts are in `test-results/cycle-performance.json` and `test-results/cycle-{alive,dead}.cpuprofile`.
+
+## Controller input — November 7
+
+macOS arm64, Node 22.23.4: `node --test tests/unit/gamepad-input.test.js` passes four checks; `npm test` passes all 708 unit checks. `npm run build` passes. Standard gamepad CLU/solo/MP input shares simulation commands, with independent keyboard/touch held channels and neutral rearming after focus loss/disconnect. `node tests/browser/gamepad.mjs` is available for browser integration; Chrome aborts before launch normally and with elevation. Browser behavior, actual controller mapping/feel and controller-only audio unlock remain unverified. No deployment.

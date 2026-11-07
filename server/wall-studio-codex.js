@@ -3,9 +3,9 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {REVISION_SCHEMA} from '../studies/maze-wall/design-schema.js';
 import {join} from 'node:path';
 export function codexRunner({command=process.env.TRON_STUDIO_CODEX||'codex'}={}){
- return async({prompt,imagePaths,jobDir,signal,onProgress})=>{
+ return async({prompt,imagePaths,jobDir,signal,onProgress,schema=REVISION_SCHEMA})=>{
   const schemaPath=join(jobDir,'schema.json'),outputPath=join(jobDir,'answer.json');
-  await writeFile(schemaPath,JSON.stringify(REVISION_SCHEMA));
+  await writeFile(schemaPath,JSON.stringify(schema));
   const args=['exec','--ephemeral','--sandbox','read-only','--skip-git-repo-check','--disable','shell_tool','--disable','unified_exec','--disable','multi_agent','--disable','apps','--config','web_search="disabled"','--cd',jobDir,'--json','--output-schema',schemaPath,'--output-last-message',outputPath];
   for(const path of imagePaths)args.push('--image',path);
   args.push('-');

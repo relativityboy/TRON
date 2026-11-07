@@ -1,3 +1,4 @@
+import { GamepadController } from './gamepad-controller.js';
 import {guardGameKey} from './game-keyboard.js';
 import {yieldStartup} from '../loading/yield-startup.js';
 import {markPlay} from '../analytics/mark-play.js';
@@ -64,6 +65,8 @@ export async function createGameApp() {
   const cycleGame=()=>selectedGame==='cycles'||selectedGame==='multiplayer';
   const $ = (id) => document.getElementById(id);
   const inputController = new InputController();
+  const gamepadController = new GamepadController();
+  let gamepadRoadBrakeHeld=false,gamepadTankTurboHeld=false;
   const loop = new GameLoop({ frame, backgroundAllowed: () => autoplay.enabled });
   const sound = new Sound(map);
   const jev = new JevClient();
@@ -317,6 +320,7 @@ export async function createGameApp() {
   function pause() {
     if (mode === 'running' || mode === 'entering') {
       pausedFrom = mode;
+      if(run.playerVehicle!=='cycle')stopTankTurbo(run);
       setMode('paused');
     }
   }
@@ -391,7 +395,7 @@ export async function createGameApp() {
       ['AFTER DEATH','LEFT/RIGHT / FOLLOW CYCLES','ENTER / RESTART'],
       ['RENDERING','SHIFT-R / NORMAL OR POV-RAY CYCLES'],
     ]:[
-      ['DRIVING','WASD OR ARROWS / DRIVE','SHIFT-W OR SHIFT-UP / CRUISE','W/S OR UP/DOWN / CANCEL CRUISE','T / TURBO'],
+      ['DRIVING','WASD OR ARROWS / DRIVE','SHIFT / HOLD TURBO'],
       ['WEAPONS','J/L / TURRET','F OR J+L / CENTER + LEVEL','SPACE / FIRE','I/K / GUNNER AIM'],
       ['CAMERA','P / GUNNER VIEW','O / GUNNER ZOOM','V / AERIAL','I/K / AERIAL ZOOM'],
     ];
@@ -400,6 +404,7 @@ export async function createGameApp() {
       ['HUMAN PLAYERS','BLACK + WHITE DIAGONAL SLASH / HUMAN PLAYER','MARKED ON BOTH THE CYCLE AND ITS ROSTER CIRCLE'],
     );
     if(cycle&&mobileTerminal)groups.unshift(['TOUCH CONTROLS','TAP LEFT / RIGHT EDGE / TURN OR FOLLOW','HOLD TOP EDGE / TURBO','HOLD BOTTOM EDGE / BRAKE','MENU / EXIT CONFIRMATION','NEW MATCH / RESTART WHEN AVAILABLE']);
+    groups.push(['CONTROLLER (STANDARD MAPPING)','LEFT STICK / D-PAD / DRIVE OR TURN',...(cycle?['RT / TURBO','LT / BRAKE']:['RIGHT STICK / TURRET + GUNNER AIM','A / CROSS OR RT / FIRE','LB / HOLD TURBO','X / SQUARE / CENTER TURRET','RB / GUNNER ZOOM']),'Y / TRIANGLE / FIRST PERSON','LEFT STICK CLICK / AERIAL','START / ENTER OR RESTART','B / CIRCLE / HOME','BACK / SHARE / HELP']);
     groups.push(['GAME',mobileTerminal?'MENU / HOME':'ESC / HOME']);
     $('controls-help-text').textContent=groups.map(group=>group.join('\n')).join('\n\n');
     pause();inputController.clear();releaseMouse();
@@ -419,7 +424,7 @@ export async function createGameApp() {
   listen(window,'keyup',event=>dismissedHelpKeys.delete(event.code));
   listen($('game'),'contextmenu',event=>{if(['running','entering'].includes(mode))event.preventDefault();});
   listen(window, 'keydown', (event) => {
-    if(guardGameKey(event,['running','entering'].includes(mode))){inputController.clearKeys();return;}
+    if(guardGameKey(event,['running','entering'].includes(mode))){inputController.clearKeys();if(run.playerVehicle!=='cycle')stopTankTurbo(run);return;}
     if(homeTransition.active){event.preventDefault();return;}
     idleTime = 0;
     if(dismissedHelpKeys.has(event.code)){event.preventDefault();return;}
@@ -541,7 +546,7 @@ export async function createGameApp() {
       if(multiplayer)return;
       if (!event.repeat) {
         resume();
-        if (['KeyW','ArrowUp'].includes(event.code)) run.cruiseThrottle = event.shiftKey;
+        if (['KeyW','ArrowUp'].includes(event.code)) run.cruiseThrottle = false;
         if (
           ['running', 'entering'].includes(mode) &&
           [
@@ -586,7 +591,8 @@ export async function createGameApp() {
     )
       clearMouseAim();
     if (['KeyW','ArrowUp'].includes(key) && !event.repeat && ['running', 'entering'].includes(mode)) {
-      run.cruiseThrottle = event.shiftKey ? true : false;
+      run.cruiseThrottle = false;
+      if(event.shiftKey&&run.playerVehicle!=='cycle')boostTank(run);
     }
     if (!event.repeat && ['running', 'entering'].includes(mode) && key === 'KeyP') {
       view.cameraRig.beamCamera.cancel();
@@ -651,13 +657,15 @@ export async function createGameApp() {
       ['running', 'entering'].includes(mode) ? pause() : resume();
       return;
     }
+    if(['ShiftLeft','ShiftRight'].includes(key)&&run.playerVehicle!=='cycle'&&['running','entering'].includes(mode)){
+      event.preventDefault();keys.add(key);boostTank(run);return;
+    }
     if (key === 'KeyT') {
       if (event.shiftKey && developmentTuningEnabled) {
         event.preventDefault();
         if(!event.repeat)$('tuning').hidden = !$('tuning').hidden;
         return;
       }
-      if (['running', 'entering'].includes(mode)) boostTank(run);
       return;
     }
     if (['running', 'entering'].includes(mode)) {
@@ -740,6 +748,7 @@ export async function createGameApp() {
   listen(window, 'keyup', (e) => {
     idleTime = 0;
     inputController.release(e.code);
+    if(run.playerVehicle!=='cycle'&&['ShiftLeft','ShiftRight'].includes(e.code)&&!keys.has('ShiftLeft')&&!keys.has('ShiftRight'))stopTankTurbo(run);
     if(run.playerVehicle!=='cycle'&&['KeyW','ArrowUp'].includes(e.code)&&!keys.has('KeyW')&&!keys.has('ArrowUp'))stopTankTurbo(run);
   });
   listen($('game'), 'pointerdown', (e) => {
@@ -838,6 +847,7 @@ export async function createGameApp() {
   });
   listen(window, 'blur', () => {
     windowFocused = false;
+    if(run.playerVehicle!=='cycle')stopTankTurbo(run);
     inputController.clearKeys();
     inputController.mouseFire = false;
     inputController.fireQueued = false;
@@ -849,6 +859,7 @@ export async function createGameApp() {
   });
   listen(document, 'visibilitychange', () => {
     if (document.hidden) {
+      if(run.playerVehicle!=='cycle')stopTankTurbo(run);
       inputController.clearKeys();
       inputController.mouseFire = false;
       inputController.fireQueued = false;
@@ -988,6 +999,30 @@ export async function createGameApp() {
 
   function frame(dt, background) {
     if (disposed||mcpPanel.active) return;
+    const controllerPlaying=mode==='running'&&!controlsHelpOpen&&!exitConfirm.open&&!cycleTuning?.open&&!view.cameraRig.freeCamera.active;
+    const controller=gamepadController.poll(navigator.getGamepads?.()??[],{active:windowFocused&&!document.hidden,cycle:run.playerVehicle==='cycle',playing:controllerPlaying});
+    inputController.gamepadKeys=controllerPlaying?controller.held:new Set();
+    inputController.gamepadAxes=controllerPlaying?controller.axes:{};
+    if(controller.active)idleTime=0;
+    for(const code of controller.pressed){
+      if(controllerPlaying&&code.startsWith('Arrow')&&!run.cycleSpectating){
+        if(run.arenaWaiting||view.cameraRig.cycleOpening!==null)continue;
+        if(run.playerVehicle==='cycle'&&['ArrowLeft','ArrowRight'].includes(code))inputController.queueCycleTurn(code==='ArrowLeft'?-1:1,run.cycleRace?.pendingTurns.length??0);
+        if(code==='ArrowUp')run.cruiseThrottle=false;
+      }else {window.dispatchEvent(new KeyboardEvent('keydown',{code,bubbles:true}));window.dispatchEvent(new KeyboardEvent('keyup',{code,bubbles:true}));}
+    }
+    if(controllerPlaying&&run.playerVehicle==='cycle'){
+      const player=run.cycleRace?.cycles[run.cycleRace.playerId];
+      if(player?.escaped&&controller.held.has('KeyS')&&!gamepadRoadBrakeHeld&&Math.abs(player.roadSpeed)<.01)inputController.cycleReverseQueued=true;
+    }
+    gamepadRoadBrakeHeld=controller.held.has('KeyS');
+    if(controllerPlaying&&run.playerVehicle!=='cycle'){
+      if(controller.axes.throttle)run.cruiseThrottle=false;
+      if(controller.held.has('ShiftLeft'))boostTank(run);
+      else if(gamepadTankTurboHeld&&!keys.has('ShiftLeft')&&!keys.has('ShiftRight'))stopTankTurbo(run);
+      if(controller.axes.turret||controller.axes.aimPitch)clearMouseAim();
+    }
+    gamepadTankTurboHeld=controllerPlaying&&run.playerVehicle!=='cycle'&&controller.held.has('ShiftLeft');
     cycleRendererControl.update();
     // Optional scenery: all game modes can load it after active play begins.
     // Use local play time, not MP server age, so joining cannot stall the opening.
@@ -997,7 +1032,7 @@ export async function createGameApp() {
     }
     if (run.crushed && run.mouseAim) clearMouseAim();
     if (!autoplay.enabled && !multiplayer && (document.hidden || !windowFocused)) pause();
-    if (mode === 'running') idleTime = keys.size || inputController.mouseFire ? 0 : idleTime + dt;
+    if (mode === 'running') idleTime = keys.size || controller.active || inputController.mouseFire ? 0 : idleTime + dt;
     if (mode === 'entering') {
       if(openingTransition){
         openingTime+=dt;
@@ -1014,7 +1049,7 @@ export async function createGameApp() {
       rig[field]=Math.max(limits.minScale,Math.min(limits.maxScale,rig[field]*Math.exp(direction*dt*limits.keyboardExponentPerSecond)));
     }
     view.cameraRig.cycleGlanceInput = mode === 'running' && !view.cameraRig.freeCamera.active
-      ? Number(keys.has('KeyL')) - Number(keys.has('KeyJ')) : 0;
+      ? (Number(keys.has('KeyL')) - Number(keys.has('KeyJ'))) || controller.axes.turret || 0 : 0;
     if(mode==='running'&&view.cameraRig.cycleOpening!==null&&(!sound.context||sound.cycleSamplesReady)){
       view.cameraRig.cycleOpening+=dt/CYCLE_OPENING.durationSeconds;
       if(view.cameraRig.cycleOpening>=1+CYCLE_OPENING.formationSeconds/CYCLE_OPENING.durationSeconds){
@@ -1081,8 +1116,8 @@ export async function createGameApp() {
         if(multiplayer&&formation?.ready&&run.cycleRace.cameraStaging&&!cycleRendererControl.busy&&!homeTransition.active&&!document.hidden&&(!sound.context||sound.cycleSamplesReady))multiplayer.cameraReady(formation.round,formation.seat);
         if((mode==='running'||mode==='entering'&&openingTransition)&&!run.arenaWaiting&&!document.body.classList.contains('cycle-loading'))homeTransition.sceneReady();
       }
-      carrierDiagnostics?.sample();
       sound.cycleOpeningSeconds=view.cameraRig.cycleOpening===null?null:view.cameraRig.cycleOpening*CYCLE_OPENING.durationSeconds;
+      carrierDiagnostics?.sample();
       if(multiplayer)sound.cycleOpeningAudio?.updateMaterialization(run.cycleRace,mode==='running');
       else sound.cycleOpeningAudio?.update(sound.cycleOpeningSeconds,mode==='running');
       sound.update(run, view.camera, mode === 'running'||mode==='entering'&&openingTransition);

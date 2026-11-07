@@ -11,6 +11,13 @@ See also: /llms.txt (curated index) and /sitemap.xml.
 <!-- Page: (root) -->
 Source: /
 
+## Controller support for CLU and Light Cycles — November 7
+
+- [x] Poll browser-standard gamepads once per frame for CLU, solo cycles and multiplayer. Left stick/D-pad drive or turn; right stick aims CLU or glances in cycles. CLU: A/Cross or RT fire, LB holds turbo, X/Square centers/levels, RB zooms. Cycles: RT turbo, LT brake (new press reverses stopped road cycles). Y/Triangle changes first-person view, left-stick click toggles aerial view, Start maps to Enter/restart, B/Circle opens Home and Back/Share opens controls help. Menu directions use discrete presses. Preserve separate physical-keyboard, touch and controller held channels.
+- [x] Named axis dead zone and trigger/turn thresholds; proportional CLU stick input. One turn per stick deflection/D-pad press; existing two-turn queue bounds remain. Disconnect/hidden/unfocused play releases controller channels; reconnect/resume after focus loss requires neutral sticks/buttons. Only browser `standard` mappings are accepted; custom mappings and haptics are not implemented.
+- [x] macOS arm64 / Node 22.23.4: four new controller regressions pass; complete unit suite passes 708/708; production build/PWA/asset audit passes. Tests cover dead zones, proportional commands, fire, pedal precedence, discrete turn/action edges, disconnect/focus neutral rearming and keyboard independence.
+- [ ] Browser integration and physical-controller play review remain pending. `node tests/browser/gamepad.mjs` injects a standard pad through both games, controls help/resume and disconnect. Chrome aborts before launch both normally and after an elevated retry; no browser or hardware-controller pass is claimed. Use Y (keyboard) or Back/Share (controller) for the complete mapping. Browser audio unlock may still require an initial keyboard/pointer gesture.
+
 ## Lower crown eye rectangle — November 6
 
 - [x] Restrict the solid yellow eye to the lower of the two stacked crown rectangles, restoring the upper rectangle to its body color. The normalized model mask now selects four triangles at Y 7.35–7.61 m, instead of eight triangles spanning both rectangles. Keep independent eye-color control, trim, geometry and folding unchanged.
@@ -38,13 +45,11 @@ Source: /
 - [x] At the user's request, run a loopback diagnostics receiver (`node tools/validation/carrier-diagnostics-server.mjs`, port 5191). Development-only `/?carrierDebug=1` reports carrier visibility/bounds/reveal, scenery time, camera, shader failures and scaled game-canvas captures every 1.5 seconds. Bound host/origin/body size, abort on disposal and exclude from production. Explicitly report non-finite carrier position rather than treating a NaN bounding box as inside the frustum.
 - [x] User confirms the carrier is visible again after the timestamp fix. Pre-fix report and capture are saved under `test-results/carrier-clock/before.*`. Browser launch remains unavailable; distinguish user visual confirmation from an automated GPU test.
 
-
 ## Stable self-shade on maze walls — November 5
 
 - [x] Address the user's intermittent flicker on walls facing away from the light by applying constant self-shade in the wall's base draw instead of depth-competing overlay polygons. Retain the same 60% darkness, molding facade inheritance, lit roofs and cast-shadow geometry on lit faces. Preserve the shade attribute through damage/reset; aircraft apply only stronger occlusion so overlapping shade does not multiply darkness.
 - [x] Fifteen focused wall tests and all 696 unit tests pass; production build and asset audit pass. Current default maze removes 26,812 self-shade overlay triangles (93,461 → 66,649 total), with zero remaining overlay vertices on faces shaded in the base draw. Extend the GPU regression to compare overlay visibility, camera jitter at 0/7,000/12,000 m and weaker/stronger aircraft overlap.
 - [ ] Confirm in-game flicker is resolved. Chrome still aborts before launch, including an escalated retry; no new GPU pass or rendered inspection is claimed.
-
 
 ## Horizontal ledges inherit wall shade — November 5
 
@@ -56,6 +61,73 @@ Source: /
 - [x] Correct the missing darkening on closed slab faces turned away from the directional light. Include those faces in the existing exact static wall-shadow/stencil union, using the same 60% darkness as cast wall shadows. Keep sun-facing sides and roofs unchanged, and preserve union semantics so multiple occluders do not darken a face twice. Rebuild self-shadowed receiver polygons after wall damage.
 - [x] Seven focused geometry/damage tests pass. Chrome GPU test measures away-facing wall brightness 255 → 102, with toward-light sides and roofs unchanged at 255; wall pattern/impact/reset browser checks pass without page errors. Inspect updated maze overview capture.
 
+## Pillar offset around the fixed doorway — November 5
+
+- [x] Add `pierOffsetMeters` to the scene workshop's schema, validator, model and prompt instructions. Shift the repeat pattern independently of the fixed doorway; a half-bay shift places the doorway through the flat backplane. Fit tunnel jambs to that plane, preserve zero-offset/older revisions, and reject shifts that overlap the opening.
+- [x] Eleven focused geometry/backend tests pass, including an unobstructed doorway and unchanged floor. Reload the live editor backend and apply the user's actual instruction through Codex: revision 6 uses a 20 m offset, 0 m base and unchanged 17 m top, preserving other settings. Frontal render inspected; all earlier revisions remain restorable.
+
+## Finer pillar shadows in scene review — November 5
+
+- [x] Replace the broad 2048² fixed shadow rectangle with a 4096² map fitted to the wall bounds in light space (hardware-size capped), finer PCF filtering and adjusted bias. Refit after model or light changes, cache while orbiting the view, and share the setup between the prompt workshop and standalone scene review. No model, lighting-direction or approved-floor edits.
+- [x] Chrome workshop regression passes. Verify live revision 4 retains the flush base and uses a 4096² depth map at approximately .12 m/texel versus the previous .41 m/texel; inspect its updated frontal capture. Prompt history and exports remain intact.
+
+## Independent wall base/top projection — November 5
+
+- [x] Fix the scene editor limitation shown in the user's screenshot: expose independent `pierBaseProjectionMeters` and `pierTopProjectionMeters`, allowing a flush base with the top unchanged. Interpolate the wall face and doorway along the resulting slope; fit tunnel jambs to that face. Preserve legacy revision loading, existing top/foot defaults and the approved floor.
+- [x] Ten focused model/backend tests pass, including a 0 m base / 17 m top, valid older models and fixed floor geometry. Restart the live workshop to load its new schema, then apply the user's actual request through the signed-in Codex runner: live revision 4 has base 0 m, top 17 m, all other settings preserved. Frontal capture inspected; prior revisions remain restorable.
+
+## Prompt-based arena scene workshop — November 5
+
+- [x] Add `/scene-workshop.html` for the current outside-arena scene, reusing reference drop/upload, prompt submission, captured view, progress, cancel, persistent versions, restore and GLB export. Seed all three film references and the current wall/light parameters; preserve the approved floor builder. Scene API/history are separate at `/api/scene-studio` and `.local/outside-arena-studio/`. No gameplay edits or maze-workspace replacement.
+- [x] Parameterize the existing local modeling backend with a schema/validator/builder/prompt adapter. Scene edits cover wall proportions, bay spacing/depth, doorway, shared material and lighting; requests beyond these controls must be reported honestly. Validate bounds and doorway relationships, cap geometry at 6,000 triangles, and keep the floor outside editable JSON.
+- [x] Chrome checks a controlled scene revision, unchanged floor/camera, schema/reference capture, separate maze history, reload/restore, wireframe/brightness and GLB download. Original workshop browser suite passes; nine focused schema/backend tests and 688-test full suite pass, production build/asset audit passes. Restart the live 5190 server and verify current scene revision 0 with three references. No real Codex revision was submitted during these checks.
+
+## Shift turbo for Clu — November 5
+
+- [x] Move manual Clu turbo from T to either Shift key. Hold to boost; release both Shift keys, stop driving, pause or lose focus to stop and return unused reserve. Forward pressed while Shift is already held also starts boost. Remove the conflicting Shift+forward cruise latch; update the HUD and controls help. Cycle turbo/brake controls and opt-in Shift+T developer tuning remain unchanged.
+- [x] Chrome verifies T no longer boosts, Shift activates turbo, release stops it, and Shift+Up does not latch cruise, alongside existing cycle/Clu navigation and tuning regression checks.
+
+## Sharper maze-wall shadows on Clu — November 5
+
+- [x] Give Clu a dedicated 1024² wall-shadow tile covering a 48 m light-space span, using the existing solid wall casters and shadow darkness. Keep whole-maze maps for other receivers and existing exact floor/wall shadow geometry. Follow the interpolated tank position, cache until its quarter-meter center changes, skip when Clu is hidden, and dispose the local atlas/shader wrappers with the parent shadow system. Retain only sub-texel edge filtering.
+- [x] Chrome GPU regression measures a 3-pixel transition versus 93 pixels from a whole-maze tile at the same view/darkness, and verifies the tile follows movement. Existing tank shadow/layering and wall occlusion regressions pass; normal Clu renderer compiles without page errors.
+
+## Corrected yellow projector eye — November 5
+
+- [x] Follow the user's correction: the eye is the crown's spotlight-emitter cap, not the central chest trapezoid. Restore the chest to its body tint and mask the eight forward-facing crown-cap triangles instead. Default eye color is solid yellow (`0xffd92e`), retaining independent per-instance color control for future context modulation.
+- [x] Chrome confirms the corrected crown location and independent yellow/red overrides; frontal capture inspected. Folding, trim, base geometry and spotlight behavior remain unchanged.
+
+## Film-style Clu cannon shots — November 5
+
+- [x] Inspect the user's `bulltets.m4v` and `bullets2.m4v`. Replace Clu's orange stretched sphere with a pale rounded head and short camera-facing, one-sided serrated trail. Keep enemy projectile appearance and all simulation speed/aim/collision/damage behavior unchanged. Use named meter dimensions, bounded instancing and travel-limited tail growth; remove all instances when shots expire/reset, with GPU resources owned by the scene lifecycle.
+- [x] Unit regression verifies early tail growth, hostile filtering, capacity and clearing. Chrome captures exterior/close views and verifies Clu head/trail counts, unchanged enemy count and cleanup without page errors. Record source hashes/reference frames under `references/film/images/Projectiles/`. Film appearance remains subject to user review.
+
+## Wall study lighting correction — November 5
+
+- [x] Follow the user's material correction: all wall faces, recesses and doorway surfaces share one rough blue material. Replace painted per-face shades with directional lighting, low ambient fill and real wall shadows. Add a Light angle slider to inspect the geometry under changing illumination. Approved floor remains unchanged; browser verifies a single wall material and both exports.
+
+## Outside arena wall reference refinement — November 5
+
+- [x] Use the user's clearer frontal wall image to replace narrow pillar-like forms with broader blue faces, sloping return facets and deep black bays. Put the chamfered doorway through a solid central blue section, matching the reference, and adjust the film-view camera to show the low frontal perspective. Rebuild the separate 3,774-triangle scene GLB; preserve the approved floor/resource unchanged.
+- [x] Add the new film reference to the scene review page and provenance sidecar. Chrome verifies finite geometry, floor/resource equivalence and distinct floor/scene exports without page errors. Wall proportions remain for user review.
+
+## Recognizer eye color — November 5
+
+- [x] Match the supplied original-film eye reference by coloring the two front polygons of the imported central trapezoid muted blue (`0x304d70`). Identify its connected part by normalized bounds; preserve original model geometry, trim, rear/side colors, folding, block IDs, materialization and shadow meshes. Reference saved under `references/film/images/Recognizers/Recognizer eye color.png`.
+- [x] Keep eye color separate from body tint using a per-instance shader uniform, named default `recognizerEyeColor`, `setEyeColor(color)` API and optional entity `eyeColor` override in the render adapter. No automatic context-driven changes yet. Chrome verifies exactly two front triangles and independent blue/red eye colors while body tint changes separately; rendered frontal captures inspected.
+
+## Approved floor resource and wall scene study — November 5
+
+- [x] Preserve the user-approved floor, including thicker .65 m grid strips, as `assets/source/models/outside-arena/floor.glb` with a provenance/approval/configuration manifest. Extract the shared floor builder into `studies/outside-arena/floor.js`; keep the original floor-only review and export available.
+- [x] Add `/outside-arena-scene.html`, composing the same floor with a separate, provisional wall group: tall dark recessed bays, broad faceted piers, sloping sides and a chamfered doorway. Keep separate scene export and named wall dimensions; 3,760 triangles total. No gameplay integration.
+- [x] Chrome verifies the floor geometry remains identical, both distinct review pages and GLB downloads work, and there are no browser errors. Rendered frontal scene capture inspected; wall scale/proportions remain for user review.
+
+## Outside arena floor study — November 5
+
+- [x] User approved the initial floor appearance; widen red/orange grid strips from .16 m to .65 m for the requested thicker lines. Regenerate the standalone GLB.
+
+- [x] Inspect the user's `OutsideArena.m4v`; extract frontal/oblique frames. Follow the user's scope correction to model only the floor: blue-gray apron, square recessed panels with real sidewalls/bottoms, and orange grid lines. Keep all geometry separate from gameplay; 3,560 triangles, meter units and named proportions, with estimated scale/extent.
+- [x] Provide `/outside-arena-study.html` with orbit/pan/zoom, four view presets, wireframe, film reference images and GLB export. Save `studies/outside-arena/outside-arena-floor.glb`; record provenance/hash and rebuild script. Chrome verifies all views, finite vertices, floor/well depths, wireframe and GLB download without page errors. Human proportion/layout review remains pending.
 
 ## Dark canyon depth cueing — November 5
 
@@ -88,7 +160,7 @@ Source: /
 ## CycleInteriorSound1 engine loop — November 4
 
 - [x] Replace both cycle engine loops with the user's `/Users/steve/Desktop/CycleInteriorSound1.mp4`. Extract actual 1.043 s stereo audio rather than padding to the 2.395 s video duration. Build a 0.7223 s loop from a phase-matched inner selection, 80 ms raised-cosine overlap and circular stereo-linked RMS smoothing; preserve original waveform and speed/Doppler behavior.
-- [x] Record source SHA256, selected timecodes and reproducible conversion in `cycle-source.json` and catalog. Measured loop level spread 0.305 dB, seam step .00775 versus ordinary 99th-percentile step .03229, peak .431. Chrome verifies both stereo buffers, level consistency, speed pitch, pause/resume/reset and no sample errors. User approved the resulting engine sound on November 4.
+- [x] Record source SHA256, selected timecodes and reproducible conversion in `cycle-source.json` and catalog. Measured loop level spread 0.305 dB, seam step .00775 versus ordinary 99th-percentile step .03229, peak .431. Chrome verifies both stereo buffers, level consistency, speed pitch, pause/resume/reset and no sample errors. Listening approval remains with the user.
 
 ## Smooth Recognizer presentation — November 4
 
@@ -150,6 +222,64 @@ Source: /
 - [x] Treat IndexedDB as an optional optimization: safely handle missing/throwing API access, rejected opens, blocked opens and a 1.5-second open timeout. Close late connections after fallback. Music retains its original network URL and speech generates without persistent caching. Legacy cleanup also tolerates inaccessible IndexedDB and Cache Storage.
 - [x] Verify missing/denied storage startup in headless Chrome and unit coverage for failed/blocked/stalled opens; all 656 unit checks pass. See validation for limits. Actual Safari/macOS Lockdown Mode remains unverified; no deployment.
 
+## Reject synthesized gameplay audio — October 29
+
+- [x] Per explicit user feedback, remove both the experimental Recognizer synthesis and added ambient drone from gameplay. Restore recorded `recognizer-flight.wav` / `recognizer-approach.wav`, preserving spatialization, Doppler and wall muffling. Do not play a noise fallback while recordings load. Restore recorded sound-study flyby and remove rejected synth audition buttons. Keep synthesis/analysis files as offline experiments with no app imports. The new recorded light-cycle engine remains in use. Validation recorded separately; no deployment.
+
+## Light cycle engine from supplied SFX — October 29
+
+- [x] Replace both world and cabin engine loops using the user's `light cycle sfx.mp4`, requested 34–35 seconds. FFT inspection shows approximately steady primary bands near 258/316 Hz in the middle and more movement at the end. Use the stable 34.425–34.775 waveform grain, 50 ms overlap and 80 ms circular stereo-linked leveling; repeat the resulting 300 ms loop three times for a 0.9-second stereo WAV. Preserve actual sample waveform, not spectrum-based resynthesis. Secondary mixed-source sounds are not isolated, and listening approval remains pending.
+- [x] Keep the existing smooth speed-dependent pitch (braking, normal, turbo and grid acceleration), player Doppler exclusion and spatial Doppler on other bikes. Add a sound-study audition. Track source/timecodes/SHA-256 and processing in `cycle-source.json` and update binary catalog hashes; rebuild with `python3 tools/assets/prepare-cycle-drone.py`. Verification is recorded in validation. Local only, no deployment.
+
+## FFT-based Recognizer reconstruction — October 28
+
+- [x] Replace the prior hand-tuned timbre after user feedback. Add reproducible radix-2 FFT tooling (`tools/audio/analyze-recognizer.mjs`, `compare-recognizer.mjs`) using ffmpeg mono decoding at 12 kHz, Hann windows, 16,384-point transforms (0.732 Hz bins), 1,024-sample hops, six-second section spectra, quiet-frame spectra and band-envelope modulation. A separate 20 ms RMS envelope measures faster variation. Record source SHA-256 and measured reports in `tools/audio/results/`; no audio source copied or shipped.
+- [x] Reference energy is approximately 49.0% at 20–60 Hz, 41.2% at 60–120 Hz, 7.6% at 120–250 Hz. The previous synth was 76.3%, 11.0%, 10.8%. Replace its steady 43 Hz harmonic stack/7.5 Hz pulse with three overlapping frequency-modulated carriers, strong second partials, restrained upper partials and a shallower comb filter. Revised flight is 49.2%, 42.6%, 7.8% in those bands. Use cached wavetables to avoid evaluating every partial for every output sample. No random-noise layer; approach gently raises upper partials without changing the whole engine pitch by 25%.
+- [x] Rework ambience around quiet-frame peak ranges near 35/44/59/67/73/83/99 Hz, with small integrated frequency sweeps. Quiet frames are still mixed aircraft/environment, not isolated ambience. Update the local auditions; retain original sample players for comparison. Spectrum agreement and automated checks do not establish audible fidelity; user listening review remains pending. Local only, no deployment.
+
+## Quieter tonal audio revision — October 28
+
+- [x] Respond to listening feedback: the first Recognizer synthesis had excessive noise and the ambience sounded like static. Reduce flight noise gain from 0.5 to 0.025 (approach 0.75 to 0.04), with two low-pass stages at 180 Hz instead of one at 680 Hz. Keep the propulsion tones and flange. Replace the ambience's random-noise and high-hiss components entirely with slowly beating 40/80/120/160 Hz tones and subtle stereo phase drift; lower its output filter to 650 Hz. Same auditions and local game, refresh required. Listening approval remains pending; no deployment.
+
+## Procedural Recognizer and background sound — October 28
+
+- [x] Recreate flight/approach and diffuse background ambience using JavaScript synthesis functions, guided by spectral inspection of the user's 74.44-second `Recognizer_sfx.mp4`. No source recording copied or shipped. Shared, cached 12-second stereo buffers use harmonic oscillators, detune, pulsing, filtered deterministic noise and flange; runtime aircraft preserve existing Doppler, distance and occlusion. Ambience uses the gameplay master, including pause/mute, and all voices dispose with the audio system.
+- [x] Add separate flight, approach and ambience auditions to `audio.html`, and switch its spatial flyby to synthesis. Keep original sample players for comparison. Automated signal/lifecycle and build results are recorded in validation; listening fidelity remains for user review. Local only, no deployment.
+
+## Hide cursor over active game view — October 26
+
+- [x] Hide the system cursor on the game canvas while `body.playing` is active. The existing state transition removes that class on pause/menu entry, restoring the default canvas cursor; interactive overlays keep their normal cursors. CSS-only change, with no pointer capture or input changes. Diff check passes; no new browser test or deployment.
+
+## Kill-weighted evolution rerun — October 26
+
+- [x] At the user's request, raise offline fitness to version 3: direct enemy-wall and successful trap kills each earn two base points plus up to two early-elimination points (double the complete prior kill reward). Keep win 1, fast-win bonus up to 0.5, unfinished enclosure 0 and bounded approach up to 0.15. One victim remains one shared credit pool across wall owners/trappers; friendly/self/uncredited deaths still earn no offense reward. This changes offline selection, not live score or control rules.
+- [x] Verify equal direct/trap weighting, doubled credit, early timing and victim caps. Add end-to-end scoring assertions to the swept self-wall-trap regression. Full suite: 650 pass before the run; post-run focused fitness/trap/plateau suite: 20 pass. Both current and candidate policies are freshly evaluated with fitness v3 and the corrected death-time trap attribution. Historical v2 fitness totals are not directly comparable.
+- [x] Complete `node tools/ai/evolve-until-plateau.mjs --population=6 --trainSeeds=4 --validationSeeds=8 --finalSeeds=12 --seconds=180 --workers=2 --patience=3 --minGain=.02 --relativeGain=.05 --improvedFraction=.75 --seedOffset=1000000 --mutationSeed=10262026 --mutationScales=.1,.2,.3 --preserve-offense --evaluation-opponent=current --opponent=tools/ai/results/historical-340000.json --opponent=tools/ai/results/followup-370000.json --artifact=cycle-ai-kill-weighted-2026-10-26`. Node 22.23.4/macOS arm64. Three generations / 464 tournament matches: 32 initial validation, 288 training, 96 challenger validation and one unique 48-match final reference. Training seed groups 1020000–1020003, 1020100–1020103 and 1020200–1020203; validation 1040000–1040007; final 1100000–1100011.
+- [x] All three training leaders fail validation: fitness changes about -18.9%, -31.0%, -4.24%; positive seed groups 2/8, 1/8, 4/8, with lower confirmed offense each time. Stop after three unsuccessful generations. Retain `approach-480000-1-0`; no new candidate, local-trial replacement or deployment. Final reference: 12 wins, 22 direct eliminations, eight shared trap credits, mean v3 fitness 2.55039 across 48 matches. These are retained-policy reference results, not a new-policy improvement.
+- [x] Serial retained-policy runtime gate passes: AI p99 0.352 ms, tick p99 0.638 ms; maximum tick 11.500 ms exceeds the 8.333 ms budget. Full artifact/checkpoint/log/plan: `test-results/cycle-ai-kill-weighted-2026-10-26*`; durable summary/weights/configuration: `tools/ai/results/kill-weighted-1000000.json`. Trainer exits normally. Keep the new fitness weighting for future runs; deployed AI remains unchanged.
+
+## Immediate self-wall trap credit — October 26
+
+- [x] Reproduce missing attribution when an opponent closes a box and the victim hits its own trail before its next round-robin trap scan. A regression fails under the previous tracker (missing `trapAssists`) and passes after the fix.
+- [x] Scan dying victims against the collision barriers before deciding trap credit, ahead of the ordinary scheduled scan. Skip the redundant periodic scan for those victims; retain the shared 16,000-node budget, geometry/candidate limits, original trap validation, friendly/open-escape exclusions and one victim award. Direct wall kills remain distinct from trap assists; no collision or reserve-reward rules change.
+- [x] Real swept self-wall collision test verifies enclosing-owner credit and full/delta multiplayer snapshot delivery. Chrome fixture drives collision → network delta → roster and confirms the owner's hollow victim-colored trap dot; inspected the capture. All 649 unit tests pass. Previously detected long-lived traps, direct-hit nonduplication and open/friendly exclusions pass.
+- [x] Production build/asset audit and Worker dry run pass. Local implementation; not deployed. Coarse-grid and first-observation limitations remain; this does not prove the exact unrecorded gameplay incident. Future AI comparisons must use the corrected attribution consistently on both policies; historical reward counts used the earlier tracker.
+
+## Extended evolution until plateau — October 25
+
+- [x] Extend the offline plateau runner with named CLI configurations, small/medium/large mutation scales, historical training opponents, a fixed current-policy evaluation opponent, relative fitness/breadth/offense gates and deduplicated final evaluations. Preserve legacy default thresholds and back up an optional local trial before any successful final replacement. No automatic production promotion.
+- [x] Predeclare a meaningful gain as >=5% fitness (and >=0.02 absolute), improvements in >=6/8 validation groups, nondecreasing confirmed-offense points and a serial runtime pass. Stop after three consecutive generations without an accepted gain; reset the counter on acceptance. Final confirmation requires the same rule on twelve fresh groups (>=9/12 positive). Unit gate checks and smoke tests verify threshold/breadth/offense handling, three-stale termination and final-evaluation deduplication.
+- [x] Complete four generations / 608 tournament matches on Node 22.23.4, macOS arm64, two workers and 180-second limits. Population six; four training seeds/generation, eight validation seeds, twelve final seeds. Mutation scales 0.1/0.2/0.3, mutation seed 10252026, seed offset 800000. Historical opponents include original bounded-v1, previous default and the earlier challenger; validation/final opponents stay fixed to deployed `approach-480000-1-0`.
+- [x] Accept first-generation `cycle-ai-plateau-2026-10-25-0-4` in selection: validation fitness 1.16909 → 1.59203 (+36.2%), positive in 6/8 groups and runtime/offense gates pass. Subsequent generations fail three times: second/fourth training leaders regress on validation, while the third retains the incumbent. Search stops at the configured local plateau; fixed validation is selection data, not held-out evidence.
+- [x] Final unseen-seed results (48 matches/policy): selected candidate 16 wins / 18 direct kills / 9 trap assists, deployed policy 12 / 27 / 6. Candidate fitness 1.42948 versus 1.54465 (-7.46%), positive in only 6/12 groups and lower confirmed offense; final gate fails. Retain deployed/default and optional trial weights, with no browser or deployment changes. Final serial AI p99 0.224 ms / tick p99 0.326 ms passes; max tick 8.564 ms exceeds the 8.333 ms budget. Trainer exits normally; no further run scheduled.
+- [x] Forty AI/fitness/approach/plateau tests pass; runner syntax and `git diff --check` pass. Full record/checkpoint/log: `test-results/cycle-ai-plateau-2026-10-25*`; summary, exact tested weights, gates and paired final results: `tools/ai/results/plateau-800000.json`. This is a plateau for this search setup, not proof of global optimality.
+
+## Further evolution productivity check — October 25
+
+- [x] Evaluate one fresh generation from deployed `approach-480000-1-0`: six policies, four training seeds, twelve evaluation seeds, 180-second limits and two workers. Add historical `approach-340000-0-0` and `approach-370000-0-2` opponents. Predeclare continuation only for >=5% held-out fitness gain, positive paired gain in >=9/12 groups, nondecreasing confirmed-offense points and a passing runtime gate; cap at two rounds including confirmation.
+- [x] Run `node tools/ai/train.mjs --population=6 --generations=1 --trainSeeds=4 --heldOutSeeds=12 --seconds=180 --workers=2 --seedOffset=600000 --opponent=tools/ai/results/historical-340000.json --opponent=tools/ai/results/followup-370000.json --artifact=cycle-ai-productivity-600000`. Node 22.23.4/macOS arm64. Incumbent leads all five mutations: training fitness 1.74619 versus best mutation 1.49312, 11 versus 9 direct kills, six wins each. Other mutations also rank below the incumbent. No novel candidate selected.
+- [x] Completed 96 training matches and 96 held-out mirrors. The trainer completed before process inspection could stop redundant mirrors; verified it exited normally. The two 48-match evaluations use the same incumbent/seeds and reproduce 12 wins, 19 direct kills, six trap assists, mean fitness 1.16192 and zero paired differences. This is reproducibility, not independent improvement evidence. Continuation gate fails; no further run is scheduled.
+- [x] Final serial gate passes: AI p99 0.236 ms, tick p99 0.351 ms, maximum tick 8.454 ms (slightly above the 8.333 ms budget). Selection probe maximum tick 11.510 ms. Full artifact/checkpoint/log/plan: `test-results/cycle-ai-productivity-600000*`; durable summary/weights: `tools/ai/results/productivity-600000.json`. Preserve deployed policy and optional trial; no simulation, browser or deployment changes. This is a local plateau for this mutation/opponent sample, not proof that no stronger AI exists.
 
 ## Promote evolved AI as normal gameplay — October 25
 
@@ -2838,6 +2968,10 @@ title: Assets
 subtitle: Model, sound, and dependency inventory
 ---
 
+## Light cycle engine replacement — October 29
+
+`public/assets/audio/cycle-drive.wav` and `cycle-drive-cabin.wav` now use the user's `/Users/steve/Desktop/light cycle sfx.mp4` 34–35-second selection (SHA-256 `b67a903e3246ce76a465d1497f100ebf29a1ed9a22d0c77e32b2f2251f0b3bd2`). A steadier inner grain at 34.425–34.775 seconds avoids the more obvious end-of-clip pitch movement. A 50 ms overlap and circular stereo-linked RMS leveling produce a 300 ms waveform loop repeated three times: 0.9 seconds, stereo 44.1 kHz PCM16. Both perspectives share this drone; their spatial routing remains independent. No spectral resynthesis. `tools/assets/prepare-cycle-drone.py` reproduces the edit; `public/assets/audio/cycle-source.json` retains per-clip provenance so unrelated event samples keep their original sources. Film-derived mixed soundtrack; rights remain with the source owners, no redistribution license supplied. No source video is shipped, no deployment.
+
 ## Big labyrinth blueprint — September 23
 
 `docs/references/images/mazes/Big labyrinth.png` is a user-supplied reference; original author and license have not been provided. Its blue wall silhouettes were traced locally into polygon contours, simplified at one image pixel, scaled to 2.4 m/pixel and extruded to 54 m. The runtime uses generated geometry, not the raster texture. Source, tracing script and an SVG comparison are retained in the repository.
@@ -3036,6 +3170,47 @@ title: Fast, compelling cycle AI
 topTitle: TRON
 subtitle: Bounded JavaScript tactics, resource planning, and measured evolution
 ---
+
+## Higher weight on confirmed kills — October 26
+
+Offline fitness version 3 doubles the entire confirmed-kill reward for both kill types equally: two base points plus up to two early-elimination points. Winning stays at one point, with its existing maximum 0.5 speed bonus. Unfinished confinement earns zero; approach remains capped at 0.15. Thus even a late single-owner confirmed kill earns more than a win without offense. A direct wall owner and successful enclosing owners still share one victim pool, so counting both roles cannot multiply the victim's total reward. Friendly/self/uncredited deaths remain excluded. The corrected immediate self-wall trap attribution is used consistently for every policy in this run.
+
+A fresh plateau search from deployed `approach-480000-1-0` tested fifteen mutations over three generations with historical opponents, 180-second limits and two workers. It executed 464 tournament matches: 32 initial validation, 288 training, 96 challenger validation, and one unique 48-match final reference. Node 22.23.4/macOS arm64. Training leaders failed all validation attempts: approximately 19%, 31% and 4.2% lower fitness, with improvements in only 2/8, 1/8 and 4/8 seed groups and lower confirmed offense. None meets the >=5% gain / >=6-of-8 breadth / offense / runtime gates. The search stops after three unsuccessful generations.
+
+No policy was promoted or trial updated. The final retained-policy reference has 12 wins, 22 direct eliminations and eight shared trap credits in 48 matches, with mean v3 fitness 2.55039. It is one reference evaluation, not three independent comparisons of the same policy. Final serial AI p99 is 0.352 ms and tick p99 0.638 ms; maximum tick 11.500 ms exceeds the nominal budget, although the p99 gate passes. No candidate browser check or deployment is claimed. Higher kill weights remain the default for future offline runs; live gameplay weights/control are unchanged.
+
+All 650 unit tests pass before training, and twenty focused fitness/trap/plateau tests pass afterward, including actual swept self-wall death → trap attribution → doubled kill scoring. Exact settings, weights, hash provenance and records: `tools/ai/results/kill-weighted-1000000.json`; full local rows: `test-results/cycle-ai-kill-weighted-2026-10-26.json`. See the plan source for the complete command. Earlier v2 fitness and pre-correction credit counts cannot be compared directly with these new totals. No training remains running.
+
+## Immediate self-wall attribution correction — October 26
+
+Fixed a gap in periodic trap detection: a victim could hit its own trail after an opponent completed the enclosure but before the next scheduled observation, leaving no recorded trap. Death proposals now trigger a victim scan before credit is decided, ahead of ordinary periodic work, using the same collision barriers and global flood budget. The enclosing opponent receives the existing trap-assist credit and hollow victim-colored roster dot. Direct wall kills, reserve rewards and collision decisions retain their previous rules.
+
+A failing-before regression now passes, along with a swept-collision/full-and-delta-snapshot integration and a Chrome roster fixture. All 649 unit tests pass. The bounded coarse graph still cannot prove every narrow trap, and a victim with no pre-closure observation can lack sufficient history. This is a correction to attribution, not new evolved weights. Historical fitness summaries used the previous tracker; future policy comparisons should rescore both sides consistently under this correction. Local change; not deployed.
+
+## Extended search reached a plateau — October 25
+
+At the user's request, continued beyond one generation until three consecutive generations failed a predeclared improvement gate. The runner now supports named configurations, historical opponent artifacts, a fixed current-policy opponent, relative gains and multiple mutation scales. A gain must exceed both 5% and 0.02 absolute fitness, improve at least six of eight validation seed groups, preserve confirmed offense and pass serial runtime checks. The counter resets on acceptance. The final test uses twelve entirely separate seed groups and requires nine positive groups. Identical final policies share one evaluation instead of repeating mirrors.
+
+The run completed four generations and 608 tournament matches: 32 initial validation, 384 training, 96 challenger validation and 96 final comparisons. Six policies per generation, four training seeds, 180-second limits and two workers on Node 22.23.4/macOS arm64. Small/medium/large mutation scales were 0.1/0.2/0.3. First-generation candidate `cycle-ai-plateau-2026-10-25-0-4` improved validation fitness 36.2% and passed all selection gates; three subsequent generations failed to improve further. Fixed validation is selection data, not held-out proof.
+
+| Final unseen-seed result (48 matches each) | Selected candidate | Deployed AI |
+| --- | --- | --- |
+| Wins | 16 | 12 |
+| Direct wall kills | 18 | 27 |
+| Trap assists | 9 | 6 |
+| Mean fitness | 1.42948 | 1.54465 |
+
+Final fitness is 7.46% lower, only six of twelve paired groups improve, and confirmed offense declines. The selected candidate therefore fails the final gate despite winning more matches. Deployed/default and local trial remain `approach-480000-1-0`; no browser trial or deployment was performed for the rejected candidate. Final serial AI p99 is 0.224 ms and tick p99 0.326 ms; maximum tick 8.564 ms exceeds the nominal tick budget, although the p99 gate passes. Forty targeted tests and smoke checks pass. The trainer exited normally and no further run is scheduled. This is evidence of a plateau for these mutation/opponent/reward settings, not proof that no stronger AI exists.
+
+Reproduce with `node tools/ai/evolve-until-plateau.mjs --population=6 --trainSeeds=4 --validationSeeds=8 --finalSeeds=12 --seconds=180 --workers=2 --patience=3 --minGain=.02 --relativeGain=.05 --improvedFraction=.75 --seedOffset=800000 --mutationSeed=10252026 --mutationScales=.1,.2,.3 --preserve-offense --evaluation-opponent=current --opponent=tools/ai/results/historical-340000.json --opponent=tools/ai/results/followup-370000.json --artifact=cycle-ai-plateau-2026-10-25`. Training seed groups begin at 820000 and advance by 100 each generation; validation 840000–840007 and final 900000–900011. The exact initial policy, opponent weights and runner hash are archived; changing the future default changes the starting policy. Summary and tested weights: `tools/ai/results/plateau-800000.json`; full rows: `test-results/cycle-ai-plateau-2026-10-25.json`.
+
+## Further evolution stopped for lack of gain — October 25
+
+A fresh generation from the now-deployed `approach-480000-1-0` tested five mutations against a training mix containing the incumbent and historical policies `approach-340000-0-0` / `approach-370000-0-2`. Six policies × four seeds × four rotations gives 96 training matches. Training fitness favored the incumbent: 1.74619 versus the best mutation's 1.49312; direct kills 11 versus 9, with six wins each.
+
+No mutation was selected. The trainer completed two 48-match fresh-seed evaluations of the same incumbent; those duplicate outcomes (12 wins, 19 direct eliminations, six assists, mean fitness 1.16192) are a reproducibility check rather than independent improvement evidence. The announced continuation gate required >=5% gain, improvement in >=9/12 seed groups, nondecreasing confirmed offense and a runtime pass. Zero gain/zero positive groups fails it, so no further round ran. The existing deployed/default and local trial weights remain unchanged.
+
+Final serial AI p99 is 0.236 ms and tick p99 0.351 ms; maximum tick 8.454 ms slightly exceeds the 120 Hz budget despite passing the p99 gate. Node 22.23.4/macOS arm64, two workers and 180-second limits. Full local output: `test-results/cycle-ai-productivity-600000.json`; summary and exact tested weights: `tools/ai/results/productivity-600000.json`. Frozen historical opponent input: `tools/ai/results/historical-340000.json`. See the plan source for the exact command and stop criteria. No training remains active and no browser/policy/deployment changes were made.
 
 ## Promoted as normal gameplay — October 25
 
@@ -3280,11 +3455,11 @@ Validation status: implementation measurements and completed checks are recorded
 
 ## Persistent trap attribution and aggressive evaluation — October 14
 
-The authority now tracks coarse reachable space on a 40×40 graph. One cycle is sampled every 0.1 seconds, at most three opposing wall owners are tested per sample, geometry is capped at 2,048 segments, and all floods in one update share a 16,000-node visit budget. This is attribution only, never a replacement for swept collision. A new enemy wall must reduce reachable space substantially: the remaining area is at most 40% of the arena, and removing its newly added barriers restores at least 80 coarse cells and 1.5× the area. Mere proximity and following do not earn credit.
+The authority now tracks coarse reachable space on a 40×40 graph. One cycle is sampled every 0.1 seconds, and dying victims are sampled immediately before attribution; at most three opposing wall owners are tested per sample, geometry is capped at 2,048 segments, and all floods in one update share a 16,000-node visit budget. This is attribution only, never a replacement for swept collision. A new enemy wall must reduce reachable space substantially: the remaining area is at most 40% of the arena, and removing its newly added barriers restores at least 80 coarse cells and 1.5× the area. Mere proximity and following do not earn credit.
 
 A detected trap remembers the original walls and region. New walls laid inside that region—including the victim filling it with a spiral—do not erase attribution. Before awarding an assist, the authority checks that the victim remains inside the original region and that surviving original barriers still enclose it. Removing the attacker's wall must restore meaningful escape space. There is no timeout. A direct hit on that same attacker's wall remains a direct kill, not an additional assist. Multiple attackers share at most one assist reward per victim. Hollow victim-colored roster dots show assists; filled dots remain direct wall eliminations. Compact snapshots carry assists, but not graph/history state.
 
-Conservative limitations: this graph cannot prove every narrow passage or every driving maneuver is viable. Breaches expand to coarse cells and deny uncertain credit. Trail damage, trimming or retirement invalidate pending attribution rather than risk keeping credit across a sub-grid opening; this can miss valid traps, including when an unrelated trail changes. Budget exhaustion cannot award an assist. A trap completed between scans can be missed. Large-region partitions and non-cardinal road joins are deliberately excluded. Human attribution review and slower-hardware/Worker profiling remain outstanding.
+Conservative limitations: this graph cannot prove every narrow passage or every driving maneuver is viable. Breaches expand to coarse cells and deny uncertain credit. Trail damage, trimming or retirement invalidate pending attribution rather than risk keeping credit across a sub-grid opening; this can miss valid traps, including when an unrelated trail changes. Budget exhaustion cannot award an assist. A death-time scan now catches a box completed between the victim’s periodic scans. An enclosure already present at that victim’s first observation still lacks evidence of a newly closing opponent wall. Large-region partitions and non-cardinal road joins are deliberately excluded. Human attribution review and slower-hardware/Worker profiling remain outstanding.
 
 Offline tournament fitness now awards 1 point per team win, 0.5 per direct enemy wall elimination, 0.35 per trap assist, and 0.1 per newly created confinement. Confinement and assist rewards are separately capped to one shared reward per victim per match. Runtime compliance ranks first; combined fitness ranks next, with win rate breaking ties. Thus aggression is a primary objective, not merely a tie-breaker for equally winning passive policies. Artifacts retain raw wins, draws, direct kills, assists and confinements. Promotion remains manual, with held-out checks and human gameplay review; no evolved weights have been deployed.
 
@@ -5592,9 +5767,17 @@ Reviewed 2026-09-14. Personal-use resource shelf; retain attribution and source 
 
 Start with the Syna-Max Recognizer and derezz recreations. Four public HQ MP3 previews are saved locally; full original downloads use the creator’s Freesound pages. The shelf also retains current game sounds, cleanup experiments, six stock-effect leads, and two complete vendor metadata catalogs. Auditory comparison is pending; file verification is not a claim of film fidelity.
 
+## Recorded Recognizer audio restored — October 29
+
+The user rejected the synthesized Recognizer and background ambience. Gameplay again uses the recorded film-derived flight and approach samples, and the added ambient synth is removed. Recognizers remain silent until recordings load rather than playing a noise fallback. The sound study uses the recorded flyby again. Synthesis code and FFT reports remain offline experiments and are not imported by the game or sound-study page.
+
+## New light cycle engine — October 29
+
+The game uses the user's light cycle sfx.mp4 34–35-second selection for world and cabin engine sound. A steady inner waveform grain (34.425–34.775) is looped with a 50 ms overlap and circular level smoothing, preserving the recording rather than resynthesizing its spectrum. In-game pitch follows actual speed multipliers; player audio excludes camera Doppler. Audition it on the [sound study](../../audio.html). Mixed soundtrack, no source-isolation or listening-approval claim. Source/timecodes/processing and hash are recorded in cycle-source.json. Older engine listings below remain historical.
+
 ## CycleInteriorSound1 engine — November 4
 
-World and cabin cycle engines now use the user-supplied CycleInteriorSound1.mp4 recording. The inner stereo waveform has an 80 ms phase-matched raised-cosine loop join and circular stereo-linked level smoothing. No spectral resynthesis. Source hash, timecodes and reproducible conversion command are recorded in cycle-source.json. User approved the resulting engine sound on November 4.
+World and cabin cycle engines now use the user-supplied CycleInteriorSound1.mp4 recording. The inner stereo waveform has an 80 ms phase-matched raised-cosine loop join and circular stereo-linked level smoothing. No spectral resynthesis. Source hash, timecodes and reproducible conversion command are recorded in cycle-source.json. Listening review remains with the user.
 
 ## Recreations
 
@@ -6215,6 +6398,49 @@ On macOS arm64 / Node 22.23.4, `npm test` passes 656 checks. `tests/unit/optiona
 
 `TRON_TEST_ENGINE=webkit node tests/browser/storage-unavailable.mjs` cannot launch because Playwright WebKit 2370 is not installed. Actual Safari in macOS Lockdown Mode is untested; IndexedDB fallback alone does not establish compatibility with its other restrictions. WebKit documents disabled IndexedDB in [Safari 17 Lockdown Mode](https://webkit.org/blog/14445/webkit-features-in-safari-17-0/). Existing unsafe getter checks could reject background cleanup/speech operations, but the exact cause of the reported loading stall has not been reproduced. No deployment.
 
+## Rejected synthesis removed from gameplay — October 29
+
+`node tests/browser/recognizer-synth.mjs` now guards the rejection: in Chrome, Recognizer voices remain silent before recordings load; every flight/approach buffer matches its decoded recording; sample reload does not duplicate voices; no grid ambience exists; disposal clears sources. The sound-study synth controls are removed, recorded flyby works, and no request imports `recognizer-synth.js`. No sample/page errors. `node tests/recognizer-audio.mjs` passes existing positional hit/explosion and cleanup checks. `npm run build` passes PWA/asset audit. Experimental synthesis functions and numerical tests remain offline only. No full unit rerun or deployment.
+
+## New light cycle engine — October 29
+
+`python3 tools/assets/prepare-cycle-drone.py` extracts a steadier 34.425–34.775-second grain inside the user's requested 34–35-second range, overlaps 50 ms, levels circular stereo RMS and repeats the 300 ms loop three times. Output is stereo PCM16/44.1 kHz, 0.9 seconds, peak about 0.450. This preserves recorded waveform rather than generating a new timbre; secondary mixed sounds are not isolated or individually pitch-corrected. No audible-fidelity approval is claimed.
+
+`node tests/browser/cycle-audio.mjs` passes in headless Chrome on macOS: all core samples load, the player uses the new cabin buffer, 100 ms RMS variation is 0.893 dB, constant player speed keeps rate 1 despite moving listener, and brake/normal/turbo/grid-speed examples yield 0.85/1/1.28/1.186667. Engine pause/resume/reset and one-time event playback pass, no sample/page errors. The old exact-eight-samples assertion was corrected to allow existing team/entry announcements while checking all eight core effects individually. `npm run build` passes including catalog hashes/aliases, PWA and source-exclusion audit. No simulation changes or full unit-suite rerun; no deployment.
+
+## FFT-based sound reconstruction — October 28
+
+`node tools/audio/analyze-recognizer.mjs /Users/steve/Downloads/Recognizer_sfx.mp4 tools/audio/results/recognizer-reference-fft.json` and `node tools/audio/compare-recognizer.mjs /Users/steve/Downloads/Recognizer_sfx.mp4 tools/audio/results/recognizer-synth-fft-comparison.json` complete on macOS arm64 / Node 22.23.4. Reports retain source hash, method, band energies, section/quiet peaks and envelope spectra. The first three flight bands now measure 49.2%/42.6%/7.8%, against 49.0%/41.2%/7.6% reference. Summed absolute band-fraction error decreases from 0.618 to 0.025. This broad spectral metric is not a perceptual score; modulation comparison has different time resolution (74.44-second source vs 12-second synth). Quiet-frame measurements are not source separation.
+
+`npm test`: 654 pass, including exact-bin FFT/energy verification and measured-band regression. `node tests/browser/recognizer-synth.mjs`: Chrome passes bounded stereo output (maximum peak 0.227), auditions, stable 23-source updates, zero-source disposal and full silent-start audio initialization. `npm run build` passes, including offline-cache generation and binary asset audit. Existing spatial routing is retained; no human listening approval, Safari validation or deployment is claimed.
+
+## Tonal audio revision — October 28
+
+After user listening feedback, remove random noise/high hiss from ambience and reduce/twice-filter aircraft noise. Focused `node --test tests/unit/recognizer-synth.test.js`: two pass. `node tests/browser/recognizer-synth.mjs`: Chrome passes rendered output, audition controls, shared sources and full startup/disposal, with no page errors; revised peaks remain below 0.228. No full-suite/build rerun for this synthesis-parameter revision. Listening approval remains pending.
+
+## Procedural Recognizer / ambience — October 28
+
+On macOS arm64 / Node 22.23.4, `npm test` passes all 652 tests. New signal tests verify deterministic stereo, nonzero bounded energy, continuous loop endpoints and context-local buffer reuse. `node tests/browser/recognizer-synth.mjs` passes in headless Chrome: all three layers render without clipping (peak at most 0.416), repeated voice updates retain 23 sources, disposal leaves zero, and full `Sound` startup has a silent master with ambience installed and clears all sources on disposal. Separate audition buttons work without page errors. Existing `node tests/recognizer-audio.mjs` passes hit/explosion spatial playback and cleanup. Browser launch requires permission outside the sandbox.
+
+`npm run build` passes including asset audit/PWA generation. Recognizer flight/approach are no longer fetched during game startup; the production-path asset assertion now checks the retained explosion sample. This production-path browser test itself was not rerun. Spectrogram inspection of the supplied 74.44-second clip guided the approximation; no human listening/film-match approval is claimed. Source MP4 remains in Downloads, unmodified and excluded from the build. New ambience inherits master pause/mute routing; no deployment.
+
+## Kill-weighted evolution — October 26
+
+`npm test`: all 650 pass with fitness v3 and corrected self-wall trap attribution. Post-run `node --test tests/unit/cycle-ai-fitness.test.js tests/unit/cycle-traps.test.js tests/unit/cycle-ai-plateau.test.js`: twenty pass. Coverage verifies both kill kinds receive equal doubled reward, shared/duplicate victims stay capped, unfinished boxes earn nothing, and actual swept self-wall deaths produce weighted trap credit. Reward/runner syntax checks pass.
+
+The fresh three-generation plateau run completes 464 matches without selecting a new policy. All three training leaders fail held validation, so the retained policy is evaluated once on 48 final matches rather than redundantly mirrored. Serial AI p99 0.352 ms/tick p99 0.638 ms pass; maximum tick 11.500 ms is over budget. Full configuration, provenance, weights and records are in `tools/ai/results/kill-weighted-1000000.json`. No new candidate browser validation or deployment; current default and optional local trial are unchanged. Historical scores use different reward/attribution versions and are not directly comparable.
+
+## Immediate self-wall trap attribution — October 26
+
+`node --test tests/unit/cycle-traps.test.js tests/unit/cycle-ai-fitness.test.js`: 15 pass, including the formerly failing box-closure-between-scans regression. Integration covers actual swept self-wall collision, enclosing-owner credit and full/delta snapshots; negative checks cover direct-hit nonduplication and opened/friendly enclosures. `npm test`: all 649 pass.
+
+`node tests/browser/cycle-trap-credit.mjs` passes in headless Chrome on macOS at 900×400. An actual collision, multiplayer delta and `CycleRoster` update produce one hollow victim-colored dot on the enclosing opponent and none on the dead victim, with no page errors. Inspected `test-results/cycle-trap-credit.png`. Production build/asset audit and Worker dry run also pass. This is a deterministic reconstruction, not a reproduction of the user's unrecorded match. No human play, Safari or deployment claim. Coarse-grid/history and shared-budget limitations remain.
+
+## Plateau-run validation — October 25
+
+`node --test tests/unit/cycle-ai.test.js tests/unit/cycle-ai-fitness.test.js tests/unit/cycle-ai-approach.test.js tests/unit/cycle-ai-plateau.test.js`: 40 pass. Gate tests cover relative/absolute gain, breadth, offense regression and unchanged policies. One-second smoke runs verify CLI/opponent handling and stopping after stale counts 1/2/3 with one unique final evaluation; they are pipeline checks, not gameplay-quality evidence. Runner syntax and diff checks pass.
+
+The full offline run exits normally after four generations / 608 matches and three consecutive unsuccessful generations. A selection-stage gain does not generalize: final candidate fitness 1.42948 vs deployed 1.54465, with 16 vs 12 wins but 18 vs 27 direct kills. Only 6/12 seed groups improve, and offense declines. No trial/default/production policy is replaced. Final serial AI p99 0.224 ms, tick p99 0.326 ms, tick max 8.564 ms; the p99 runtime gate passes but not every tick fits the 8.333 ms budget. Summary with gates, exact weights and paired results: `tools/ai/results/plateau-800000.json`. No browser check is claimed for the rejected candidate; simulation/controller code did not change.
 
 ## Evolved AI default release — October 25
 
@@ -7435,3 +7661,7 @@ Revised audio checks decode seven stereo clips, verify the 0.9-second exterior a
 `npm test`: 339/339 passed after the outside-world cadence, wall-query optimizations and radio-range reduction. Updated radio fixtures explicitly check half of the active world's maze width and place transmitters within the reduced radius. A cadence regression checks tank/road/spectator 60 Hz versus arena 120 Hz.
 
 `node tests/cycle-performance.mjs`: Chrome, local macOS, 1280×800, seed 1982, engine sound/renderer and the existing tire traces enabled. Five-second live-bike CPU totals decreased from 1,572 to 177.5 ms; post-death totals from 639 to 216 ms. Samples include a moving live bike and the same session after death, with JEV requests intercepted for repeatability. Both before and after were approximately 60 fps on this machine. These are combined-change CPU measurements, not proof that the user's browser slowdown is eliminated. Final capture ran after the unit tests completed; artifacts are in `test-results/cycle-performance.json` and `test-results/cycle-{alive,dead}.cpuprofile`.
+
+## Controller input — November 7
+
+macOS arm64, Node 22.23.4: `node --test tests/unit/gamepad-input.test.js` passes four checks; `npm test` passes all 708 unit checks. `npm run build` passes. Standard gamepad CLU/solo/MP input shares simulation commands, with independent keyboard/touch held channels and neutral rearming after focus loss/disconnect. `node tests/browser/gamepad.mjs` is available for browser integration; Chrome aborts before launch normally and with elevation. Browser behavior, actual controller mapping/feel and controller-only audio unlock remain unverified. No deployment.

@@ -218,7 +218,7 @@ export class HudPresenter {
     const turbo = $('turbo'),
       boosting = cycleMode ? cycleBike.boosting : run.turboRemaining > 0,
       charging = cycleMode ? cycleBike.turboCharge < 1 : run.turboCooldown > 0;
-    turbo.querySelector('span').textContent = roadBike ? `W / ↑ / TURBO · ${roadBike.reverseGear?'R':Math.round(roadBike.targetRoadSpeed*3.6)+' SET'} · ${Math.round(Math.abs(roadBike.roadSpeed)*3.6)} KM/H` : cycleMode ? 'W / ↑ / TURBO' : 'T / TURBO';
+    turbo.querySelector('span').textContent = roadBike ? `W / ↑ / TURBO · ${roadBike.reverseGear?'R':Math.round(roadBike.targetRoadSpeed*3.6)+' SET'} · ${Math.round(Math.abs(roadBike.roadSpeed)*3.6)} KM/H` : cycleMode ? 'W / ↑ / TURBO' : 'SHIFT / TURBO';
     turbo.setAttribute(
       'aria-label',
       boosting ? 'Turbo active' : charging ? 'Turbo recharging' : 'Turbo ready',

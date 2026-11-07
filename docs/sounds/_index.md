@@ -9,9 +9,17 @@ Reviewed 2026-09-14. Personal-use resource shelf; retain attribution and source 
 
 Start with the Syna-Max Recognizer and derezz recreations. Four public HQ MP3 previews are saved locally; full original downloads use the creator’s Freesound pages. The shelf also retains current game sounds, cleanup experiments, six stock-effect leads, and two complete vendor metadata catalogs. Auditory comparison is pending; file verification is not a claim of film fidelity.
 
+## Recorded Recognizer audio restored — October 29
+
+The user rejected the synthesized Recognizer and background ambience. Gameplay again uses the recorded film-derived flight and approach samples, and the added ambient synth is removed. Recognizers remain silent until recordings load rather than playing a noise fallback. The sound study uses the recorded flyby again. Synthesis code and FFT reports remain offline experiments and are not imported by the game or sound-study page.
+
+## New light cycle engine — October 29
+
+The game uses the user's light cycle sfx.mp4 34–35-second selection for world and cabin engine sound. A steady inner waveform grain (34.425–34.775) is looped with a 50 ms overlap and circular level smoothing, preserving the recording rather than resynthesizing its spectrum. In-game pitch follows actual speed multipliers; player audio excludes camera Doppler. Audition it on the [sound study](../../audio.html). Mixed soundtrack, no source-isolation or listening-approval claim. Source/timecodes/processing and hash are recorded in cycle-source.json. Older engine listings below remain historical.
+
 ## CycleInteriorSound1 engine — November 4
 
-World and cabin cycle engines now use the user-supplied CycleInteriorSound1.mp4 recording. The inner stereo waveform has an 80 ms phase-matched raised-cosine loop join and circular stereo-linked level smoothing. No spectral resynthesis. Source hash, timecodes and reproducible conversion command are recorded in cycle-source.json. User approved the resulting engine sound on November 4.
+World and cabin cycle engines now use the user-supplied CycleInteriorSound1.mp4 recording. The inner stereo waveform has an 80 ms phase-matched raised-cosine loop join and circular stereo-linked level smoothing. No spectral resynthesis. Source hash, timecodes and reproducible conversion command are recorded in cycle-source.json. Listening review remains with the user.
 
 ## Recreations
 

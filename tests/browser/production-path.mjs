@@ -13,7 +13,7 @@ try {
  await page.waitForFunction(()=>document.body.classList.contains('playing'));
  await page.waitForTimeout(3000);
  assert(assets.filter(x=>x.includes('.glb')).length>=3,'All vehicle models load');
- assert(assets.some(x=>/recognizer-flight(?:-[a-f0-9]+)?\.wav/.test(x)),'Game audio loads');
+ assert(assets.some(x=>/recognizer-explosion(?:-[a-f0-9]+)?\.wav/.test(x)),'Game audio loads');
  assert(assets.every(x=>new URL(x).pathname.startsWith('/fun/TRON/')),'Assets stay inside game subdirectory');
  assert.deepEqual(errors,[]);
  await page.goto(new URL('audio.html',url).href);

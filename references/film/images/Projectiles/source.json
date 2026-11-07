@@ -1,0 +1,27 @@
+{
+  "sources": [
+    {
+      "path": "/Users/steve/Desktop/bulltets.m4v",
+      "sha256": "6b1e66af397d10ef31706fe4e185a5ce30c8dc5a222c6c2dbc33b5c8ac679b80"
+    },
+    {
+      "path": "/Users/steve/Desktop/bullets2.m4v",
+      "sha256": "a6655a1f612c3b71681f805e50ff9ee4a8a456f92511dcff1cb8eb7f389bc4ae"
+    }
+  ],
+  "attribution": "TRON (1982), respective film rights holders; user-supplied reference clips.",
+  "useConstraints": "No redistribution license supplied; reference material, not shipped game assets.",
+  "frames": [
+    {
+      "file": "Clu projectile gunner.png",
+      "clip": "bulltets.m4v",
+      "timeSeconds": 0.55
+    },
+    {
+      "file": "Clu projectile exterior.png",
+      "clip": "bullets2.m4v",
+      "timeSeconds": 0.18
+    }
+  ],
+  "geometry": "src/rendering/clu-cannon-bolts.js; reference-based procedural approximation, no film bitmap textures"
+}

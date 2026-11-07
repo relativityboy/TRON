@@ -1,0 +1,991 @@
+{
+  "version": 1,
+  "options": {
+    "population": 6,
+    "trainSeeds": 4,
+    "validationSeeds": 8,
+    "finalSeeds": 12,
+    "seconds": 180,
+    "workers": 2,
+    "patience": 3,
+    "minGain": 0.02,
+    "relativeGain": 0.05,
+    "improvedFraction": 0.75,
+    "seedOffset": 1000000,
+    "mutationSeed": 10262026,
+    "mutationScales": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "preserveOffense": true,
+    "evaluationOpponent": "current"
+  },
+  "opponentPaths": [
+    "tools/ai/results/historical-340000.json",
+    "tools/ai/results/followup-370000.json"
+  ],
+  "trainingOpponents": [
+    {
+      "version": 1,
+      "id": "bounded-v1",
+      "space": 1.4,
+      "clearance": 0.7,
+      "cutoff": 2.4,
+      "pressure": 0.55,
+      "allyPenalty": 1.4,
+      "reserveCost": 0.22,
+      "reserveFloor": 0.2,
+      "straightBonus": 0.12,
+      "switchCost": 0.12,
+      "leadSeconds": 0.18,
+      "variation": 0.015
+    },
+    {
+      "version": 1,
+      "id": "approach-480000-1-0",
+      "space": 0.719743750281632,
+      "clearance": 0.791621218281798,
+      "cutoff": 1.7066593531519172,
+      "pressure": 0.32037167462985966,
+      "allyPenalty": 1.1630799298989587,
+      "reserveCost": 0.08071088971290737,
+      "reserveFloor": 0.16631910644471648,
+      "straightBonus": 0.08031191605143248,
+      "switchCost": 0.07173405723879114,
+      "leadSeconds": 0.13908921824907886,
+      "variation": 0.008232411816716195
+    },
+    {
+      "version": 1,
+      "id": "approach-340000-0-0",
+      "space": 0.7,
+      "clearance": 0.5710767524503172,
+      "cutoff": 1.6172238771803673,
+      "pressure": 0.3472025061398745,
+      "allyPenalty": 1.027476475341245,
+      "reserveCost": 0.08986003088857979,
+      "reserveFloor": 0.18521312844008211,
+      "straightBonus": 0.09796467728912829,
+      "switchCost": 0.06432283084141091,
+      "leadSeconds": 0.15562226661108436,
+      "variation": 0.010922345181461424
+    },
+    {
+      "version": 1,
+      "id": "approach-370000-0-2",
+      "space": 0.7,
+      "clearance": 0.6588844531658106,
+      "cutoff": 1.2652308436576274,
+      "pressure": 0.3197035271651112,
+      "allyPenalty": 1,
+      "reserveCost": 0.08,
+      "reserveFloor": 0.15162182116881018,
+      "straightBonus": 0.08676089869346468,
+      "switchCost": 0.07006924509769306,
+      "leadSeconds": 0.17208569974056448,
+      "variation": 0.008674360181903467
+    }
+  ],
+  "evaluationOpponent": {
+    "version": 1,
+    "id": "approach-480000-1-0",
+    "space": 0.719743750281632,
+    "clearance": 0.791621218281798,
+    "cutoff": 1.7066593531519172,
+    "pressure": 0.32037167462985966,
+    "allyPenalty": 1.1630799298989587,
+    "reserveCost": 0.08071088971290737,
+    "reserveFloor": 0.16631910644471648,
+    "straightBonus": 0.08031191605143248,
+    "switchCost": 0.07173405723879114,
+    "leadSeconds": 0.13908921824907886,
+    "variation": 0.008232411816716195
+  },
+  "fitnessWeights": {
+    "version": 3,
+    "winPoints": 1,
+    "fastWinBonusPoints": 0.5,
+    "enemyWallPoints": 2,
+    "trapAssistPoints": 2,
+    "earlyEliminationBonusPoints": 2,
+    "confinementPoints": 0,
+    "approachPoints": 0.15
+  },
+  "approachConfig": {
+    "version": 1,
+    "sampleSeconds": 1,
+    "gridStepMeters": 2.4,
+    "nearMeters": 20,
+    "farMeters": 120,
+    "pairCap": 1,
+    "teamCap": 1
+  },
+  "initial": {
+    "version": 1,
+    "id": "approach-480000-1-0",
+    "space": 0.719743750281632,
+    "clearance": 0.791621218281798,
+    "cutoff": 1.7066593531519172,
+    "pressure": 0.32037167462985966,
+    "allyPenalty": 1.1630799298989587,
+    "reserveCost": 0.08071088971290737,
+    "reserveFloor": 0.16631910644471648,
+    "straightBonus": 0.08031191605143248,
+    "switchCost": 0.07173405723879114,
+    "leadSeconds": 0.13908921824907886,
+    "variation": 0.008232411816716195
+  },
+  "initialValidation": {
+    "wins": 8,
+    "draws": 0,
+    "losses": 24,
+    "matches": 32,
+    "winRate": 0.25,
+    "wallEliminations": 15,
+    "trapAssists": 7,
+    "confinements": 39,
+    "offensePoints": 75.53064814814815,
+    "approach": 2.2413739087383786,
+    "approachMs": 191612.62504799868,
+    "fastWinBonus": 2.044675925925926,
+    "fitness": 2.6847353175120263
+  },
+  "policy": {
+    "version": 1,
+    "id": "approach-480000-1-0",
+    "space": 0.719743750281632,
+    "clearance": 0.791621218281798,
+    "cutoff": 1.7066593531519172,
+    "pressure": 0.32037167462985966,
+    "allyPenalty": 1.1630799298989587,
+    "reserveCost": 0.08071088971290737,
+    "reserveFloor": 0.16631910644471648,
+    "straightBonus": 0.08031191605143248,
+    "switchCost": 0.07173405723879114,
+    "leadSeconds": 0.13908921824907886,
+    "variation": 0.008232411816716195
+  },
+  "validation": {
+    "wins": 8,
+    "draws": 0,
+    "losses": 24,
+    "matches": 32,
+    "winRate": 0.25,
+    "wallEliminations": 15,
+    "trapAssists": 7,
+    "confinements": 39,
+    "offensePoints": 75.53064814814815,
+    "approach": 2.2413739087383786,
+    "approachMs": 191612.62504799868,
+    "fastWinBonus": 2.044675925925926,
+    "fitness": 2.6847353175120263
+  },
+  "records": [
+    {
+      "generation": 0,
+      "scores": [
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-0-0",
+            "space": 0.7,
+            "clearance": 0.810867867884226,
+            "cutoff": 1.8304692402714862,
+            "pressure": 0.3273251023050398,
+            "allyPenalty": 1.155491841188632,
+            "reserveCost": 0.10568809802923351,
+            "reserveFloor": 0.1693562351819128,
+            "straightBonus": 0.07338891636580228,
+            "switchCost": 0.07007110204431229,
+            "leadSeconds": 0.13946329890238124,
+            "variation": 0.007474694589036518
+          },
+          "result": {
+            "wins": 9,
+            "draws": 0,
+            "losses": 7,
+            "matches": 16,
+            "winRate": 0.5625,
+            "wallEliminations": 13,
+            "trapAssists": 3,
+            "confinements": 19.5,
+            "offensePoints": 57.49796296296296,
+            "approach": 1.1527361035117383,
+            "approachMs": 40601.632165999385,
+            "fastWinBonus": 2.831388888888889,
+            "fitness": 4.343891391711163
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-0-4",
+            "space": 0.7210584629420191,
+            "clearance": 0.8020562467677518,
+            "cutoff": 1.6459108157549052,
+            "pressure": 0.3451006812648848,
+            "allyPenalty": 1.2501822637976148,
+            "reserveCost": 0.10953728119377046,
+            "reserveFloor": 0.16772737784311179,
+            "straightBonus": 0.06122934193350374,
+            "switchCost": 0.056432899204082794,
+            "leadSeconds": 0.1406768399155699,
+            "variation": 0.007451275157509372
+          },
+          "result": {
+            "wins": 6,
+            "draws": 0,
+            "losses": 10,
+            "matches": 16,
+            "winRate": 0.375,
+            "wallEliminations": 9,
+            "trapAssists": 6,
+            "confinements": 21,
+            "offensePoints": 52.314907407407404,
+            "approach": 1.3477445039936438,
+            "approachMs": 36416.21739100199,
+            "fastWinBonus": 1.7466666666666666,
+            "fitness": 3.7664834843545703
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-0-2",
+            "space": 0.8342370881000534,
+            "clearance": 0.675882220827043,
+            "cutoff": 1.688015866675414,
+            "pressure": 0.2193118367949501,
+            "allyPenalty": 1.0250235962914303,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.14458275987766686,
+            "straightBonus": 0.10834123528562485,
+            "switchCost": 0.06768702277331613,
+            "leadSeconds": 0.12,
+            "variation": 0.008037670479970985
+          },
+          "result": {
+            "wins": 7,
+            "draws": 0,
+            "losses": 9,
+            "matches": 16,
+            "winRate": 0.4375,
+            "wallEliminations": 10,
+            "trapAssists": 5,
+            "confinements": 17,
+            "offensePoints": 49.6787037037037,
+            "approach": 1.2799067130089294,
+            "approachMs": 38748.03194000642,
+            "fastWinBonus": 2.2185185185185183,
+            "fitness": 3.693075514323347
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "approach-480000-1-0",
+            "space": 0.719743750281632,
+            "clearance": 0.791621218281798,
+            "cutoff": 1.7066593531519172,
+            "pressure": 0.32037167462985966,
+            "allyPenalty": 1.1630799298989587,
+            "reserveCost": 0.08071088971290737,
+            "reserveFloor": 0.16631910644471648,
+            "straightBonus": 0.08031191605143248,
+            "switchCost": 0.07173405723879114,
+            "leadSeconds": 0.13908921824907886,
+            "variation": 0.008232411816716195
+          },
+          "result": {
+            "wins": 7,
+            "draws": 1,
+            "losses": 8,
+            "matches": 16,
+            "winRate": 0.4375,
+            "wallEliminations": 8,
+            "trapAssists": 3,
+            "confinements": 21,
+            "offensePoints": 40.617037037037036,
+            "approach": 1.2963175907525981,
+            "approachMs": 39531.426807001466,
+            "fastWinBonus": 2.113194444444445,
+            "fitness": 3.120292445005898
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-0-1",
+            "space": 0.7,
+            "clearance": 0.6891740425210445,
+            "cutoff": 1.4522096782922742,
+            "pressure": 0.2893501855712384,
+            "allyPenalty": 1.2604414859204554,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.15064057245850565,
+            "straightBonus": 0.07386293618008494,
+            "switchCost": 0.07326201241230593,
+            "leadSeconds": 0.12196672411914916,
+            "variation": 0.009245184157043696
+          },
+          "result": {
+            "wins": 7,
+            "draws": 0,
+            "losses": 9,
+            "matches": 16,
+            "winRate": 0.4375,
+            "wallEliminations": 8,
+            "trapAssists": 2,
+            "confinements": 20,
+            "offensePoints": 35.653148148148155,
+            "approach": 1.1061617616613162,
+            "approachMs": 41847.92370099714,
+            "fastWinBonus": 1.9260185185185184,
+            "fitness": 2.796568183182241
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-0-3",
+            "space": 0.7184708856977522,
+            "clearance": 0.7473589005111716,
+            "cutoff": 1.6561511489097027,
+            "pressure": 0.29101791052846243,
+            "allyPenalty": 1.091505328740459,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.14844594458118082,
+            "straightBonus": 0.08265782467555254,
+            "switchCost": 0.08207646085647867,
+            "leadSeconds": 0.1347499744433444,
+            "variation": 0.00906217521405779
+          },
+          "result": {
+            "wins": 3,
+            "draws": 0,
+            "losses": 13,
+            "matches": 16,
+            "winRate": 0.1875,
+            "wallEliminations": 7,
+            "trapAssists": 2.5,
+            "confinements": 14,
+            "offensePoints": 33.30185185185185,
+            "approach": 1.2609330553729576,
+            "approachMs": 41013.28839600133,
+            "fastWinBonus": 0.9930555555555555,
+            "fitness": 2.342752960357085
+          }
+        }
+      ],
+      "challenger": {
+        "wins": 13,
+        "draws": 0,
+        "losses": 19,
+        "matches": 32,
+        "winRate": 0.40625,
+        "wallEliminations": 12,
+        "trapAssists": 3.6666666666666665,
+        "confinements": 37.083333333333336,
+        "offensePoints": 52.88731481481482,
+        "approach": 2.192042616240658,
+        "approachMs": 85338.8930600076,
+        "fastWinBonus": 3.4382638888888892,
+        "fitness": 2.1766995342543694
+      },
+      "timing": null,
+      "gate": {
+        "gain": -0.508035783257657,
+        "requiredGain": 0.13423676587560132,
+        "improvedSeeds": 2,
+        "requiredSeeds": 6,
+        "offensePasses": false,
+        "passes": false
+      },
+      "gain": -0.508035783257657,
+      "improvedSeeds": 2,
+      "accepted": false,
+      "stale": 1,
+      "champion": "approach-480000-1-0"
+    },
+    {
+      "generation": 1,
+      "scores": [
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-1-4",
+            "space": 0.7,
+            "clearance": 0.8975324209686368,
+            "cutoff": 1.588260983303189,
+            "pressure": 0.4088921734597534,
+            "allyPenalty": 1.239425036625471,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.16344203710556032,
+            "straightBonus": 0.09283375551924108,
+            "switchCost": 0.07708764852723107,
+            "leadSeconds": 0.13756458423566076,
+            "variation": 0.007518057683482767
+          },
+          "result": {
+            "wins": 1,
+            "draws": 0,
+            "losses": 15,
+            "matches": 16,
+            "winRate": 0.0625,
+            "wallEliminations": 14,
+            "trapAssists": 3,
+            "confinements": 13.666666666666666,
+            "offensePoints": 61.653796296296306,
+            "approach": 1.3018259371935335,
+            "approachMs": 35696.69202000741,
+            "fastWinBonus": 0.2647222222222222,
+            "fitness": 3.9446120255685972
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-1-3",
+            "space": 0.7,
+            "clearance": 0.7523735604295506,
+            "cutoff": 1.6746983485529197,
+            "pressure": 0.34426374827511613,
+            "allyPenalty": 1.088297410006635,
+            "reserveCost": 0.08469285062793641,
+            "reserveFloor": 0.17383266284130516,
+            "straightBonus": 0.07626379139721393,
+            "switchCost": 0.07177317763562314,
+            "leadSeconds": 0.13704703547293323,
+            "variation": 0.008574161768774503
+          },
+          "result": {
+            "wins": 5,
+            "draws": 0,
+            "losses": 11,
+            "matches": 16,
+            "winRate": 0.3125,
+            "wallEliminations": 9,
+            "trapAssists": 4,
+            "confinements": 16.5,
+            "offensePoints": 47.65074074074074,
+            "approach": 1.2478323156797226,
+            "approachMs": 35722.71765799774,
+            "fastWinBonus": 1.6350231481481479,
+            "fitness": 3.4045586710150535
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-1-0",
+            "space": 0.7083200008887798,
+            "clearance": 0.7586420558416284,
+            "cutoff": 1.7219504996202883,
+            "pressure": 0.31029037183383484,
+            "allyPenalty": 1.2142625371110627,
+            "reserveCost": 0.08579992974735795,
+            "reserveFloor": 0.16219516679644588,
+            "straightBonus": 0.08471175669226795,
+            "switchCost": 0.08356411487329751,
+            "leadSeconds": 0.14606813220982443,
+            "variation": 0.007709593705367297
+          },
+          "result": {
+            "wins": 8,
+            "draws": 0,
+            "losses": 8,
+            "matches": 16,
+            "winRate": 0.5,
+            "wallEliminations": 6,
+            "trapAssists": 2,
+            "confinements": 16,
+            "offensePoints": 28.625925925925927,
+            "approach": 1.1984713177502644,
+            "approachMs": 36734.930641999934,
+            "fastWinBonus": 2.6436805555555556,
+            "fitness": 2.465586073696501
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "approach-480000-1-0",
+            "space": 0.719743750281632,
+            "clearance": 0.791621218281798,
+            "cutoff": 1.7066593531519172,
+            "pressure": 0.32037167462985966,
+            "allyPenalty": 1.1630799298989587,
+            "reserveCost": 0.08071088971290737,
+            "reserveFloor": 0.16631910644471648,
+            "straightBonus": 0.08031191605143248,
+            "switchCost": 0.07173405723879114,
+            "leadSeconds": 0.13908921824907886,
+            "variation": 0.008232411816716195
+          },
+          "result": {
+            "wins": 5,
+            "draws": 0,
+            "losses": 11,
+            "matches": 16,
+            "winRate": 0.3125,
+            "wallEliminations": 8,
+            "trapAssists": 1,
+            "confinements": 21.5,
+            "offensePoints": 32.47731481481481,
+            "approach": 1.2516440852720085,
+            "approachMs": 38067.58510201145,
+            "fastWinBonus": 1.5961574074074074,
+            "fitness": 2.4538261771883145
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-1-2",
+            "space": 0.7,
+            "clearance": 0.6754793129605241,
+            "cutoff": 1.4419708190951495,
+            "pressure": 0.35946477486053485,
+            "allyPenalty": 1,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.21469614299014214,
+            "straightBonus": 0.08785388174001127,
+            "switchCost": 0.07748638220364229,
+            "leadSeconds": 0.1679930577131454,
+            "variation": 0.011783783066784964
+          },
+          "result": {
+            "wins": 3,
+            "draws": 0,
+            "losses": 13,
+            "matches": 16,
+            "winRate": 0.1875,
+            "wallEliminations": 4,
+            "trapAssists": 6,
+            "confinements": 16,
+            "offensePoints": 34.45574074074074,
+            "approach": 1.0841174966341387,
+            "approachMs": 34870.951803998556,
+            "fastWinBonus": 0.9183564814814814,
+            "fitness": 2.4085446779198345
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-1-1",
+            "space": 0.7,
+            "clearance": 0.8611033985065295,
+            "cutoff": 1.7011326040606942,
+            "pressure": 0.29925458941143007,
+            "allyPenalty": 1.140111644298304,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.14972370425239206,
+            "straightBonus": 0.07883754557929933,
+            "switchCost": 0.07539979657158256,
+            "leadSeconds": 0.12,
+            "variation": 0.008673491306835786
+          },
+          "result": {
+            "wins": 6,
+            "draws": 0,
+            "losses": 10,
+            "matches": 16,
+            "winRate": 0.375,
+            "wallEliminations": 5,
+            "trapAssists": 1,
+            "confinements": 13.5,
+            "offensePoints": 22.024074074074072,
+            "approach": 1.2456519122976446,
+            "approachMs": 37801.55920800567,
+            "fastWinBonus": 1.6909027777777779,
+            "fitness": 1.868864039918531
+          }
+        }
+      ],
+      "challenger": {
+        "wins": 7,
+        "draws": 0,
+        "losses": 25,
+        "matches": 32,
+        "winRate": 0.21875,
+        "wallEliminations": 9,
+        "trapAssists": 7.5,
+        "confinements": 46.666666666666664,
+        "offensePoints": 49.852754629629636,
+        "approach": 2.6139180591051314,
+        "approachMs": 79359.53554101521,
+        "fastWinBonus": 2.030185185185185,
+        "fitness": 1.8523446101150185
+      },
+      "timing": null,
+      "gate": {
+        "gain": -0.8323907073970078,
+        "requiredGain": 0.13423676587560132,
+        "improvedSeeds": 1,
+        "requiredSeeds": 6,
+        "offensePasses": false,
+        "passes": false
+      },
+      "gain": -0.8323907073970078,
+      "improvedSeeds": 1,
+      "accepted": false,
+      "stale": 2,
+      "champion": "approach-480000-1-0"
+    },
+    {
+      "generation": 2,
+      "scores": [
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-2-0",
+            "space": 0.7509456520108506,
+            "clearance": 0.8453794788848608,
+            "cutoff": 1.6103805989725513,
+            "pressure": 0.28362766946200285,
+            "allyPenalty": 1.1731534143909812,
+            "reserveCost": 0.08146810669358819,
+            "reserveFloor": 0.15929626208730044,
+            "straightBonus": 0.07503126154653728,
+            "switchCost": 0.07583605568506756,
+            "leadSeconds": 0.14816546680871398,
+            "variation": 0.008891465082415381
+          },
+          "result": {
+            "wins": 9,
+            "draws": 0,
+            "losses": 7,
+            "matches": 16,
+            "winRate": 0.5625,
+            "wallEliminations": 14,
+            "trapAssists": 1,
+            "confinements": 9.5,
+            "offensePoints": 50.8099537037037,
+            "approach": 1.261710587414899,
+            "approachMs": 39186.53530900227,
+            "fastWinBonus": 2.807962962962963,
+            "fitness": 3.9254483284236814
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-2-1",
+            "space": 0.8964688833802938,
+            "clearance": 0.7471051474288105,
+            "cutoff": 1.4860185851342973,
+            "pressure": 0.2805485511384905,
+            "allyPenalty": 1.292851202923339,
+            "reserveCost": 0.11504867312964051,
+            "reserveFloor": 0.1751597271487117,
+            "straightBonus": 0.08684329379349946,
+            "switchCost": 0.0854575984296389,
+            "leadSeconds": 0.1291569851897657,
+            "variation": 0.008952637200709433
+          },
+          "result": {
+            "wins": 6,
+            "draws": 0,
+            "losses": 10,
+            "matches": 16,
+            "winRate": 0.375,
+            "wallEliminations": 6,
+            "trapAssists": 6,
+            "confinements": 18.5,
+            "offensePoints": 42.342592592592595,
+            "approach": 1.1960096634385997,
+            "approachMs": 35367.06823898945,
+            "fastWinBonus": 1.8682407407407406,
+            "fitness": 3.1493896739280705
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-2-3",
+            "space": 0.7913038352970034,
+            "clearance": 0.8117893798858857,
+            "cutoff": 1.6389180474914609,
+            "pressure": 0.3425764508196153,
+            "allyPenalty": 1.2236355475266465,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.1762114141136408,
+            "straightBonus": 0.08174458364490418,
+            "switchCost": 0.06641828592400999,
+            "leadSeconds": 0.136010864404263,
+            "variation": 0.007634153256658466
+          },
+          "result": {
+            "wins": 7,
+            "draws": 0,
+            "losses": 9,
+            "matches": 16,
+            "winRate": 0.4375,
+            "wallEliminations": 12,
+            "trapAssists": 0,
+            "confinements": 7.833333333333333,
+            "offensePoints": 39.89314814814815,
+            "approach": 1.166025149040048,
+            "approachMs": 37975.48020099569,
+            "fastWinBonus": 2.1849537037037035,
+            "fitness": 3.0783128515129907
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-2-4",
+            "space": 0.7,
+            "clearance": 0.7864294659020379,
+            "cutoff": 1.8984003543388095,
+            "pressure": 0.2698640933586285,
+            "allyPenalty": 1.2810411616344937,
+            "reserveCost": 0.11193688388634473,
+            "reserveFloor": 0.1482441910542548,
+            "straightBonus": 0.09548448084853589,
+            "switchCost": 0.07531107906252146,
+            "leadSeconds": 0.14281939813354985,
+            "variation": 0.008290164625504986
+          },
+          "result": {
+            "wins": 8,
+            "draws": 0,
+            "losses": 8,
+            "matches": 16,
+            "winRate": 0.5,
+            "wallEliminations": 8,
+            "trapAssists": 2.5,
+            "confinements": 11.5,
+            "offensePoints": 34.22347222222222,
+            "approach": 1.3867110486574457,
+            "approachMs": 37028.54374701157,
+            "fastWinBonus": 2.4479398148148155,
+            "fitness": 2.804963668395978
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "cycle-ai-kill-weighted-2026-10-26-2-2",
+            "space": 0.7,
+            "clearance": 0.9083482951996847,
+            "cutoff": 2.0492298343917352,
+            "pressure": 0.2731957397330553,
+            "allyPenalty": 1.147587012127042,
+            "reserveCost": 0.08,
+            "reserveFloor": 0.21148182899691167,
+            "straightBonus": 0.09485409077256918,
+            "switchCost": 0.1061612802615855,
+            "leadSeconds": 0.12,
+            "variation": 0.007017583989654668
+          },
+          "result": {
+            "wins": 8,
+            "draws": 0,
+            "losses": 8,
+            "matches": 16,
+            "winRate": 0.5,
+            "wallEliminations": 9,
+            "trapAssists": 0,
+            "confinements": 10.166666666666666,
+            "offensePoints": 32.20148148148148,
+            "approach": 1.329463992358698,
+            "approachMs": 38052.759100998286,
+            "fastWinBonus": 2.492268518518519,
+            "fitness": 2.680823099928363
+          }
+        },
+        {
+          "policy": {
+            "version": 1,
+            "id": "approach-480000-1-0",
+            "space": 0.719743750281632,
+            "clearance": 0.791621218281798,
+            "cutoff": 1.7066593531519172,
+            "pressure": 0.32037167462985966,
+            "allyPenalty": 1.1630799298989587,
+            "reserveCost": 0.08071088971290737,
+            "reserveFloor": 0.16631910644471648,
+            "straightBonus": 0.08031191605143248,
+            "switchCost": 0.07173405723879114,
+            "leadSeconds": 0.13908921824907886,
+            "variation": 0.008232411816716195
+          },
+          "result": {
+            "wins": 6,
+            "draws": 0,
+            "losses": 10,
+            "matches": 16,
+            "winRate": 0.375,
+            "wallEliminations": 5,
+            "trapAssists": 2,
+            "confinements": 9,
+            "offensePoints": 24.231805555555557,
+            "approach": 1.1824096985667567,
+            "approachMs": 36584.259075999726,
+            "fastWinBonus": 1.8304166666666668,
+            "fitness": 2.0149739798129525
+          }
+        }
+      ],
+      "challenger": {
+        "wins": 16,
+        "draws": 0,
+        "losses": 16,
+        "matches": 32,
+        "winRate": 0.5,
+        "wallEliminations": 15,
+        "trapAssists": 2.5,
+        "confinements": 37,
+        "offensePoints": 61.70638888888889,
+        "approach": 2.188779037001119,
+        "approachMs": 84663.21039599087,
+        "fastWinBonus": 4.2370833333333335,
+        "fitness": 2.570993408680388
+      },
+      "timing": null,
+      "gate": {
+        "gain": -0.11374190883163848,
+        "requiredGain": 0.13423676587560132,
+        "improvedSeeds": 4,
+        "requiredSeeds": 6,
+        "offensePasses": false,
+        "passes": false
+      },
+      "gain": -0.11374190883163848,
+      "improvedSeeds": 4,
+      "accepted": false,
+      "stale": 3,
+      "champion": "approach-480000-1-0"
+    }
+  ],
+  "heldOut": {
+    "candidate": {
+      "wins": 12,
+      "draws": 0,
+      "losses": 36,
+      "matches": 48,
+      "winRate": 0.25,
+      "wallEliminations": 22,
+      "trapAssists": 8,
+      "confinements": 55,
+      "offensePoints": 106.43685185185184,
+      "approach": 3.3850224050723754,
+      "approachMs": 131618.34694099426,
+      "fastWinBonus": 3.473935185185185,
+      "fitness": 2.5503862582874564
+    },
+    "previousTrial": {
+      "wins": 12,
+      "draws": 0,
+      "losses": 36,
+      "matches": 48,
+      "winRate": 0.25,
+      "wallEliminations": 22,
+      "trapAssists": 8,
+      "confinements": 55,
+      "offensePoints": 106.43685185185184,
+      "approach": 3.3850224050723754,
+      "approachMs": 131618.34694099426,
+      "fastWinBonus": 3.473935185185185,
+      "fitness": 2.5503862582874564
+    },
+    "baseline": {
+      "wins": 12,
+      "draws": 0,
+      "losses": 36,
+      "matches": 48,
+      "winRate": 0.25,
+      "wallEliminations": 22,
+      "trapAssists": 8,
+      "confinements": 55,
+      "offensePoints": 106.43685185185184,
+      "approach": 3.3850224050723754,
+      "approachMs": 131618.34694099426,
+      "fastWinBonus": 3.473935185185185,
+      "fitness": 2.5503862582874564
+    },
+    "uniqueEvaluations": 1,
+    "gate": {
+      "gain": 0,
+      "requiredGain": 0.12751931291437282,
+      "improvedSeeds": 0,
+      "requiredSeeds": 9,
+      "offensePasses": true,
+      "passes": false
+    }
+  },
+  "timing": {
+    "aiMs": {
+      "p95": 0.18079099990427494,
+      "p99": 0.3519170000217855,
+      "max": 2.721832999959588
+    },
+    "tickMs": {
+      "p50": 0.17608400015160441,
+      "p95": 0.31441699992865324,
+      "p99": 0.638499999884516,
+      "max": 11.500417000148445
+    },
+    "passes": true
+  },
+  "stale": 3,
+  "generations": 3,
+  "trialUpdated": false,
+  "promoted": false,
+  "note": "Observed plateau under the configured patience, fitness/seed/offense gates and serial runtime limits. Fixed validation is selection data, not held-out proof. Final seeds are used once per distinct policy. No production promotion.",
+  "environment": {
+    "node": "v22.23.4",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "sourceRevision": "b400248",
+  "fileHashes": {
+    "tools/ai/fitness.mjs": "2380afab76a23bf6ab4393368086b4c4067aa403fd223310c2fa22fed12dc67d",
+    "shared/simulation/cycle-traps.js": "2eef64c1ad5c184d17fc477a4c10e17f0bb6bff0c9a82dc3093710256b26c593",
+    "tools/ai/evolve-until-plateau.mjs": "08bbf990727c1ca3f075d74735e35e6ea1487a50207216344f796dae3e37348c"
+  },
+  "fullArtifact": "test-results/cycle-ai-kill-weighted-2026-10-26.json",
+  "plan": {
+    "startedAt": "2026-10-26T18:43:22.339Z",
+    "fitnessWeights": {
+      "version": 3,
+      "winPoints": 1,
+      "fastWinBonusPoints": 0.5,
+      "enemyWallPoints": 2,
+      "trapAssistPoints": 2,
+      "earlyEliminationBonusPoints": 2,
+      "confinementPoints": 0,
+      "approachPoints": 0.15
+    },
+    "startingPolicy": "approach-480000-1-0",
+    "attribution": "Includes immediate self-wall trap-credit correction.",
+    "selection": {
+      "patience": 3,
+      "relativeGain": 0.05,
+      "absoluteGain": 0.02,
+      "positiveValidationSeedGroups": 6,
+      "validationSeedGroups": 8,
+      "preserveConfirmedOffense": true,
+      "serialRuntimeGate": true
+    },
+    "final": {
+      "seedGroups": 12,
+      "positiveSeedGroupsRequired": 9,
+      "seedsUnusedDuringSelection": true
+    },
+    "productionPromotion": false
+  },
+  "decision": {
+    "totalMatches": 464,
+    "acceptedGenerations": 0,
+    "stoppedForPlateau": true,
+    "consecutiveUnsuccessfulGenerations": 3,
+    "promoted": false,
+    "trialUpdated": false,
+    "retainedPolicy": "approach-480000-1-0",
+    "reason": "Every training winner failed validation gain, seed breadth and offense gates. Final retained policy evaluated once; no duplicate-policy comparison claimed."
+  }
+}

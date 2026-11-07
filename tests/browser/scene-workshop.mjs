@@ -1,0 +1,31 @@
+import {chromium} from '@playwright/test';
+import {createServer} from 'vite';
+import {mkdtemp,rm,mkdir} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import assert from 'node:assert/strict';
+import {sceneStudioPlugin} from '../../server/scene-studio.js';
+import {wallStudioPlugin} from '../../server/wall-studio.js';
+import {startingSceneModel} from '../../studies/outside-arena/workshop-model.js';
+const temp=await mkdtemp(join(tmpdir(),'tron-scene-workshop-'));let invocation;
+const runner=async context=>{invocation=context;const model=startingSceneModel();model.parts[0].parameters.heightMeters+=20;model.lighting.angleDegrees=-25;return {summary:'Raised walls 20 m and moved the light; approved floor unchanged.',model};};
+const server=await createServer({configFile:false,root:process.cwd(),cacheDir:join(temp,'cache'),optimizeDeps:{noDiscovery:true,include:['three','three/addons/controls/OrbitControls.js','three/addons/exporters/GLTFExporter.js']},plugins:[sceneStudioPlugin({storeDir:join(temp,'scene'),runner}),wallStudioPlugin({storeDir:join(temp,'wall'),runner:async()=>{throw Error('Scene request reached maze wall workspace');}})],server:{host:'127.0.0.1',port:0,hmr:false}});await server.listen();
+const browser=await chromium.launch({channel:'chrome',headless:true});
+try{
+ const page=await browser.newPage({viewport:{width:1500,height:1050}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/scene-workshop.html`);await page.waitForFunction(()=>window.wallStudy?.state&&document.querySelector('#submit').disabled===false);
+ assert.equal(await page.locator('.reference-card').count(),3);
+ const shadow=await page.evaluate(()=>{const key=wallStudy.scene.children.find(o=>o.isDirectionalLight);return {size:key.shadow.mapSize.x,texel:(key.shadow.camera.right-key.shadow.camera.left)/key.shadow.mapSize.x};});assert.equal(shadow.size,4096);assert(shadow.texel<.2);console.log('Shadow detail:',shadow);
+ const before=await page.evaluate(()=>({camera:wallStudy.camera.position.toArray(),floor:[...wallStudy.model.children[0].children[0].geometry.attributes.position.array]}));
+ await page.locator('#feedback').fill('Raise the walls 20 meters and move the light toward the middle.');await page.locator('#feedback').press('Enter');await page.waitForFunction(()=>wallStudy.state.current.id===1);
+ assert.equal(await page.evaluate(()=>wallStudy.design.parts[0].parameters.heightMeters),170);
+ const after=await page.evaluate(()=>({camera:wallStudy.camera.position.toArray(),floor:[...wallStudy.model.children[0].children[0].geometry.attributes.position.array]}));assert.deepEqual(after,before);
+ assert.equal(invocation.schema.properties.model.properties.parts.maxItems,1);assert.equal(invocation.imagePaths.length,4);assert.match(invocation.prompt,/immutable resource/);
+ const mazeState=await page.evaluate(async()=>await(await fetch('/api/wall-studio/state')).json());assert.equal(mazeState.current.id,0);assert.equal(mazeState.current.model.parts[0].id,'slab');
+ await page.locator('#wire').check();await page.locator('#wire').uncheck();await page.locator('#inspect').check();await page.locator('#inspect').uncheck();
+ const download=page.waitForEvent('download');await page.locator('#download').click();assert.equal((await download).suggestedFilename(),'outside-arena-revision-1.glb');
+ await page.reload();await page.waitForFunction(()=>wallStudy.state?.current.id===1);
+ await page.locator('[data-restore="0"]').click();await page.waitForFunction(()=>wallStudy.state.current.id===2);assert.equal(await page.evaluate(()=>wallStudy.design.parts[0].parameters.heightMeters),150);
+ await mkdir('test-results/scene-workshop',{recursive:true});await page.screenshot({path:'test-results/scene-workshop/workshop.png'});
+ assert.deepEqual(errors,[]);console.log('Scene prompt/revision, lighting, immutable floor, camera preservation, isolated maze history, reload, restore, wireframe, brightness and GLB download passed.');
+}finally{await browser.close();await server.close();await rm(temp,{recursive:true,force:true});}

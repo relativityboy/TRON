@@ -1,6 +1,7 @@
 @import url('./ui.css');
 @import url('./cycle-tuning.css');
 @import url('./terminal.css');
+body.playing #game{cursor:none}
 #system-warnings{position:fixed;top:158px;right:24px;width:min(240px,calc(100vw - 48px));z-index:5;pointer-events:none;display:grid;gap:10px;font:10px/1.5 monospace;text-align:right;visibility:visible}
 .system-notice{color:#e8b56e;text-shadow:0 1px 4px #000}
 .system-notice strong{display:block;font-weight:normal;letter-spacing:1px}

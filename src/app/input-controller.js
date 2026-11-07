@@ -3,6 +3,8 @@ export class InputController {
   constructor() {
     this.keys = new Set();
     this.touchKeys = new Set();
+    this.gamepadKeys = new Set();
+    this.gamepadAxes = {};
     this.cleanups = [];
     this.clear();
   }
@@ -10,7 +12,7 @@ export class InputController {
     object.addEventListener(event, handler, options);
     this.cleanups.push(() => object.removeEventListener(event, handler, options));
   }
-  clearKeys(){this.keys.clear();this.touchKeys.clear();this.turretCenterChord=false;}
+  clearKeys(){this.keys.clear();this.touchKeys.clear();this.gamepadKeys.clear();this.gamepadAxes={};this.turretCenterChord=false;}
   clear() {
     this.clearKeys();
     this.mouseFire = false;
@@ -33,7 +35,7 @@ export class InputController {
     this.mouseTarget = null;
   }
   command(run, { mouseLook, mouseTarget } = {}) {
-    const held = (...keys) => keys.some((key) => this.keys.has(key)||this.touchKeys.has(key));
+    const held = (...keys) => keys.some((key) => this.keys.has(key)||this.touchKeys.has(key)||this.gamepadKeys.has(key));
     const road=run.playerVehicle==='cycle'&&run.cycleRace?.cycles[run.cycleRace.playerId]?.escaped;
     return {
       cycleTurn:this.cycleTurns[0]??0,
@@ -42,13 +44,13 @@ export class InputController {
       cycleSlow:run.playerVehicle==='cycle'&&held('KeyS','ArrowDown'),
       throttle: held('KeyS', 'ArrowDown')
         ? -1
-        : Number(run.cruiseThrottle || held('KeyW', 'ArrowUp')),
-      steer: Number(held('KeyD', 'ArrowRight')) - Number(held('KeyA', 'ArrowLeft')),
+        : (held('KeyW','ArrowUp') ? 1 : this.gamepadAxes.throttle || Number(run.cruiseThrottle)),
+      steer: (Number(held('KeyD', 'ArrowRight')) - Number(held('KeyA', 'ArrowLeft'))) || this.gamepadAxes.steer || 0,
       mouseTarget: mouseLook ? mouseTarget : this.mouseTarget,
       firePressed: this.fireQueued,
       fire: held('Space') || this.mouseFire || this.fireQueued,
-      turret: this.turretCenterChord?0:Number(held('KeyL')) - Number(held('KeyJ')),
-      aimPitch: run.gunner ? Number(held('KeyI')) - Number(held('KeyK')) : 0,
+      turret: this.turretCenterChord?0:(Number(held('KeyL')) - Number(held('KeyJ'))) || this.gamepadAxes.turret || 0,
+      aimPitch: run.gunner ? (Number(held('KeyI')) - Number(held('KeyK'))) || this.gamepadAxes.aimPitch || 0 : 0,
     };
   }
   dispose() {

@@ -50,6 +50,8 @@ The editor returns validated boxes and polygon-profile extrusions, capped at 48 
 
 The source starting model is `studies/maze-wall/design.json`. `node tools/studies/export-maze-wall.mjs` exports the latest local workspace model (or the starting design when no workspace exists) to `studies/maze-wall/maze-wall.glb`. The earlier procedural wall remains an unapproved starting study, not a fidelity target.
 
+The outside-arena scene uses the same prompt UI at <http://127.0.0.1:5190/scene-workshop.html>. Its current walls, single-material lighting and film references are preloaded. Prompts adjust wall proportions, bays, doorway and lighting while preserving the approved floor resource. It has independent history under `.local/outside-arena-studio/`, restore/cancel and scene GLB export; the maze-wall workspace remains separate. Changes outside the available wall/lighting parameters are reported as unsupported rather than silently claimed.
+
 Workflow checks: `node --test tests/unit/wall-studio.test.js` and `node tests/browser/wall-workshop.mjs`. The browser check uses a controlled editor and a temporary workspace. `TRON_STUDIO_LIVE=1 node tests/browser/wall-workshop-live.mjs` explicitly opts into one real Codex revision in a temporary workspace.
 
 ## Build and verification

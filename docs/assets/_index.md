@@ -3,6 +3,10 @@ title: Assets
 subtitle: Model, sound, and dependency inventory
 ---
 
+## Light cycle engine replacement — October 29
+
+`public/assets/audio/cycle-drive.wav` and `cycle-drive-cabin.wav` now use the user's `/Users/steve/Desktop/light cycle sfx.mp4` 34–35-second selection (SHA-256 `b67a903e3246ce76a465d1497f100ebf29a1ed9a22d0c77e32b2f2251f0b3bd2`). A steadier inner grain at 34.425–34.775 seconds avoids the more obvious end-of-clip pitch movement. A 50 ms overlap and circular stereo-linked RMS leveling produce a 300 ms waveform loop repeated three times: 0.9 seconds, stereo 44.1 kHz PCM16. Both perspectives share this drone; their spatial routing remains independent. No spectral resynthesis. `tools/assets/prepare-cycle-drone.py` reproduces the edit; `public/assets/audio/cycle-source.json` retains per-clip provenance so unrelated event samples keep their original sources. Film-derived mixed soundtrack; rights remain with the source owners, no redistribution license supplied. No source video is shipped, no deployment.
+
 ## Big labyrinth blueprint — September 23
 
 `docs/references/images/mazes/Big labyrinth.png` is a user-supplied reference; original author and license have not been provided. Its blue wall silhouettes were traced locally into polygon contours, simplified at one image pixel, scaled to 2.4 m/pixel and extruded to 54 m. The runtime uses generated geometry, not the raster texture. Source, tracing script and an SVG comparison are retained in the repository.

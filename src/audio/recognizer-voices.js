@@ -17,25 +17,17 @@ export class RecognizerVoices {
     filter.frequency.value = 5800;
     filter.connect(emitter.input);
     emitter.gain.gain.value = 0;
-    const merger = c.createChannelMerger(2),
-      rotor = this.source(this.noiseBuffer, merger, true, i * 0.31);
-    rotor.disconnect();
-    rotor.connect(merger, 0, 0);
-    rotor.connect(merger, 0, 1);
-    merger.connect(filter);
     const flightGain = c.createGain(),
       attackGain = c.createGain();
     flightGain.connect(filter);
     attackGain.connect(filter);
     attackGain.gain.value = 0;
-    const v = { ...emitter, filter, merger, rotor, flightGain, attackGain };
+    const v = { ...emitter, filter, flightGain, attackGain };
     this.loadRecognizerVoice(v, i);
     return v;
   }
   loadRecognizerVoice(v, i) {
     if (this.samples['recognizer-flight'] && !v.flight) {
-      v.rotor.stop();
-      v.merger.disconnect();
       v.flight = this.source(this.samples['recognizer-flight'], v.flightGain, true, i * 0.29);
     }
     if (this.samples['recognizer-approach'] && !v.attack)
@@ -58,7 +50,7 @@ export class RecognizerVoices {
       const attacking = ['fold', 'drop', 'recover'].includes(e.state),
         mix = attacking ? 0.85 : e.state === 'pursue' ? 0.35 : 0;
       v.gain.gain.setTargetAtTime(
-        present && distance < 900 ? (v.flight ? 0.65 : 0.25) * (clear ? 1 : 0.4) : 0,
+        present && distance < 900 ? (v.flight ? 0.65 : 0) * (clear ? 1 : 0.4) : 0,
         now,
         0.12,
       );
@@ -73,7 +65,7 @@ export class RecognizerVoices {
   }
   dispose() {
     for (const v of this.voices) {
-      for (const node of [v.flight, v.attack, v.rotor]) {
+      for (const node of [v.flight, v.attack]) {
         try {
           node?.stop();
         } catch {}
@@ -81,7 +73,6 @@ export class RecognizerVoices {
       }
       for (const node of [
         v.filter,
-        v.merger,
         v.flightGain,
         v.attackGain,
         v.input,

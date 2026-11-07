@@ -1,0 +1,26 @@
+{
+  "name": "Outside arena floor",
+  "status": "User approved November 5, 2026, including thicker grid lines",
+  "file": "floor.glb",
+  "sha256": "48cd12236c2ea418a1d582aaad6819826d68052994d182ba8ac10fa5261f07b8",
+  "bytes": 401356,
+  "units": "meters",
+  "triangles": 3560,
+  "author": "Reference-based authored geometry in this project",
+  "source": "/Users/steve/Desktop/OutsideArena.m4v",
+  "sourceSha256": "093566a90429dd6904e773592de291ee88b24b3f26c50a26ba6621548851cf91",
+  "attribution": "TRON (1982), respective film rights holders; user-supplied reference.",
+  "useConstraints": "No redistribution license supplied. Study frames are local review references, not runtime game assets.",
+  "builder": "studies/outside-arena/floor.js",
+  "rebuild": "node tools/studies/export-outside-arena.mjs",
+  "configuration": {
+    "widthMeters": 640,
+    "apronStartZ": -180,
+    "apronDepthMeters": 480,
+    "tileMeters": 40,
+    "wellWidthMeters": 25,
+    "wellDepthMeters": 2.5,
+    "gridWidthMeters": 0.65
+  },
+  "notes": "Standalone approved floor resource; no vehicle/collision geometry; estimated physical scale."
+}

@@ -27,7 +27,8 @@ try{
  await blockedDefaults();
  await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isHidden());
  await home();await page.locator('#start').click();await page.keyboard.press('Enter');await page.waitForFunction(()=>__tron.state.mode==='running'&&!document.body.classList.contains('home-opening'),{},{timeout:60000});
- await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isHidden());assert((await page.evaluate(()=>__tron.state.turboRemaining))>0,'Shift+T remains turbo during normal CLU play');
+ await page.keyboard.press('KeyT');assert.equal(await page.evaluate(()=>__tron.state.turboRemaining),0,'T no longer boosts');
+ await page.keyboard.down('Shift');assert((await page.evaluate(()=>__tron.state.turboRemaining))>0,'Shift boosts Clu');await page.keyboard.down('ArrowUp');assert.equal(await page.evaluate(()=>__tron.state.cruiseThrottle),false,'Shift+forward does not latch cruise');await page.keyboard.up('ArrowUp');await page.keyboard.up('Shift');assert.equal(await page.evaluate(()=>__tron.state.turboRemaining),0,'Releasing Shift stops boost');assert(await page.locator('#tuning').isHidden());
  await blockedDefaults();
  await home('?tuning=1');await page.locator('#start').click();await page.keyboard.press('Enter');await page.waitForFunction(()=>__tron.state.mode==='running'&&!document.body.classList.contains('home-opening'),{},{timeout:60000});
  await page.keyboard.press('Shift+KeyT');assert(await page.locator('#tuning').isVisible());

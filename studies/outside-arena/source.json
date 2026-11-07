@@ -1,0 +1,28 @@
+{
+  "source": "/Users/steve/Desktop/OutsideArena.m4v",
+  "sha256": "093566a90429dd6904e773592de291ee88b24b3f26c50a26ba6621548851cf91",
+  "attribution": "TRON (1982), respective film rights holders; user-supplied reference.",
+  "useConstraints": "No redistribution license supplied. Study frames are local review references, not runtime game assets.",
+  "referenceFrames": [
+    {
+      "file": "references/front.jpg",
+      "timeSeconds": 12,
+      "widthPixels": 1600
+    },
+    {
+      "file": "references/apron.jpg",
+      "timeSeconds": 8.5,
+      "widthPixels": 1280
+    }
+  ],
+  "model": "outside-arena-floor.glb",
+  "scope": "Floor only; authored simple geometry. Dimensions and unseen extent approximated from frames.",
+  "units": "meters",
+  "rebuild": "node tools/studies/export-outside-arena.mjs",
+  "additionalWallReference": {
+    "file": "references/wall-front.png",
+    "source": "/Users/steve/Desktop/Screenshot 2026-11-05 at 12.03.47\u202fPM.png",
+    "description": "User-supplied clearer frontal film reference for folded wall geometry and doorway."
+  },
+  "sceneModel": "outside-arena-scene.glb"
+}
