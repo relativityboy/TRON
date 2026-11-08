@@ -11,6 +11,11 @@ See also: /llms.txt (curated index) and /sitemap.xml.
 <!-- Page: (root) -->
 Source: /
 
+## Faster closing credits — November 7
+
+- [x] Combine Wendy Carlos's two entries on one screen, and the ray-cast renderer credit with Carl N. Hoff's light-cycle model credit. Keep model previews individual through BIT, then present five entries per screen. Halve only the per-word reading time after BIT (240 → 480 words/minute); retain the original three-second minimum, 0.75-second settling time, all earlier pauses and typing cadence. This reduces the extended sequence from 34 to 19 screens; the tallest screen has 21 lines.
+- Validation: macOS arm64; six terminal/victory unit checks pass. Direct timing checks verify original earlier holds and halved per-word time after BIT with unchanged minimum/settling time. Direct authored-text check verifies five-entry grouping after BIT. Updated browser layout allowance to 21 lines; no browser playback or song-end synchronization check run.
+
 ## Controller support for CLU and Light Cycles — November 7
 
 - [x] Poll browser-standard gamepads once per frame for CLU, solo cycles and multiplayer. Left stick/D-pad drive or turn; right stick aims CLU or glances in cycles. CLU: A/Cross or RT fire, LB holds turbo, X/Square centers/levels, RB zooms. Cycles: RT turbo, LT brake (new press reverses stopped road cycles). Y/Triangle changes first-person view, left-stick click toggles aerial view, Start maps to Enter/restart, B/Circle opens Home and Back/Share opens controls help. Menu directions use discrete presses. Preserve separate physical-keyboard, touch and controller held channels.

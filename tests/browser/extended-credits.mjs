@@ -59,7 +59,7 @@ try{
   const box=element.getBoundingClientRect(),left=document.querySelector('#intro .terminal-content').getBoundingClientRect().left;
   return {rows:new Set([...tribute.output.querySelectorAll('.printer-character')].map(e=>Math.round(e.getBoundingClientRect().top))).size,removed,stable:first===tribute.output.querySelector('.printer-character'),text:tribute.output.textContent,expected,left:box.left,right:innerWidth-box.right,originalLeft:left,earlyMs:samples.slice(0,60).reduce((a,b)=>a+b,0)/60,lateMs:samples.slice(-60).reduce((a,b)=>a+b,0)/60};
  });
- assert(rendering.rows<=8);assert.equal(rendering.removed,0);assert(rendering.stable);assert.equal(rendering.text,rendering.expected);
+ assert(rendering.rows<=21);assert.equal(rendering.removed,0);assert(rendering.stable);assert.equal(rendering.text,rendering.expected);
  assert(Math.abs(rendering.left-rendering.right)<1);assert.equal(rendering.left,rendering.originalLeft);
  await page.screenshot({path:'test-results/extended-credits-layout.png'});
  console.log('Credits append cost, early/late ms:',rendering.earlyMs,rendering.lateMs);

@@ -1,5 +1,5 @@
-export const CREDIT_READING=Object.freeze({wordsPerMinute:240,minimumSeconds:3,settleSeconds:.75});
-export function creditHoldSeconds(text){return Math.max(CREDIT_READING.minimumSeconds,(text.match(/\S+/g)?.length??0)*60/CREDIT_READING.wordsPerMinute+CREDIT_READING.settleSeconds);}
+export const CREDIT_READING=Object.freeze({wordsPerMinute:240,postBitWordsPerMinute:480,minimumSeconds:3,settleSeconds:.75});
+export function creditHoldSeconds(text,afterBit=false){return Math.max(CREDIT_READING.minimumSeconds,(text.match(/\S+/g)?.length??0)*60/(afterBit?CREDIT_READING.postBitWordsPerMinute:CREDIT_READING.wordsPerMinute)+CREDIT_READING.settleSeconds);}
 export const EXTENDED_CREDIT_PRINT=Object.freeze({secondsPerCharacter:.018});
 
 // Static access text; the opening dissolve is handled by the main view.
@@ -28,6 +28,24 @@ export function creditPages(text){
  return pages;
 }
 
+// Combine the composer's entries; keep model previews solo, then show five entries.
+export function creditScreens(text){
+ const pages=creditPages(text);
+ const composer=pages.findIndex(page=>page.startsWith('WENDY CARLOS\n'));
+ if(composer>=0&&pages[composer+1]?.startsWith('WENDY CARLOS\n')){
+  pages.splice(composer,2,pages[composer]+'\n\n'+pages[composer+1].slice('WENDY CARLOS\n'.length));
+ }
+ const cycle=pages.findIndex(page=>page.startsWith('CARL N. HOFF\n'));
+ if(cycle>=0&&pages[cycle+1]?.startsWith('RAY-CAST RENDERER\n')){
+  pages.splice(cycle,2,pages[cycle]+'\n\n'+pages[cycle+1]);
+ }
+ const lastModel=pages.findIndex(page=>page.startsWith('CONTROLLINGTRANSMISSION\n'));
+ if(lastModel<0)return pages;
+ const screens=pages.slice(0,lastModel+1);
+ for(let i=lastModel+1;i<pages.length;i+=5)screens.push(pages.slice(i,i+5).join('\n\n'));
+ return screens;
+}
+
 // Driven by the frame loop, including pauses/fades: restart leaves no timers.
 export class TerminalTribute {
  constructor(element,message,extendedMessage=''){
@@ -36,7 +54,9 @@ export class TerminalTribute {
   this.message=message.replace(/\r\n?/g,'\n').replace(/\n+$/,'').replace(/\nEND OF LINE$/,'');
   this.sentences=this.message.split(/\n\n/);
   this.extendedStart=this.sentences.length;
-  this.sentences.push(...creditPages(extendedMessage));
+  this.sentences.push(...creditScreens(extendedMessage));
+  const bitIndex=this.sentences.findIndex((text,index)=>index>=this.extendedStart&&text.startsWith('CONTROLLINGTRANSMISSION\n'));
+  this.postBitStart=bitIndex<0?Infinity:bitIndex+1;
   element.querySelector('.tribute-measure').textContent=this.sentences.reduce((a,b)=>a.split('\n').length>b.split('\n').length?a:b,'')+'\nEND OF LINE';
   this.element.setAttribute('aria-label',this.sentences.join('\n\n')+'\nEND OF LINE');this.reset();
  }
@@ -64,7 +84,7 @@ export class TerminalTribute {
    this.phase=this.index===this.sentences.length-1?'waiting':'hold';this.phaseStarted=this.elapsed;this.element.classList.add('complete');
   }
   if(this.phase==='hold'){
-   if(this.elapsed-this.phaseStarted<creditHoldSeconds(this.sentences[this.index]))return false;
+   if(this.elapsed-this.phaseStarted<creditHoldSeconds(this.sentences[this.index],this.index>=this.postBitStart))return false;
    this.phase='fade';this.phaseStarted=this.elapsed;
   }
   if(this.phase==='fade'){
