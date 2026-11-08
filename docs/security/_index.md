@@ -4,6 +4,14 @@ topTitle: TRON
 subtitle: TRON and related dekorte.com software — October 23, 2026
 ---
 
+## Relay and multiplayer hardening — November 7
+
+The current follow-up restores finite shared AI quotas (1,000 calls and 16,000,000 input bytes per UTC day; 300 calls per IP per day and 60 per minute), renews active concurrency leases every three seconds and aborts provider work on renewal failure. Renewals neither consume quota nor revive expired/released leases. These volume limits do not guarantee exact dollar spend, and anonymous callers can still exhaust the allowance.
+
+Production Worker and Vite preview multiplayer now allow three simultaneous clients per IP, with twelve admissions per rolling minute including reconnects. Only Vite development is exempt; trusted transport IPs identify callers. Close, error and failed upgrades release slots once, while recent reconnect history remains after the arena empties. Admission counters retain short-lived raw IPs in bounded arena memory only; no IP logging or persistence is added. Shared public IPs share the limit. Vite retains its complete upstream sensitive-file blocklist alongside project exclusions.
+
+Validation on macOS arm64 / Node 24.22.1: 720 unit tests pass, including thirteen new security regressions; production/PWA/asset build and Worker dry-run packaging pass. Real loopback HTTP/WebSocket checks cover file blocking and admission; simulated-time SQLite/provider mocks cover renewal and abort behavior without paid calls. This change is prepared for a fork pull request; no deployment or new browser play validation was performed. See the current [project plan](../) and [multiplayer notes](../multiplayer/).
+
 ## Decision summary
 
 Address the confirmed publication of a legacy development TLS private key first. Then patch Node and certificate trust stores, update active development/build dependencies, and retire or upgrade the older utility dependency trees. Preserve gameplay behavior and keep the public multiplayer protocol unchanged during this work.

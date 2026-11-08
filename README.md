@@ -208,6 +208,10 @@ Anonymous access is intentional. Allowed browser origins are dekorte.com and www
 
 These are request/byte caps, not a guaranteed dollar cap. Limits are intentionally conservative for an initial public trial. Change the named variables in `wrangler.jsonc` and redeploy to tune them. Set `JEV_ENABLED` to `false` to disable public provider calls. The client honors Retry-After and runs local tactics during errors, rate limits and exhausted allowances. Quotas persist across deploys; do not delete the Durable Object to reset them accidentally.
 
+AI calls renew their ten-second concurrency lease every three seconds until the provider response body completes. Renewal does not consume quota. Failed renewal aborts the provider request; completion/failure stops renewal and releases the slot. This applies to the longer MCP chat and speech requests as well as JEV decisions.
+
+Public multiplayer and Vite preview allow three simultaneous connections per IP and twelve admitted connections per rolling minute, including reconnects. Cloudflare uses `CF-Connecting-IP`; preview uses the TCP peer address and ignores forwarded headers. Disconnect/error releases a slot, but reconnect history remains for the rest of its minute. These short-lived raw IP counters stay in arena memory and are not logged or written to storage. Vite development is exempt so local multi-client tests can use one IP. Networks sharing a public IP share these limits.
+
 ### Clu autoplay and spatial teleporters
 
 Clu autoplay is temporarily disabled (`CLU_AUTOPLAY_ENABLED=false`). U, Shift-U, the autoplay button and Clu JEV statistics are unavailable. The descriptions below document the retained implementation for future reactivation. Clu I/K camera zoom now works only in V aerial mode.

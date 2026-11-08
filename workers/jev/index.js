@@ -3,6 +3,7 @@ import {mcpRoute} from './mcp.js';
 import {errorBody} from '../../shared/jev-errors.js';
 import {jevQuestion} from '../../shared/jev-protocol.js';
 import {PUBLIC_LIMITS} from './budget.js';
+import {withBudgetLease} from './lease.js';
 export {JevBudget} from './budget.js';
 const encoder=new TextEncoder();
 async function boundedJson(request){
@@ -52,11 +53,13 @@ export function createWorker(fetchImpl=fetch){return {async fetch(request,env,ct
   if(!reservation.ok)return send(429,{error:reservation.error,retryAfter:reservation.retryAfter},{'Retry-After':String(reservation.retryAfter)});
  }catch{return send(503,{error:'AI budget unavailable; using local tactics',retryAfter:30},{'Retry-After':'30'});}
  try{
-  const upstream=await fetchImpl('https://api.typesafe.ai/v1/systemone',{method:'POST',headers:{Authorization:`Bearer ${env.TYPESAFE_API_KEY}`,'Content-Type':'application/json'},body,signal:AbortSignal.timeout(PUBLIC_LIMITS.timeoutMs)});
-  if(!upstream.ok)return send(502,{error:'Jev unavailable; using local tactics'});
-  const data=await upstream.json(),answer=data.answers?.maneuver,options=JSON.parse(body).questions.maneuver.criteria;
-  if(!Object.hasOwn(options,answer?.choice)||!Number.isFinite(answer?.confidence)||answer.confidence<0||answer.confidence>1)return send(502,{error:'Invalid Jev answer; using local tactics'});
-  return send(200,{id:answer.choice,confidence:answer.confidence,probabilities:answer.probabilities||{},usage:data.usage||null});
+  return await withBudgetLease(budget,reservation.lease,async leaseSignal=>{
+   const upstream=await fetchImpl('https://api.typesafe.ai/v1/systemone',{method:'POST',headers:{Authorization:`Bearer ${env.TYPESAFE_API_KEY}`,'Content-Type':'application/json'},body,signal:AbortSignal.any([leaseSignal,AbortSignal.timeout(PUBLIC_LIMITS.timeoutMs)])});
+   if(!upstream.ok)return send(502,{error:'Jev unavailable; using local tactics'});
+   const data=await upstream.json(),answer=data.answers?.maneuver,options=JSON.parse(body).questions.maneuver.criteria;
+   if(!Object.hasOwn(options,answer?.choice)||!Number.isFinite(answer?.confidence)||answer.confidence<0||answer.confidence>1)return send(502,{error:'Invalid Jev answer; using local tactics'});
+   return send(200,{id:answer.choice,confidence:answer.confidence,probabilities:answer.probabilities||{},usage:data.usage||null});
+  });
  }catch(error){const timeout=error.name==='TimeoutError'||error.name==='AbortError';return send(502,{code:timeout?'timeout':'unavailable',error:timeout?'Jev timed out; using local tactics':'Jev unavailable; using local tactics'});}
  finally{ctx.waitUntil(budget.fetch('https://budget/release',{method:'POST',body:JSON.stringify({lease:reservation.lease})}).catch(()=>{}));}
 }};}

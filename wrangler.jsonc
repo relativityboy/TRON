@@ -11,10 +11,10 @@
     "MCP_ENABLED": "true",
     "MULTIPLAYER_ENABLED": "true",
     "MCP_MODEL": "gemini-3.8-flash",
-    "DAILY_REQUESTS": "unlimited",
-    "DAILY_INPUT_BYTES": "unlimited",
-    "IP_DAILY_REQUESTS": "unlimited",
-    "IP_MINUTE_REQUESTS": "unlimited"
+    "DAILY_REQUESTS": "1000",
+    "DAILY_INPUT_BYTES": "16000000",
+    "IP_DAILY_REQUESTS": "300",
+    "IP_MINUTE_REQUESTS": "60"
   },
   "durable_objects": {
     "bindings": [{"name": "JEV_BUDGET", "class_name": "JevBudget"}, {"name":"MULTIPLAYER_ARENA", "class_name":"MultiplayerArena"}]

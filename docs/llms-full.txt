@@ -16,6 +16,15 @@ Source: /
 - [x] Combine Wendy Carlos's two entries on one screen, and the ray-cast renderer credit with Carl N. Hoff's light-cycle model credit. Keep model previews individual through BIT, then present five entries per screen. Halve only the per-word reading time after BIT (240 → 480 words/minute); retain the original three-second minimum, 0.75-second settling time, all earlier pauses and typing cadence. This reduces the extended sequence from 34 to 19 screens; the tallest screen has 21 lines.
 - Validation: macOS arm64; six terminal/victory unit checks pass. Direct timing checks verify original earlier holds and halved per-word time after BIT with unchanged minimum/settling time. Direct authored-text check verifies five-entry grouping after BIT. Updated browser layout allowance to 21 lines; no browser playback or song-end synchronization check run.
 
+## Relay and multiplayer security — November 7
+
+- [x] Restore production quotas: 1,000 requests and 16,000,000 input bytes per UTC day globally, 300 requests per IP per day and 60 per minute. These are provider-use volume limits, not an exact dollar-spend guarantee.
+- [x] Renew AI concurrency leases every three seconds while provider calls and response bodies remain pending. Fail closed by aborting the provider request if renewal fails; release on completion/failure. Renewal does not charge another request or revive expired/released leases.
+- [x] Limit production Worker and Vite preview multiplayer to three simultaneous connections per IP, plus twelve admitted connections per rolling minute to bound reconnect churn. Use Cloudflare's trusted client IP or the TCP peer address; ignore forwarded identities and client-selected development flags. Vite development is exempt. Release slots idempotently on close, error and failed upgrades; retain reconnect history after all peers leave.
+- [x] Preserve every Vite default sensitive-file deny pattern alongside project exclusions. Regression compares the installed Vite defaults and requests sensitive fixtures over HTTP.
+- [x] macOS arm64 / Node 24.22.1: `npm test` passes 720/720, including thirteen new security regressions; `npm run build` passes production/PWA/asset checks; `npm run worker:check -- --outdir /private/tmp/tron-security-worker-pinned` passes the local dry run. Real loopback HTTP/WebSocket tests verify file blocking, preview admission, disconnect cleanup, spoofed forwarded headers and development exemption; simulated-time SQLite tests verify continued leases, quota-free renewal and fail-closed cancellation. Regenerated documentation with the existing public site URL/analytics context. No browser play check, paid provider call or deployment was run.
+
+
 ## Controller support for CLU and Light Cycles — November 7
 
 - [x] Poll browser-standard gamepads once per frame for CLU, solo cycles and multiplayer. Left stick/D-pad drive or turn; right stick aims CLU or glances in cycles. CLU: A/Cross or RT fire, LB holds turbo, X/Square centers/levels, RB zooms. Cycles: RT turbo, LT brake (new press reverses stopped road cycles). Y/Triangle changes first-person view, left-stick click toggles aerial view, Start maps to Enter/restart, B/Circle opens Home and Back/Share opens controls help. Menu directions use discrete presses. Preserve separate physical-keyboard, touch and controller held channels.
@@ -4551,7 +4560,7 @@ Earlier direct-browser tests found TypeSafe rejecting localhost CORS preflights,
 
 Public builds set `VITE_JEV_API_BASE=https://tron-jev.tron-canyon-run.workers.dev`. The browser sends the same snapshot contract to `/api/jev/decision` there. The fixed model and question are assembled on the server using shared `shared/jev-protocol.js`; the client cannot supply an upstream URL, credential or question template. The Worker bounds incoming JSON to 32 KiB and serialized provider input to 64 KiB, enforces a 2.2-second provider timeout, validates the returned candidate/confidence, and never returns the key. `/api/jev/status` exposes only configured/model. See README for deploy and key rotation commands.
 
-`workers/jev/budget.js` uses a single globally named SQLite Durable Object and synchronous transactions to reserve requests before calling the provider. The initial limits are 1,000 calls and 16 MB of submitted input per UTC day globally; 300 calls/day and 60/minute per IP; 750 ms minimum spacing; one pending call per IP and four globally. Failed calls count. Reservations expire after ten seconds if release fails. Limits survive Worker restarts/deployments; the next UTC day starts a fresh allowance. Missing or failed budget storage denies the request without contacting Jev. Only counters, daily keyed IP hashes and short-lived leases are stored, not snapshots or raw IP addresses. These bounds limit request volume, not exact dollar spend.
+`workers/jev/budget.js` uses a single globally named SQLite Durable Object and synchronous transactions to reserve requests before calling the provider. The initial limits are 1,000 calls and 16 MB of submitted input per UTC day globally; 300 calls/day and 60/minute per IP; 750 ms minimum spacing; one pending call per IP and four globally. Failed calls count. Active calls renew their ten-second reservations every three seconds through completion of the provider response body, including long MCP chat and speech requests. Renewal is quota-free, cannot revive expired or released leases, and aborts the provider call on failure. Completion/failure stops renewal and releases the reservation; abandoned leases expire after ten seconds. Limits survive Worker restarts/deployments; the next UTC day starts a fresh allowance. Missing or failed budget storage denies the request without contacting Jev. Only counters, daily keyed IP hashes and short-lived leases are stored, not snapshots or raw IP addresses. These bounds limit request volume, not exact dollar spend.
 
 CORS allows only the two website origins, but public clients are anonymous and Origin is not authentication. Non-browser abuse can still exhaust the shared budget; the persistent caps bound provider usage. Players behind the same IP share limits. Public clients space request starts by at least 1,200 ms of wall time. The browser honors the exposed Retry-After header using wall time, even across simulation resets, and continues local tactics. Provider failure also retains local control. Disable calls with `JEV_ENABLED=false` or adjust the named quota variables and redeploy. The game remains static on GitHub Pages; only Jev decisions use Cloudflare.
 
@@ -4706,9 +4715,13 @@ Snapshots contain arena-local meter coordinates, self pose and reserves, nearby 
 
 The updated Worker must be deployed with the client to enable the cycle-specific production prompt. Automated tests use mocked decisions; live JEV driving quality is not yet validated.
 
-## Public usage cap removal — October 2
+## Public usage cap removal — October 2 (superseded November 7)
 
 The user requested that TypeSafe balance control total public usage. `wrangler.jsonc` now sets `DAILY_REQUESTS`, `DAILY_INPUT_BYTES`, `IP_DAILY_REQUESTS` and `IP_MINUTE_REQUESTS` to `unlimited`. This supersedes the prior daily quotas. The relay retains only per-request size/timeout rules and short-term overlap/pacing controls. Local development's hourly dollar cap is separate and unchanged. A browser that received a previous daily-cap cooldown should reload to clear that in-memory cooldown after deployment.
+
+## Public security limits restored — November 7
+
+The security review supersedes the October 2 unlimited-usage setting. Production restores 1,000 calls and 16,000,000 serialized input bytes per UTC day globally, 300 calls per IP per day and 60 per minute. These limits are shared by JEV, MCP chat and MCP speech. Anonymous callers can still exhaust the finite allowance; Origin remains a browser restriction, not authentication. See the project plan for verification.
 
 
 ---
@@ -5026,6 +5039,10 @@ The next local change removes the fixed eight-tick lead for local presentation a
 With 1.8 m of clearance to the existing arena wall's collision boundary, tests at normal speed (38.4 m/s) and turbo (96 m/s) survive zero/two-tick input transit under next-tick handling, whereas the old eight-tick schedule crashes. Two ticks of transit move the accepted turn 0.64/1.6 m from the keypress position. Six ticks of transit (50 ms) is too late at that clearance for either approach. All 528 unit tests, production build and Worker dry run pass. These are controlled simulation results, not a guarantee of precise turning at arbitrary network latency.
 
 No collision rollback or provisional death system is included. Inputs received after confirmed impact cannot restore the player. This follow-up requires both a server and client deployment; it is currently local only.
+
+## Connection admission security — November 7
+
+Production Worker and Vite preview enforce three simultaneous clients per IP and twelve admitted connections per rolling minute (including reconnects). The Worker uses Cloudflare-provided `CF-Connecting-IP`; preview uses the TCP peer address. Forwarded headers and client-supplied development flags cannot bypass admission. Close, error and failed upgrade paths release slots exactly once. Recent admission timestamps remain after the arena empties, then expire after one minute. Counters contain short-lived raw IPs in memory only, with no logging or persistent storage; admission memory is bounded to 4,096 tracked IPs and fails closed if full. Vite development is exempt. Shared public IPs share limits. No authentication or distributed-bot protection is implied.
 
 
 ---
@@ -5591,6 +5608,14 @@ title: Security review and remediation plan
 topTitle: TRON
 subtitle: TRON and related dekorte.com software — October 23, 2026
 ---
+
+## Relay and multiplayer hardening — November 7
+
+The current follow-up restores finite shared AI quotas (1,000 calls and 16,000,000 input bytes per UTC day; 300 calls per IP per day and 60 per minute), renews active concurrency leases every three seconds and aborts provider work on renewal failure. Renewals neither consume quota nor revive expired/released leases. These volume limits do not guarantee exact dollar spend, and anonymous callers can still exhaust the allowance.
+
+Production Worker and Vite preview multiplayer now allow three simultaneous clients per IP, with twelve admissions per rolling minute including reconnects. Only Vite development is exempt; trusted transport IPs identify callers. Close, error and failed upgrades release slots once, while recent reconnect history remains after the arena empties. Admission counters retain short-lived raw IPs in bounded arena memory only; no IP logging or persistence is added. Shared public IPs share the limit. Vite retains its complete upstream sensitive-file blocklist alongside project exclusions.
+
+Validation on macOS arm64 / Node 24.22.1: 720 unit tests pass, including thirteen new security regressions; production/PWA/asset build and Worker dry-run packaging pass. Real loopback HTTP/WebSocket checks cover file blocking and admission; simulated-time SQLite/provider mocks cover renewal and abort behavior without paid calls. This change is prepared for a fork pull request; no deployment or new browser play validation was performed. See the current [project plan](../) and [multiplayer notes](../multiplayer/).
 
 ## Decision summary
 

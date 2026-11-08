@@ -1,5 +1,6 @@
 import {mcpSpeech,speechText,MCP_SPEECH} from '../../shared/mcp-speech.js';
 import {mcpMessages,mcpCompletion,mcpConfig,mcpError} from '../../shared/mcp-chat.js';
+import {withBudgetLease} from './lease.js';
 export async function mcpRoute(request,env,ctx,{send,boundedJson,clientHash,fetchImpl}){
  const {url,key,model}=mcpConfig(env);
  const path=new URL(request.url).pathname,speech=path==='/api/mcp/speech';
@@ -19,7 +20,11 @@ export async function mcpRoute(request,env,ctx,{send,boundedJson,clientHash,fetc
   if(!reservation.ok)throw new Error();const result=await reservation.json();
   if(!result.ok)return send(429,{error:'MCP BUSY — TRY AGAIN',retryAfter:result.retryAfter});
   lease=result.lease;
-  return send(200,speech?await mcpSpeech({text:messages,key:env.FAL_KEY,signal:AbortSignal.timeout(MCP_SPEECH.timeoutMs),fetchImpl}):await mcpCompletion({messages,url,key,model,searchKey:env.BRAVE_SEARCH_API_KEY,signal:AbortSignal.timeout(45000),fetchImpl}));
+  const completion=await withBudgetLease(budget,lease,leaseSignal=>{
+   const signal=AbortSignal.any([leaseSignal,AbortSignal.timeout(speech?MCP_SPEECH.timeoutMs:45000)]);
+   return speech?mcpSpeech({text:messages,key:env.FAL_KEY,signal,fetchImpl}):mcpCompletion({messages,url,key,model,searchKey:env.BRAVE_SEARCH_API_KEY,signal,fetchImpl});
+  });
+  return send(200,completion);
  }catch(error){const failure=speech?{status:502,message:'MCP CLONED VOICE UNAVAILABLE'}:mcpError(error);return send(failure.status,{error:failure.message});}
  finally{if(lease)ctx.waitUntil(budget.fetch('https://budget/release',{method:'POST',body:JSON.stringify({lease})}).catch(()=>{}));}
 }

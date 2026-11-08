@@ -1,5 +1,5 @@
 export const PUBLIC_LIMITS=Object.freeze({bodyBytes:32768,upstreamBytes:65536,timeoutMs:2200,
- dailyRequests:1000,dailyInputBytes:16000000,ipDailyRequests:300,ipMinuteRequests:60,ipIntervalMs:750,concurrentRequests:4,leaseMs:10000});
+ dailyRequests:1000,dailyInputBytes:16000000,ipDailyRequests:300,ipMinuteRequests:60,ipIntervalMs:750,concurrentRequests:4,leaseMs:10000,leaseRenewIntervalMs:3000,leaseRenewTimeoutMs:2000});
 export function limitsFor(env){
  const limits={...PUBLIC_LIMITS};
  for(const [name,key] of [['DAILY_REQUESTS','dailyRequests'],['DAILY_INPUT_BYTES','dailyInputBytes'],['IP_DAILY_REQUESTS','ipDailyRequests'],['IP_MINUTE_REQUESTS','ipMinuteRequests']]){
@@ -36,9 +36,17 @@ export class JevBudget{
    return {ok:true,lease};
   });
  }
+ renew(lease,now=Date.now()){
+  // Never recreate a released or expired lease, or charge quota for a heartbeat.
+  return {ok:[...this.ctx.storage.sql.exec('UPDATE leases SET expires = ? WHERE id = ? AND expires > ? RETURNING id',now+this.limits.leaseMs,lease,now)].length===1};
+ }
  async fetch(request){
   if(request.method!=='POST')return new Response(null,{status:405});
   const body=await request.json();
+  if(new URL(request.url).pathname==='/renew'){
+   if(typeof body.lease!=='string')return new Response(null,{status:400});
+   return Response.json(this.renew(body.lease));
+  }
   if(new URL(request.url).pathname==='/release'){
    if(typeof body.lease!=='string')return new Response(null,{status:400});
    this.ctx.storage.sql.exec('DELETE FROM leases WHERE id = ?',body.lease);return new Response(null,{status:204});
