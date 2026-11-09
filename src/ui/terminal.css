@@ -141,7 +141,7 @@ body.home-opening #game{visibility:visible}
 @media(pointer:coarse){.terminal .game-choice{min-height:44px}body.terminal #intro{overflow-y:auto}}
 
 .terminal .game-choice:disabled{cursor:not-allowed}
-#clu-mobile-note{opacity:.65}
+#clu-mobile-note,#mcp-mobile-note{opacity:.65}
 html.mobile-terminal .terminal .game-choice{min-height:44px}
 html.mobile-terminal #game-menu{width:100%}
 html.mobile-terminal .game-choice>span:last-child{min-width:0;white-space:normal}

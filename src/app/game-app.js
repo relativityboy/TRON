@@ -51,7 +51,11 @@ import { config, defaults, GUNNER, AERIAL_ZOOM, FOLLOW_ZOOM } from '../game/conf
 
 export async function createGameApp() {
   const mobileTerminal=isMobileTerminal();
+  // CLU needs a keyboard; MCP is too slow to load on a phone.
+  const mobileBlocked=game=>mobileTerminal&&(game==='space'||game==='mcp');
   document.getElementById('clu-mobile-note').hidden=!mobileTerminal;
+  document.getElementById('mcp-mobile-note').hidden=!mobileTerminal;
+  document.getElementById('mcp-wip-note').hidden=mobileTerminal;
   void clearLegacyMcpCache();
   performance.mark('tron:startup');
   const loadingTimings = new LoadingTimings();
@@ -217,12 +221,12 @@ export async function createGameApp() {
 
   const homeTransition=createHomeTransition();
   const mcpPanel=createMcpPanel({onClose:()=>{homeTransition.clear();$('start-mcp').focus();},onLaunch:async(game,overlay)=>{
-    if(mobileTerminal&&game==='space')return;
+    if(mobileBlocked(game))return;
     homeTransition.clear();selectGame(game);windowFocused=true;window.focus();
     await start(overlay);await homeTransition.finish();
   }});
   async function start(directOverlay=null) {
-    if(homeTransition.active||mobileTerminal&&selectedGame==='space')return;
+    if(homeTransition.active||mobileBlocked(selectedGame))return;
     if(mode==='ready'&&!endingStage&&selectedGame==='feedback'){
       window.location.assign('mailto:steve@dekorte.com?subject=ENCOM%20TERMINAL%3A%20USER%20FEEDBACK');
       return;
@@ -366,7 +370,7 @@ export async function createGameApp() {
   }):null;
   const gameChoices=[...document.querySelectorAll('#game-menu .game-choice')];
   function selectGame(game,{focus=false}={}){
-    if(homeTransition.active||mobileTerminal&&game==='space')return;
+    if(homeTransition.active||mobileBlocked(game))return;
     selectedGame=game;
     for(const button of gameChoices){
       const selected=button.dataset.game===game;
@@ -1205,7 +1209,7 @@ export async function createGameApp() {
       $('start-cycles').disabled = false;
       $('start-multiplayer').disabled = false;
       $('start-bit').disabled = false;
-      $('start-mcp').disabled = false;
+      $('start-mcp').disabled = mobileTerminal;
       $('start-credits').disabled = false;
       $('start-feedback').disabled = false;
       terminal.finish();
