@@ -11,7 +11,7 @@ try{
  await ready();
  assert.equal(await page.locator('#game-menu button').first().getAttribute('id'),'start-multiplayer');
  assert.equal(await page.locator('#start-multiplayer').getAttribute('aria-pressed'),'true');
- for(const id of ['start-cycles','start-multiplayer','start','start-bit','start-mcp','start-credits']){
+ for(const id of ['start-cycles','start-multiplayer','start','start-bit','start-mcp','start-credits','start-feedback']){
   await page.locator('#'+id).hover();assert.equal(await page.locator('#'+id).getAttribute('aria-pressed'),'true');
  }
  const rows=await page.locator('#game-menu button').evaluateAll(buttons=>buttons.map(b=>({width:b.getBoundingClientRect().width,height:b.getBoundingClientRect().height})));

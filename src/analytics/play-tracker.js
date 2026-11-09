@@ -5,7 +5,7 @@ export class PlayTracker {
   update({mode,game,run}){
     if(mode!=='running')return;
     if(game==='space'){
-      if(!this.space){this.space=true;this.mark('space-paranoids');}
+      if(!this.space){this.space=true;this.mark('clu');}
       return;
     }
     if(game!=='cycles'&&game!=='multiplayer')return;

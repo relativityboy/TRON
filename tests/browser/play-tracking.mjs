@@ -32,13 +32,13 @@ try{
  },chunk);
  assert.equal(await page.locator('[data-play-marker]').count(),0);
  const waitReport=async mode=>{await page.waitForFunction(mode=>document.querySelector(`[data-play-marker="${mode}"]`),mode);await new Promise(r=>setTimeout(r,1800));assert.ok(reports.some(r=>String(r.location).endsWith(`/events/play-${mode}.html`)),JSON.stringify(reports));};
- await page.evaluate(()=>{update('space');update('space');});await waitReport('space-paranoids');
+ await page.evaluate(()=>{update('space');update('space');});await waitReport('clu');
  await page.evaluate(()=>{run.cycleRace.phase='racing';update('cycles');update('cycles');});await waitReport('cycles-solo');
  await page.evaluate(()=>{run.cycleRace.round++;update('cycles');});await waitReport('cycles-solo');
  await page.evaluate(()=>{run.multiplayer.seat=0;update('multiplayer');update('multiplayer');});await waitReport('cycles-mp');
  assert.equal(await page.locator('[data-play-marker]').count(),1);
  await page.goto(url+'/bit/check');await page.evaluate(async()=>{const m=await import('/src/analytics/bit-play.js');m.markBitPlay();m.markBitPlay();});await waitReport('bit');
- assert.deepEqual(reports.map(r=>new URL(r.location).pathname),['/events/play-space-paranoids.html','/events/play-cycles-solo.html','/events/play-cycles-solo.html','/events/play-cycles-mp.html','/events/play-bit.html']);
+ assert.deepEqual(reports.map(r=>new URL(r.location).pathname),['/events/play-clu.html','/events/play-cycles-solo.html','/events/play-cycles-solo.html','/events/play-cycles-mp.html','/events/play-bit.html']);
  await page.goto(url+'/check');await page.evaluate(async chunk=>{localStorage.setItem('colvmn:no-analytics','1');Object.values(await import('/assets/'+chunk)).find(x=>typeof x==='function')('cycles-solo');},chunk);
  assert.equal(await page.locator('[data-play-marker]').count(),0);
  await page.goto(url+'/events/play-cycles-solo.html');await page.waitForTimeout(1800);assert.equal(reports.length,5);

@@ -31,7 +31,7 @@ Recognizers now attack visually located Clu by turning and closing their legs, t
 
 Recognizer horizontal propulsion follows its facing direction only. It retains momentum through yaw turns, slows through drag/braking, and stays level without helicopter-style pitch or roll. Vertical lift and the crush drop remain independent.
 
-The in-game title is Space Paranoids. TRON remains the film and visual reference.
+The tank program is titled CLU within ENCOM TERMINAL. TRON remains the film and visual reference.
 
 The opening fades the typed access terminal into the grid, then moves the camera down to Clu while Recognizers continue their simulation. Reduced-motion preference skips the move; Enter/Space can skip it.
 

@@ -223,6 +223,10 @@ export async function createGameApp() {
   }});
   async function start(directOverlay=null) {
     if(homeTransition.active||mobileTerminal&&selectedGame==='space')return;
+    if(mode==='ready'&&!endingStage&&selectedGame==='feedback'){
+      window.location.assign('mailto:steve@dekorte.com?subject=ENCOM%20TERMINAL%3A%20USER%20FEEDBACK');
+      return;
+    }
     const homeSelection=mode==='ready'&&!endingStage;
     if(homeSelection){
       void sound.unlock().catch(e=>console.warn('Audio unavailable; continuing silently.',e.message));
@@ -1203,6 +1207,7 @@ export async function createGameApp() {
       $('start-bit').disabled = false;
       $('start-mcp').disabled = false;
       $('start-credits').disabled = false;
+      $('start-feedback').disabled = false;
       terminal.finish();
       setMode('ready');
       loadingTimings.checkpoint('Opening terminal ready');

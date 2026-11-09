@@ -231,7 +231,7 @@ Use `/?maze=blueprint&layoutSeed=1982&runSeed=1982` (or `maze=authored`) to repl
 
 ### Installable web app
 
-Production builds include a scoped web app manifest and service worker for Space Paranoids. Serve `dist` over HTTPS (localhost also works), then use your browser's install/Add to Home Screen command. The application opens in a standalone window. Gameplay remains designed for desktop keyboard and mouse.
+Production builds include a scoped web app manifest and service worker for ENCOM TERMINAL. Serve `dist` over HTTPS (localhost also works), then use your browser's install/Add to Home Screen command. The application opens in a standalone window. CLU uses desktop keyboard and mouse; Light Cycles also provides mobile touch controls.
 
 On the first online visit, the worker downloads approximately 49 MiB of local game code, models, fonts and audio. Once installation completes, both game modes can launch offline. Remote Jev services and uncached documentation still require a connection. New releases wait until all game windows/tabs using the old worker close; the next launch uses the update. Only this game's scoped caches are cleaned up. Vite development does not register the worker.
 

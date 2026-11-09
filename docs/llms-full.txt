@@ -2967,6 +2967,21 @@ Recognizers can thrust sideways and backward independently of yaw, in local/JEV 
 - [x] Remove all carrier-shuttle source assets (44.9 MB), rejected variants, standalone preview, generators and their dedicated tests. Retain the working carrier model. Remove obsolete asset aliases and preview build entry.
 - Validation: macOS arm64; asset inventory regeneration, documentation regeneration and `npm run build` pass, including production asset/PWA audits. Build manifest confirms rooftop scenery and retired shuttle models/images are excluded. No browser play check run for this unused-asset removal. Git history still retains the deleted assets.
 
+## CLU naming cleanup — November 8
+
+- [x] Confirm the home menu uses CLU and the browser/PWA branding uses ENCOM TERMINAL. Rename the remaining sound-study page title/heading to CLU; correct the current Goal/README wording and the legacy attack test title assertion. Historical change records retain the former name.
+- Validation: source search and `git diff --check` pass. Documentation regenerated. No browser run for these text-only corrections.
+
+## CLU analytics identifier — November 8
+
+- [x] Rename the CLU play marker to `clu` and its event page to `events/play-clu.html`. Update the allowed marker names and unit/browser expectations. Historical analytics already collected under the previous path remain unchanged.
+- Validation: focused play-tracker unit tests and production build/asset audit pass. Browser check not rerun; Chrome launch aborted during this session. Local only; not deployed.
+
+## Feedback menu — November 8
+
+- [x] Add FEEDBACK after CREDITS, using the existing mouse/touch selection and keyboard/controller navigation. Activation opens `mailto:steve@dekorte.com` with subject `ENCOM TERMINAL: USER FEEDBACK` and leaves the terminal ready.
+- Validation: JavaScript syntax and whitespace checks pass; documentation regenerated. Browser/mail-client handoff not exercised. Local only; not deployed.
+
 
 ---
 

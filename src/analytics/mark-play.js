@@ -1,4 +1,4 @@
-const modes=new Set(['space-paranoids','cycles-solo','cycles-mp','bit']);
+const modes=new Set(['clu','cycles-solo','cycles-mp','bit']);
 let frame,timer;
 /** Best-effort, production-only marker. No caller waits for analytics. */
 export function markPlay(mode,base){
